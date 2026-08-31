@@ -19,6 +19,17 @@ inserts new sections below this marker:
   toolbox API from its `toolboxProxyUrl`
 - `ExDaytona.Analytics.connection/1` — builds a connection to the analytics
   API (base URL configurable via `config :ex_daytona, :analytics_base_url`)
+- High-level SDK facade (hand-written, survives regeneration):
+  `ExDaytona.Client` (API-key auth, `DAYTONA_API_KEY` fallback),
+  `ExDaytona.Error` (all generated-client failure shapes normalized to
+  `{:error, %ExDaytona.Error{}}`), and `ExDaytona.Sandbox`
+  (create/get/list/start/stop/delete with state waiting, `exec/3`,
+  `write_file/3`, `read_file/2`, `list_files/2`)
+
+### Fixed
+- Request bodies no longer send explicit JSON `null`s for unset optional
+  model fields — the Daytona API rejects them (500) where an empty object
+  succeeds; models now omit nil fields when encoding
 
 ### Changed
 - Cleaned generated function names via a spec patch: analytics endpoints

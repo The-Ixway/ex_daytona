@@ -32,6 +32,29 @@ defmodule ModelSurfaceTest do
     assert failures == []
   end
 
+  test "every struct model encodes with nil fields omitted" do
+    # Unset optional fields must be OMITTED from request JSON, not sent as
+    # explicit nulls — real servers (Daytona included) reject bodies full of
+    # nulls that a bare {} would satisfy. An all-nil struct must therefore
+    # encode to exactly "{}".
+    failures =
+      Enum.reduce(SdkSurface.model_modules(), [], fn module, acc ->
+        {:module, ^module} = Code.ensure_loaded(module)
+
+        if function_exported?(module, :__struct__, 1) do
+          case JSON.encode!(struct(module)) do
+            "{}" -> acc
+            other -> [{module, other} | acc]
+          end
+        else
+          # Enum models are plain strings, no struct to encode
+          acc
+        end
+      end)
+
+    assert failures == []
+  end
+
   test "the generated model surface is present" do
     assert SdkSurface.model_modules() != []
   end

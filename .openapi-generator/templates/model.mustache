@@ -4,7 +4,26 @@
   {{#description}}{{&description}}{{/description}}{{^description}}{{classname}} model.{{/description}}
   """
 
-  @derive JSON.Encoder
+{{#isEnum}}
+  @typedoc """
+  Enum values are plain strings on the wire and stay strings at runtime.
+  """
+  @type t :: String.t()
+{{/isEnum}}
+{{^isEnum}}
+  # Encode without nil fields: unset optional fields must be OMITTED from
+  # request JSON, not sent as explicit nulls — real servers (Daytona
+  # included) reject bodies full of nulls that a bare {} would satisfy.
+  defimpl JSON.Encoder do
+    def encode(struct, encoder) do
+      struct
+      |> Map.from_struct()
+      |> Enum.reject(fn {_field, value} -> is_nil(value) end)
+      |> Map.new()
+      |> encoder.(encoder)
+    end
+  end
+
   defstruct [
     {{#vars}}{{#atom}}{{&baseName}}{{/atom}}{{^-last}},
     {{/-last}}{{/vars}}
@@ -14,6 +33,7 @@
     {{#vars}}{{#atom}}{{&baseName}}{{/atom}} => {{{datatype}}}{{#isNullable}} | nil{{/isNullable}}{{^isNullable}}{{^required}} | nil{{/required}}{{/isNullable}}{{^-last}},
     {{/-last}}{{/vars}}
   }
+{{/isEnum}}
 
 {{#hasComplexVars}}
   alias {{&moduleName}}.Deserializer

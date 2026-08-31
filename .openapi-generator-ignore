@@ -47,5 +47,9 @@ generator-config.yaml
 # Custom templates
 .openapi-generator/templates/**
 
+# Hand-written SDK facade layer (Client, Error, Sandbox facade) — persistent,
+# NOT generated. Also exempted from orphan pruning in scripts/post-generate.sh.
+lib/ex_daytona/sdk/**
+
 # Mix lock file (let dependency resolution handle this)
 mix.lock

@@ -55,7 +55,14 @@ no longer lists, so renamed-away modules don't linger.
 ## The golden rule: generated vs. persistent files
 
 `lib/` and `mix.exs` are **generated** — they are overwritten by every
-`./scripts/regenerate.sh` run. Never hand-edit them to fix a problem; the fix
+`./scripts/regenerate.sh` run — with ONE exception: `lib/ex_daytona/sdk/`
+is the **hand-written facade layer** (`ExDaytona.Client`, `ExDaytona.Error`,
+`ExDaytona.Sandbox`). It is listed in `.openapi-generator-ignore`, exempted
+from orphan pruning, and edited directly like any normal code. The facade
+wraps the generated `ExDaytona.Api.*`/`Model.*` modules with idiomatic
+Elixir (snake_case options, normalized `{:error, %ExDaytona.Error{}}`
+returns); the generated modules remain the escape hatch for the long tail
+of endpoints. Everywhere else, never hand-edit generated files; the fix
 belongs in one of the persistent sources:
 
 - `openapi-spec.yaml` — the API contract (or its upstream source recorded in

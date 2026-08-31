@@ -34,18 +34,46 @@ config :ex_daytona,
 
 ## Usage
 
-Get an API key at [app.daytona.io/dashboard/keys](https://app.daytona.io/dashboard/keys).
+Get an API key at [app.daytona.io/dashboard/keys](https://app.daytona.io/dashboard/keys)
+and set `DAYTONA_API_KEY` (or pass `api_key:` explicitly).
+
+### High-level facade (recommended)
 
 ```elixir
-# Create a connection to the main platform API
-conn = ExDaytona.Connection.new(bearer_token: System.fetch_env!("DAYTONA_API_KEY"))
+{:ok, client} = ExDaytona.Client.new()
 
-# List your sandboxes — responses decode into typed model structs
+# Create a sandbox (waits until it's running) and use it
+{:ok, sandbox} = ExDaytona.Sandbox.create(client, ttl_minutes: 30)
+
+{:ok, %{exit_code: 0, output: out}} =
+  ExDaytona.Sandbox.exec(sandbox, "echo hello", cwd: "/tmp", env: %{"FOO" => "bar"})
+
+:ok = ExDaytona.Sandbox.write_file(sandbox, "/tmp/hello.txt", "hi")
+{:ok, "hi"} = ExDaytona.Sandbox.read_file(sandbox, "/tmp/hello.txt")
+{:ok, files} = ExDaytona.Sandbox.list_files(sandbox, "/tmp")
+
+{:ok, sandbox} = ExDaytona.Sandbox.stop(sandbox)
+{:ok, sandbox} = ExDaytona.Sandbox.start(sandbox)
+:ok = ExDaytona.Sandbox.delete(sandbox)
+```
+
+Facade calls return `{:ok, value}` or `{:error, %ExDaytona.Error{status, message, code, details}}` —
+all of the generated client's response conventions are normalized away.
+
+### Low-level generated API (full surface)
+
+Every endpoint of all three APIs is available through the generated
+modules — use them for anything the facade doesn't cover:
+
+```elixir
+conn = ExDaytona.Client.conn(client)   # or ExDaytona.Connection.new(bearer_token: ...)
+
 {:ok, sandboxes} = ExDaytona.Api.Sandbox.list_sandboxes(conn)
+{:ok, snapshots} = ExDaytona.Api.Snapshots.get_all_snapshots(conn)
 
-# Create a sandbox
-{:ok, %ExDaytona.Model.Sandbox{} = sandbox} =
-  ExDaytona.Api.Sandbox.create_sandbox(conn, %ExDaytona.Model.CreateSandbox{})
+# Toolbox APIs the facade doesn't wrap (Git, LSP, computer-use, ...)
+{:ok, tconn} = ExDaytona.Sandbox.toolbox_conn(sandbox)
+{:ok, status} = ExDaytona.Api.Git.get_status(tconn, "/workspace/repo")
 ```
 
 ## Base URLs
@@ -88,8 +116,12 @@ analytics_conn = ExDaytona.Analytics.connection(bearer_token: token)
 
 ## Error handling
 
-Operations return one of three shapes — note that `{:ok, _}` alone is **not**
-a safe success match:
+**Facade functions** (`ExDaytona.Client` / `ExDaytona.Sandbox`) always return
+`{:ok, value}` or `{:error, %ExDaytona.Error{}}` — use them and skip the
+rest of this section.
+
+**Low-level generated operations** return one of three shapes — note that
+`{:ok, _}` alone is **not** a safe success match:
 
 1. **Success statuses** decode into the mapped model struct.
 2. **Error statuses declared in the OpenAPI spec** *also* return `:ok`,

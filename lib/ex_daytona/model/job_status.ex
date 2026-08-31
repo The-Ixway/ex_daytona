@@ -7,10 +7,10 @@ defmodule ExDaytona.Model.JobStatus do
   JobStatus model.
   """
 
-  @derive JSON.Encoder
-  defstruct []
-
-  @type t :: %__MODULE__{}
+  @typedoc """
+  Enum values are plain strings on the wire and stay strings at runtime.
+  """
+  @type t :: String.t()
 
   def decode(value) do
     value

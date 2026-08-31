@@ -7,7 +7,19 @@ defmodule ExDaytona.Model.ExecuteResponse do
   ExecuteResponse model.
   """
 
-  @derive JSON.Encoder
+  # Encode without nil fields: unset optional fields must be OMITTED from
+  # request JSON, not sent as explicit nulls — real servers (Daytona
+  # included) reject bodies full of nulls that a bare {} would satisfy.
+  defimpl JSON.Encoder do
+    def encode(struct, encoder) do
+      struct
+      |> Map.from_struct()
+      |> Enum.reject(fn {_field, value} -> is_nil(value) end)
+      |> Map.new()
+      |> encoder.(encoder)
+    end
+  end
+
   defstruct [
     :exitCode,
     :result

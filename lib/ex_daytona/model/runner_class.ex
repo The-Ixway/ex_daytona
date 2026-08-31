@@ -7,10 +7,10 @@ defmodule ExDaytona.Model.RunnerClass do
   The class of the runner. Deprecated and always returns \"container\" for backward compatibility - use sandboxClass instead.
   """
 
-  @derive JSON.Encoder
-  defstruct []
-
-  @type t :: %__MODULE__{}
+  @typedoc """
+  Enum values are plain strings on the wire and stay strings at runtime.
+  """
+  @type t :: String.t()
 
   def decode(value) do
     value

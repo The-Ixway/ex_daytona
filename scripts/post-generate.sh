@@ -175,7 +175,10 @@ prune_orphaned_files() {
       echo_info "Pruned orphaned generated file: ${file#"$PROJECT_ROOT"/}"
       pruned=$((pruned + 1))
     fi
-  done < <(find "$PROJECT_ROOT/lib" -type f -name "*.ex" 2>/dev/null)
+  done < <(find "$PROJECT_ROOT/lib" -type f -name "*.ex" \
+    -not -path "$PROJECT_ROOT/lib/*/sdk/*" 2>/dev/null)
+  # lib/*/sdk/ is the hand-written facade layer (see .openapi-generator-ignore
+  # and AGENTS.md) — never generated, never pruned.
 
   if [[ $pruned -gt 0 ]]; then
     echo_info "Pruned $pruned orphaned file(s) from lib/"

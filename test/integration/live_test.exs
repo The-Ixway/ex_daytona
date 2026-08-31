@@ -148,4 +148,47 @@ defmodule LiveSmokeTest do
       assert is_map(body) or is_binary(body)
     end
   end
+
+  describe "facade lifecycle (creates real resources)" do
+    # Unlike the rest of this suite, this test CREATES (and deletes) a real
+    # sandbox — it is skipped unless explicitly opted into:
+    #
+    #     SDK_LIVE_LIFECYCLE=1 SDK_LIVE_TOKEN=... mix test.live
+    #
+    @tag timeout: 300_000
+    test "create -> exec -> files -> stop/start -> delete via the facade", ctx do
+      if System.get_env("SDK_LIVE_LIFECYCLE") != "1" do
+        IO.puts("skipping facade lifecycle test (set SDK_LIVE_LIFECYCLE=1 to run)")
+      else
+        {:ok, client} =
+          ExDaytona.Client.new(api_key: ctx.token, base_url: ctx.base_url, retry: false)
+
+        {:ok, sandbox} =
+          ExDaytona.Sandbox.create(client,
+            labels: %{"purpose" => "ex_daytona-live-lifecycle"},
+            ttl_minutes: 15
+          )
+
+        try do
+          assert ExDaytona.Sandbox.state(sandbox) == "started"
+
+          assert {:ok, %{exit_code: 0, output: output}} =
+                   ExDaytona.Sandbox.exec(sandbox, "echo live-lifecycle")
+
+          assert output =~ "live-lifecycle"
+
+          assert :ok = ExDaytona.Sandbox.write_file(sandbox, "/tmp/live.txt", "roundtrip")
+          assert {:ok, "roundtrip"} = ExDaytona.Sandbox.read_file(sandbox, "/tmp/live.txt")
+
+          assert {:ok, stopped} = ExDaytona.Sandbox.stop(sandbox, poll_interval: 2_000)
+          assert ExDaytona.Sandbox.state(stopped) == "stopped"
+
+          assert {:ok, restarted} = ExDaytona.Sandbox.start(stopped, poll_interval: 2_000)
+          assert ExDaytona.Sandbox.state(restarted) == "started"
+        after
+          :ok = ExDaytona.Sandbox.delete(sandbox)
+        end
+      end
+    end
+  end
 end
