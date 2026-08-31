@@ -40,6 +40,13 @@ defmodule ExDaytona.Error do
     do: {:error, from(env)}
 
   def normalize({:ok, value}), do: {:ok, value}
+
+  # A 2xx the spec didn't declare: the generated client can only return it
+  # as {:error, env}, but the server succeeded — the spec is just behind
+  # (e.g. a 201 where the spec declares 200). Treat it as success.
+  def normalize({:error, %Tesla.Env{status: status} = env}) when status in 200..299,
+    do: {:ok, env}
+
   def normalize({:error, reason}), do: {:error, from(reason)}
 
   @doc """

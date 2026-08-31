@@ -14,6 +14,13 @@ defmodule ExDaytona.ErrorTest do
       assert {:ok, %Tesla.Env{status: 204}} = Error.normalize({:ok, %Tesla.Env{status: 204}})
     end
 
+    test "rescues undeclared 2xx statuses the generated client rejected" do
+      # e.g. the server returns 201 where the spec declares only 200 — the
+      # generated client can only produce {:error, env}; the request worked.
+      assert {:ok, %Tesla.Env{status: 201}} =
+               Error.normalize({:error, %Tesla.Env{status: 201, body: ""}})
+    end
+
     test "converts spec-declared error models (the {:ok, error_struct} convention)" do
       result = {:ok, %ErrorResponse{statusCode: 400, message: "bad input", code: "BAD_REQUEST"}}
 

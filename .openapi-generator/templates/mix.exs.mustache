@@ -57,6 +57,9 @@ defmodule {{moduleName}}.MixProject do
       {:tesla, "~> 1.15"},
       {:finch, "~> 0.20"},
 
+      # WebSocket support (PTY sessions; Mint comes in via Finch)
+      {:mint_web_socket, "~> 1.0"},
+
       # Development and testing
       {:ex_doc, "~> 0.38", only: :dev, runtime: false},
       {:excoveralls, "~> 0.18", only: :test},

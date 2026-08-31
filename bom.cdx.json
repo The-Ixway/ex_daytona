@@ -1765,6 +1765,57 @@
       "version": "0.4.0"
     },
     {
+      "bom-ref": "otp:component:mint_web_socket:hex:91229639",
+      "cpe": "cpe:2.3:a:elixir-mint:mint_web_socket:1.0.6:*:*:*:*:*:*:*",
+      "description": "HTTP/1 and HTTP/2 WebSocket support for Mint",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/elixir-mint/mint_web_socket"
+        },
+        {
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "0c360e9012413f1c115a63532601eb5d63731aab7010949178769760686c1698"
+            }
+          ],
+          "type": "distribution",
+          "url": "https://repo.hex.pm/tarballs/mint_web_socket-1.0.6.tar"
+        },
+        {
+          "comment": "changelog",
+          "type": "documentation",
+          "url": "https://github.com/elixir-mint/mint_web_socket/blob/main/CHANGELOG.md"
+        },
+        {
+          "comment": "github",
+          "type": "vcs",
+          "url": "https://github.com/elixir-mint/mint_web_socket"
+        }
+      ],
+      "group": "hexpm",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "0c360e9012413f1c115a63532601eb5d63731aab7010949178769760686c1698"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "name": "mint_web_socket",
+      "purl": "pkg:hex/mint_web_socket@1.0.6?checksum=sha256:0c360e9012413f1c115a63532601eb5d63731aab7010949178769760686c1698&download_url=https://repo.hex.pm/tarballs/mint_web_socket-1.0.6.tar&vcs_url=https://github.com/elixir-mint/mint_web_socket",
+      "scope": "required",
+      "type": "library",
+      "version": "1.0.6"
+    },
+    {
       "bom-ref": "otp:component:file_system:hex:5267745",
       "cpe": "cpe:2.3:a:falood:file_system:1.1.1:*:*:*:*:*:*:*",
       "description": "An Elixir file system change watcher wrapper based on FS, the native file\nsystem listener.\n",
@@ -2805,6 +2856,7 @@
         "otp:component:elixir:otp:91030763",
         "otp:component:tesla:hex:106181469",
         "otp:component:finch:hex:63700879",
+        "otp:component:mint_web_socket:hex:91229639",
         "otp:component:ex_doc:hex:3052568",
         "otp:component:excoveralls:hex:39185539",
         "otp:component:credo:hex:95473491",
@@ -2882,6 +2934,16 @@
         "otp:component:telemetry:hex:111137185"
       ],
       "ref": "otp:component:cowboy_telemetry:hex:1321192"
+    },
+    {
+      "dependsOn": [
+        "otp:component:mint:hex:82086386",
+        "otp:component:kernel:otp:41009003",
+        "otp:component:stdlib:otp:33644561",
+        "otp:component:elixir:otp:91030763",
+        "otp:component:logger:otp:72055478"
+      ],
+      "ref": "otp:component:mint_web_socket:hex:91229639"
     },
     {
       "dependsOn": [
@@ -3062,7 +3124,7 @@
       "type": "library",
       "version": "0.1.0"
     },
-    "timestamp": "2026-08-31T22:43:00Z",
+    "timestamp": "2026-08-31T23:13:03Z",
     "tools": {
       "components": [
         {
@@ -3075,7 +3137,7 @@
       ]
     }
   },
-  "serialNumber": "urn:uuid:12cdd458-da06-4238-96ad-3a10af28250b",
+  "serialNumber": "urn:uuid:e57cdaa2-cc36-41e0-9aa7-71997483b65b",
   "specVersion": "1.6",
   "version": 1
 }

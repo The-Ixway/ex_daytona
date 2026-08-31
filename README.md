@@ -105,6 +105,89 @@ logs the same way.
 :ok = ExDaytona.Git.push(sandbox, "/tmp/repo", username: "bot", password: token)
 ```
 
+### PTY — interactive terminals over websockets
+
+```elixir
+{:ok, pty} = ExDaytona.Pty.create(sandbox, cols: 120, rows: 30)
+{:ok, ws} = ExDaytona.Pty.connect(pty)   # terminal output arrives as messages
+
+:ok = ExDaytona.Pty.send_input(ws, "htop\n")
+
+receive do
+  {:ex_daytona_ws, ^ws, {:binary, output}} -> IO.write(output)
+end
+
+:ok = ExDaytona.Pty.resize(pty, 200, 50)
+:ok = ExDaytona.Pty.disconnect(ws)
+:ok = ExDaytona.Pty.delete(pty)
+```
+
+### SSH access
+
+```elixir
+{:ok, %{ssh_command: cmd, token: token}} =
+  ExDaytona.Sandbox.ssh_access(sandbox, expires_in_minutes: 60)
+# cmd => "ssh <token>@ssh.app.daytona.io"
+
+:ok = ExDaytona.Sandbox.revoke_ssh_access(sandbox)
+```
+
+### Preview URLs
+
+```elixir
+# Stable per-port URL + auth token (send as x-daytona-preview-token)
+{:ok, %{url: url, token: token}} = ExDaytona.Sandbox.preview_url(sandbox, 3000)
+
+# Self-authenticating, expiring, shareable link
+{:ok, %{url: signed, token: signed_token}} =
+  ExDaytona.Sandbox.signed_preview_url(sandbox, 3000, expires_in_seconds: 3600)
+
+:ok = ExDaytona.Sandbox.expire_signed_preview_url(sandbox, 3000, signed_token)
+```
+
+Building a **custom preview proxy**? `ExDaytona.PreviewProxy` wraps the
+verification endpoints (is the sandbox public, is this token valid,
+resolve a signed token, fetch the signing key). Note: most of those
+endpoints require proxy-infrastructure credentials — a regular user API
+key gets 403.
+
+### Webhooks
+
+Setting up (Daytona delivers through Svix):
+
+```elixir
+{:ok, _} = ExDaytona.Webhooks.initialize(client, org_id)
+{:ok, %{url: portal}} = ExDaytona.Webhooks.portal(client, org_id)
+# open the portal to add endpoints and pick events
+```
+
+Receiving — verify deliveries with the endpoint's `whsec_...` secret and
+the **raw** request body:
+
+```elixir
+case ExDaytona.Webhooks.verify(raw_body, conn.req_headers, secret) do
+  {:ok, event} -> handle_event(event)
+  {:error, _} -> send_resp(conn, 400, "bad signature")
+end
+```
+
+### Declarative builds
+
+Build a sandbox from an image definition instead of a snapshot:
+
+```elixir
+image =
+  ExDaytona.Image.from("elixir:1.20-alpine")
+  |> ExDaytona.Image.run("apk add --no-cache git build-base")
+  |> ExDaytona.Image.env(%{"MIX_ENV" => "dev"})
+  |> ExDaytona.Image.workdir("/workspace")
+
+{:ok, sandbox} = ExDaytona.Sandbox.create(client, image: image, timeout: 300_000)
+
+# Or a raw Dockerfile: ExDaytona.Sandbox.create(client, image: "FROM ...")
+# Watch the build: ExDaytona.Sandbox.stream_build_logs(sandbox, &IO.write/1)
+```
+
 ### Low-level generated API (full surface)
 
 Every endpoint of all three APIs is available through the generated

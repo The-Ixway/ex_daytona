@@ -34,6 +34,23 @@ inserts new sections below this marker:
   authenticated remotes
 - `ExDaytona.Sandbox.build_logs/1` and `stream_build_logs/3` — fetch or
   follow a building sandbox's build logs
+- `ExDaytona.Pty` — interactive terminals: create/resize/list/delete plus
+  a real websocket connection (`connect/2`, `send_input/2`) built on the
+  new `ExDaytona.WebSocket` client (Mint.WebSocket)
+- SSH access on the sandbox facade: `ssh_access/2`, `revoke_ssh_access/1`,
+  `validate_ssh_access/2`
+- Preview URLs on the sandbox facade: `preview_url/2`,
+  `signed_preview_url/3`, `expire_signed_preview_url/3`; plus
+  `ExDaytona.PreviewProxy` verification helpers for running a custom
+  preview proxy
+- `ExDaytona.Webhooks` — organization webhook setup (initialize, status,
+  Svix app portal access, endpoint refresh) and `verify/4` for receiving:
+  Svix/Standard-Webhooks HMAC signature verification with timestamp
+  tolerance
+- `ExDaytona.Image` — declarative image DSL (`from/run/env/workdir/user/
+  label/expose/entrypoint/cmd` + raw Dockerfiles) wired into
+  `ExDaytona.Sandbox.create(client, image: ...)` for building sandboxes
+  from Dockerfiles
 
 ### Fixed
 - Request bodies no longer send explicit JSON `null`s for unset optional

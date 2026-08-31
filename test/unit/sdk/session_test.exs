@@ -194,7 +194,11 @@ defmodule ExDaytona.SessionTest do
 
   describe "toolbox URL guard" do
     test "operations on a sandbox without a toolbox URL fail cleanly", %{sandbox: sandbox} do
-      bare = %Sandbox{sandbox | info: %Model.Sandbox{id: "sb-x", toolboxProxyUrl: nil}}
+      bare = %Sandbox{
+        client: sandbox.client,
+        info: %Model.Sandbox{id: "sb-x", toolboxProxyUrl: nil}
+      }
+
       session = %Session{sandbox: bare, id: "s-1"}
 
       assert {:error, %Error{message: message}} = Session.run(session, "echo hi")

@@ -73,6 +73,10 @@ defmodule ExDaytona.Sandbox do
   - `:wait` — wait until the sandbox is running (default `true`)
   - `:timeout` — max milliseconds to wait (default `120_000`)
   - `:poll_interval` — milliseconds between state polls (default `1_000`)
+  - `:image` — build the sandbox declaratively instead of from a snapshot:
+    an `ExDaytona.Image` or a raw Dockerfile string. Building takes longer
+    than starting from a snapshot — raise `:timeout` accordingly and watch
+    progress with `stream_build_logs/3`.
   - sandbox settings, all optional: `:snapshot`, `:name`, `:user`, `:cpu`,
     `:gpu`, `:memory`, `:disk`, `:env`, `:labels`, `:public`, `:target`,
     `:volumes`, `:ttl_minutes`, `:auto_stop_interval`,
@@ -84,8 +88,10 @@ defmodule ExDaytona.Sandbox do
   @spec create(Client.t(), keyword()) :: {:ok, t()} | {:error, Error.t()}
   def create(%Client{} = client, opts \\ []) do
     {wait_opts, opts} = Keyword.split(opts, [:wait, :timeout, :poll_interval])
+    {image, opts} = Keyword.pop(opts, :image)
 
     with {:ok, model} <- build_create_model(opts),
+         model = apply_image(model, image),
          {:ok, %Model.Sandbox{} = info} <-
            Error.normalize(Api.Sandbox.create_sandbox(client.conn, model)) do
       sandbox = %__MODULE__{client: client, info: info}
@@ -191,6 +197,113 @@ defmodule ExDaytona.Sandbox do
   """
   @spec state(t()) :: String.t() | nil
   def state(%__MODULE__{info: %{state: state}}), do: state
+
+  ## SSH access --------------------------------------------------------------
+
+  @doc """
+  Create SSH access to the sandbox. Returns
+  `{:ok, %{token, ssh_command, expires_at}}` — run `ssh_command` in a
+  terminal, or use `token` as the SSH username against Daytona's SSH
+  gateway.
+
+  Options: `:expires_in_minutes` — token lifetime (server default when
+  omitted).
+  """
+  @spec ssh_access(t(), keyword()) ::
+          {:ok, %{token: String.t(), ssh_command: String.t() | nil, expires_at: String.t() | nil}}
+          | {:error, Error.t()}
+  def ssh_access(%__MODULE__{client: client, info: %{id: id}}, opts \\ []) do
+    api_opts =
+      case Keyword.fetch(opts, :expires_in_minutes) do
+        {:ok, minutes} -> [expiresInMinutes: minutes]
+        :error -> []
+      end
+
+    with {:ok, %Model.SshAccessDto{} = dto} <-
+           Error.normalize(Api.Sandbox.create_ssh_access(client.conn, id, api_opts)) do
+      {:ok, %{token: dto.token, ssh_command: dto.sshCommand, expires_at: dto.expiresAt}}
+    end
+  end
+
+  @doc """
+  Revoke the sandbox's SSH access. Returns `:ok`.
+  """
+  @spec revoke_ssh_access(t()) :: :ok | {:error, Error.t()}
+  def revoke_ssh_access(%__MODULE__{client: client, info: %{id: id}}) do
+    with {:ok, _} <- Error.normalize(Api.Sandbox.revoke_ssh_access(client.conn, id)), do: :ok
+  end
+
+  @doc """
+  Validate an SSH access token (for building SSH gateways/tooling).
+  Returns `{:ok, %{valid: boolean, sandbox_id: id | nil}}`.
+
+  > #### Authentication {: .warning}
+  >
+  > This endpoint authenticates gateway infrastructure — with a regular
+  > user API key it returns `403 "Invalid authentication context"`.
+  """
+  @spec validate_ssh_access(Client.t(), String.t()) ::
+          {:ok, %{valid: boolean() | nil, sandbox_id: String.t() | nil}} | {:error, Error.t()}
+  def validate_ssh_access(%Client{} = client, token) when is_binary(token) do
+    with {:ok, %Model.SshAccessValidationDto{valid: valid, sandboxId: sandbox_id}} <-
+           Error.normalize(Api.Sandbox.validate_ssh_access(client.conn, token)) do
+      {:ok, %{valid: valid, sandbox_id: sandbox_id}}
+    end
+  end
+
+  ## Preview URLs -------------------------------------------------------------
+
+  @doc """
+  The preview URL for a port the sandbox is listening on. Returns
+  `{:ok, %{url, token}}` — for private sandboxes, send the token as the
+  `x-daytona-preview-token` header (browsers hitting the URL directly get
+  Daytona's auth flow).
+  """
+  @spec preview_url(t(), pos_integer()) ::
+          {:ok, %{url: String.t(), token: String.t() | nil}} | {:error, Error.t()}
+  def preview_url(%__MODULE__{client: client, info: %{id: id}}, port) when is_integer(port) do
+    with {:ok, %Model.PortPreviewUrl{url: url, token: token}} <-
+           Error.normalize(Api.Sandbox.get_port_preview_url(client.conn, id, port)) do
+      {:ok, %{url: url, token: token}}
+    end
+  end
+
+  @doc """
+  A signed (self-authenticating, expiring) preview URL for a port —
+  shareable without exposing an auth token header. Returns
+  `{:ok, %{url, token}}`; expire it early with
+  `expire_signed_preview_url/3`.
+
+  Options: `:expires_in_seconds` — link lifetime (server default when
+  omitted).
+  """
+  @spec signed_preview_url(t(), pos_integer(), keyword()) ::
+          {:ok, %{url: String.t(), token: String.t() | nil}} | {:error, Error.t()}
+  def signed_preview_url(%__MODULE__{client: client, info: %{id: id}}, port, opts \\ [])
+      when is_integer(port) do
+    api_opts =
+      case Keyword.fetch(opts, :expires_in_seconds) do
+        {:ok, seconds} -> [expiresInSeconds: seconds]
+        :error -> []
+      end
+
+    with {:ok, %Model.SignedPortPreviewUrl{url: url, token: token}} <-
+           Error.normalize(Api.Sandbox.get_signed_port_preview_url(client.conn, id, port, api_opts)) do
+      {:ok, %{url: url, token: token}}
+    end
+  end
+
+  @doc """
+  Expire a signed preview URL before its natural expiry. Returns `:ok`.
+  """
+  @spec expire_signed_preview_url(t(), pos_integer(), String.t()) :: :ok | {:error, Error.t()}
+  def expire_signed_preview_url(%__MODULE__{client: client, info: %{id: id}}, port, token)
+      when is_integer(port) and is_binary(token) do
+    with {:ok, _} <-
+           Error.normalize(Api.Sandbox.expire_signed_port_preview_url(client.conn, id, port, token)) do
+      :ok
+    end
+  end
 
   @doc """
   The sandbox's build logs so far, as a binary. Only sandboxes built from
@@ -314,6 +427,11 @@ defmodule ExDaytona.Sandbox do
   end
 
   ## Internals ---------------------------------------------------------------
+
+  defp apply_image(model, nil), do: model
+
+  defp apply_image(model, image),
+    do: %{model | buildInfo: ExDaytona.Image.build_info(image)}
 
   defp build_create_model(opts) do
     Enum.reduce_while(opts, {:ok, %Model.CreateSandbox{}}, fn {key, value}, {:ok, model} ->

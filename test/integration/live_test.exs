@@ -209,6 +209,46 @@ defmodule LiveSmokeTest do
           assert logs =~ "s1"
           assert :ok = ExDaytona.Session.delete(session)
 
+          # PTY: interactive terminal over a websocket
+          {:ok, pty} = ExDaytona.Pty.create(sandbox, cols: 120, rows: 30)
+          {:ok, ws} = ExDaytona.Pty.connect(pty)
+          :ok = ExDaytona.Pty.send_input(ws, "echo PTY-$((6*7))\n")
+
+          pty_output =
+            Enum.reduce_while(1..20, "", fn _, acc ->
+              receive do
+                {:ex_daytona_ws, ^ws, {:binary, data}} ->
+                  acc = acc <> data
+                  if acc =~ "PTY-42", do: {:halt, acc}, else: {:cont, acc}
+
+                {:ex_daytona_ws, ^ws, {:text, data}} ->
+                  {:cont, acc <> data}
+              after
+                1_000 -> {:cont, acc}
+              end
+            end)
+
+          assert pty_output =~ "PTY-42"
+          :ok = ExDaytona.Pty.disconnect(ws)
+          :ok = ExDaytona.Pty.delete(pty)
+
+          # SSH access + preview URLs
+          {:ok, %{token: ssh_token, ssh_command: ssh_command}} =
+            ExDaytona.Sandbox.ssh_access(sandbox, expires_in_minutes: 5)
+
+          assert is_binary(ssh_token)
+          assert ssh_command =~ "ssh "
+          assert :ok = ExDaytona.Sandbox.revoke_ssh_access(sandbox)
+
+          {:ok, %{url: preview_url}} = ExDaytona.Sandbox.preview_url(sandbox, 3000)
+          assert preview_url =~ "3000"
+
+          {:ok, %{url: signed_url, token: signed_token}} =
+            ExDaytona.Sandbox.signed_preview_url(sandbox, 3000, expires_in_seconds: 300)
+
+          assert signed_url =~ "http"
+          assert :ok = ExDaytona.Sandbox.expire_signed_preview_url(sandbox, 3000, signed_token)
+
           # Git: clone a small public repo and inspect it
           repo = "/tmp/live-repo"
 

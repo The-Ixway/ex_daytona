@@ -101,6 +101,125 @@ defmodule ExDaytona.SandboxTest do
     end
   end
 
+  describe "create/2 with image:" do
+    test "sends the Dockerfile as buildInfo", %{bypass: bypass, client: client} do
+      image = ExDaytona.Image.from("alpine") |> ExDaytona.Image.run("apk add git")
+
+      Bypass.expect_once(bypass, "POST", "/sandbox", fn conn ->
+        {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+        assert %{"buildInfo" => %{"dockerfileContent" => "FROM alpine\nRUN apk add git\n"}} =
+                 JSON.decode!(body)
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, JSON.encode!(%{id: "sb-built", state: "pending_build"}))
+      end)
+
+      assert {:ok, %Sandbox{}} = Sandbox.create(client, image: image, wait: false)
+    end
+  end
+
+  describe "ssh access" do
+    test "ssh_access/2 sends expiry and normalizes the DTO", %{bypass: bypass, client: client} do
+      sandbox = mock_sandbox(bypass, client)
+
+      Bypass.expect_once(bypass, "POST", "/sandbox/sb-1/ssh-access", fn conn ->
+        assert URI.decode_query(conn.query_string)["expiresInMinutes"] == "60"
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(
+          200,
+          JSON.encode!(%{
+            token: "ssh-tok",
+            sshCommand: "ssh ssh-tok@ssh.app.daytona.io",
+            expiresAt: "2026-09-01T00:00:00Z"
+          })
+        )
+      end)
+
+      assert {:ok, %{token: "ssh-tok", ssh_command: "ssh ssh-tok@ssh.app.daytona.io"}} =
+               Sandbox.ssh_access(sandbox, expires_in_minutes: 60)
+    end
+
+    test "revoke_ssh_access/1 returns :ok", %{bypass: bypass, client: client} do
+      sandbox = mock_sandbox(bypass, client)
+
+      Bypass.expect_once(bypass, "DELETE", "/sandbox/sb-1/ssh-access", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, JSON.encode!(%{id: "sb-1"}))
+      end)
+
+      assert :ok = Sandbox.revoke_ssh_access(sandbox)
+    end
+
+    test "validate_ssh_access/2 normalizes the validation DTO", %{
+      bypass: bypass,
+      client: client
+    } do
+      Bypass.expect_once(bypass, "GET", "/sandbox/ssh-access/validate", fn conn ->
+        assert URI.decode_query(conn.query_string)["token"] == "ssh-tok"
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, JSON.encode!(%{valid: true, sandboxId: "sb-1"}))
+      end)
+
+      assert {:ok, %{valid: true, sandbox_id: "sb-1"}} =
+               Sandbox.validate_ssh_access(client, "ssh-tok")
+    end
+  end
+
+  describe "preview URLs" do
+    test "preview_url/2 returns url and token", %{bypass: bypass, client: client} do
+      sandbox = mock_sandbox(bypass, client)
+
+      MockServer.expect_get(bypass, "/sandbox/sb-1/ports/3000/preview-url", 200, %{
+        url: "https://3000-sb-1.proxy.daytona.works",
+        token: "prev-tok"
+      })
+
+      assert {:ok, %{url: "https://3000-sb-1.proxy.daytona.works", token: "prev-tok"}} =
+               Sandbox.preview_url(sandbox, 3000)
+    end
+
+    test "signed_preview_url/3 sends expiry and expire_signed_preview_url/3 revokes", %{
+      bypass: bypass,
+      client: client
+    } do
+      sandbox = mock_sandbox(bypass, client)
+
+      Bypass.expect_once(bypass, "GET", "/sandbox/sb-1/ports/3000/signed-preview-url", fn conn ->
+        assert URI.decode_query(conn.query_string)["expiresInSeconds"] == "600"
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(
+          200,
+          JSON.encode!(%{url: "https://signed.example", token: "signed-tok", port: 3000})
+        )
+      end)
+
+      assert {:ok, %{url: "https://signed.example", token: "signed-tok"}} =
+               Sandbox.signed_preview_url(sandbox, 3000, expires_in_seconds: 600)
+
+      Bypass.expect_once(
+        bypass,
+        "POST",
+        "/sandbox/sb-1/ports/3000/signed-preview-url/signed-tok/expire",
+        fn conn ->
+          conn
+          |> Plug.Conn.put_resp_content_type("application/json")
+          |> Plug.Conn.resp(200, JSON.encode!(%{}))
+        end
+      )
+
+      assert :ok = Sandbox.expire_signed_preview_url(sandbox, 3000, "signed-tok")
+    end
+  end
+
   describe "await_state/3" do
     test "times out with a clear error", %{bypass: bypass, client: client} do
       Bypass.expect(bypass, "GET", "/sandbox/sb-slow", fn conn ->
