@@ -23,9 +23,9 @@ defmodule ExDaytona.Api.Config do
   - `{:ok, ExDaytona.Model.DaytonaConfiguration.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec config_controller_get_config(Tesla.Env.client(), keyword()) ::
+  @spec get_config(Tesla.Env.client(), keyword()) ::
           {:ok, ExDaytona.Model.DaytonaConfiguration.t()} | {:error, Tesla.Env.t()}
-  def config_controller_get_config(connection, _opts \\ []) do
+  def get_config(connection, _opts \\ []) do
     request =
       %{}
       |> method(:get)

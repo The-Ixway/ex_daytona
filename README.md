@@ -59,15 +59,14 @@ covered by this one SDK — pick the base URL per `Connection`:
 | Toolbox (inside a sandbox) | `ExDaytona.Api.Process`, `FileSystem`, `Git`, `Lsp`, `ComputerUse`, … | `{toolboxProxyUrl}/{sandboxId}` — from the sandbox's `toolboxProxyUrl` field |
 | Analytics | `ExDaytona.Api.Usage`, `Telemetry` | `https://analytics.app.daytona.io` |
 
+The `ExDaytona.Toolbox` and `ExDaytona.Analytics` helpers build correctly
+targeted connections for you:
+
 ```elixir
 # Toolbox: execute a command inside a sandbox you created above
 token = System.fetch_env!("DAYTONA_API_KEY")
 
-toolbox_conn =
-  ExDaytona.Connection.new(
-    base_url: "#{sandbox.toolboxProxyUrl}/#{sandbox.id}",
-    bearer_token: token
-  )
+toolbox_conn = ExDaytona.Toolbox.connection(sandbox, bearer_token: token)
 
 {:ok, result} =
   ExDaytona.Api.Process.execute_command(
@@ -75,11 +74,15 @@ toolbox_conn =
     %ExDaytona.Model.ExecuteRequest{command: "echo hello"}
   )
 
-# Analytics
-analytics_conn =
-  ExDaytona.Connection.new(
-    base_url: "https://analytics.app.daytona.io",
-    bearer_token: token
+# Analytics (base URL configurable via `config :ex_daytona, :analytics_base_url`)
+analytics_conn = ExDaytona.Analytics.connection(bearer_token: token)
+
+{:ok, usage} =
+  ExDaytona.Api.Usage.get_organization_usage_aggregated(
+    analytics_conn,
+    org_id,
+    "2026-01-01T00:00:00Z",
+    "2026-02-01T00:00:00Z"
   )
 ```
 

@@ -25,9 +25,9 @@ defmodule ExDaytona.Api.Webhooks do
   - `{:ok, ExDaytona.Model.WebhookAppPortalAccess.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec webhook_controller_get_app_portal_access(Tesla.Env.client(), String.t(), keyword()) ::
+  @spec get_app_portal_access(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.WebhookAppPortalAccess.t()} | {:error, Tesla.Env.t()}
-  def webhook_controller_get_app_portal_access(connection, organization_id, opts \\ []) do
+  def get_app_portal_access(connection, organization_id, opts \\ []) do
     optional_params = %{
       :"X-Daytona-Organization-ID" => :headers
     }
@@ -62,9 +62,9 @@ defmodule ExDaytona.Api.Webhooks do
   - `{:ok, ExDaytona.Model.WebhookInitializationStatus.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec webhook_controller_get_initialization_status(Tesla.Env.client(), String.t(), keyword()) ::
+  @spec get_initialization_status(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, nil} | {:ok, ExDaytona.Model.WebhookInitializationStatus.t()} | {:error, Tesla.Env.t()}
-  def webhook_controller_get_initialization_status(connection, organization_id, opts \\ []) do
+  def get_initialization_status(connection, organization_id, opts \\ []) do
     optional_params = %{
       :"X-Daytona-Organization-ID" => :headers
     }
@@ -99,9 +99,9 @@ defmodule ExDaytona.Api.Webhooks do
   - `{:ok, ExDaytona.Model.WebhookInitializationStatus.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec webhook_controller_initialize_webhooks(Tesla.Env.client(), String.t(), keyword()) ::
+  @spec initialize_webhooks(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.WebhookInitializationStatus.t()} | {:error, Tesla.Env.t()}
-  def webhook_controller_initialize_webhooks(connection, organization_id, opts \\ []) do
+  def initialize_webhooks(connection, organization_id, opts \\ []) do
     optional_params = %{
       :"X-Daytona-Organization-ID" => :headers
     }
@@ -136,9 +136,8 @@ defmodule ExDaytona.Api.Webhooks do
   - `{:ok, nil}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec webhook_controller_refresh_endpoints(Tesla.Env.client(), String.t(), keyword()) ::
-          {:ok, nil} | {:error, Tesla.Env.t()}
-  def webhook_controller_refresh_endpoints(connection, organization_id, opts \\ []) do
+  @spec refresh_endpoints(Tesla.Env.client(), String.t(), keyword()) :: {:ok, nil} | {:error, Tesla.Env.t()}
+  def refresh_endpoints(connection, organization_id, opts \\ []) do
     optional_params = %{
       :"X-Daytona-Organization-ID" => :headers
     }

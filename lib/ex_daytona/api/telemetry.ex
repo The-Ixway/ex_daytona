@@ -32,22 +32,9 @@ defmodule ExDaytona.Api.Telemetry do
   - `{:ok, [%ModelsLogEntry{}, ...]}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec organization_organization_id_sandbox_sandbox_id_telemetry_logs_get(
-          Tesla.Env.client(),
-          String.t(),
-          String.t(),
-          String.t(),
-          String.t(),
-          keyword()
-        ) :: {:ok, [ExDaytona.Model.ModelsLogEntry.t()]} | {:error, Tesla.Env.t()}
-  def organization_organization_id_sandbox_sandbox_id_telemetry_logs_get(
-        connection,
-        organization_id,
-        sandbox_id,
-        from,
-        to,
-        opts \\ []
-      ) do
+  @spec get_organization_sandbox_logs(Tesla.Env.client(), String.t(), String.t(), String.t(), String.t(), keyword()) ::
+          {:ok, [ExDaytona.Model.ModelsLogEntry.t()]} | {:error, Tesla.Env.t()}
+  def get_organization_sandbox_logs(connection, organization_id, sandbox_id, from, to, opts \\ []) do
     optional_params = %{
       :severity => :query,
       :search => :query,
@@ -90,22 +77,9 @@ defmodule ExDaytona.Api.Telemetry do
   - `{:ok, [%ModelsMetricPoint{}, ...]}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec organization_organization_id_sandbox_sandbox_id_telemetry_metrics_get(
-          Tesla.Env.client(),
-          String.t(),
-          String.t(),
-          String.t(),
-          String.t(),
-          keyword()
-        ) :: {:ok, [ExDaytona.Model.ModelsMetricPoint.t()]} | {:error, Tesla.Env.t()}
-  def organization_organization_id_sandbox_sandbox_id_telemetry_metrics_get(
-        connection,
-        organization_id,
-        sandbox_id,
-        from,
-        to,
-        opts \\ []
-      ) do
+  @spec get_organization_sandbox_metrics(Tesla.Env.client(), String.t(), String.t(), String.t(), String.t(), keyword()) ::
+          {:ok, [ExDaytona.Model.ModelsMetricPoint.t()]} | {:error, Tesla.Env.t()}
+  def get_organization_sandbox_metrics(connection, organization_id, sandbox_id, from, to, opts \\ []) do
     optional_params = %{
       :metricNames => :query
     }
@@ -123,6 +97,39 @@ defmodule ExDaytona.Api.Telemetry do
     |> Connection.request(request)
     |> evaluate_response([
       {200, ExDaytona.Model.ModelsMetricPoint}
+    ])
+  end
+
+  @doc """
+  Get trace spans
+  Returns all spans belonging to a specific trace ID
+
+  ### Parameters
+
+  - `connection` (ExDaytona.Connection): Connection to server
+  - `organization_id` (String.t): Organization ID
+  - `sandbox_id` (String.t): Sandbox ID
+  - `trace_id` (String.t): Trace ID
+  - `opts` (keyword): Optional parameters
+
+  ### Returns
+
+  - `{:ok, [%ModelsSpan{}, ...]}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec get_organization_sandbox_trace_spans(Tesla.Env.client(), String.t(), String.t(), String.t(), keyword()) ::
+          {:ok, [ExDaytona.Model.ModelsSpan.t()]} | {:error, Tesla.Env.t()}
+  def get_organization_sandbox_trace_spans(connection, organization_id, sandbox_id, trace_id, _opts \\ []) do
+    request =
+      %{}
+      |> method(:get)
+      |> url("/organization/#{organization_id}/sandbox/#{sandbox_id}/telemetry/traces/#{trace_id}")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response([
+      {200, ExDaytona.Model.ModelsSpan}
     ])
   end
 
@@ -146,22 +153,9 @@ defmodule ExDaytona.Api.Telemetry do
   - `{:ok, [%ModelsTraceSummary{}, ...]}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec organization_organization_id_sandbox_sandbox_id_telemetry_traces_get(
-          Tesla.Env.client(),
-          String.t(),
-          String.t(),
-          String.t(),
-          String.t(),
-          keyword()
-        ) :: {:ok, [ExDaytona.Model.ModelsTraceSummary.t()]} | {:error, Tesla.Env.t()}
-  def organization_organization_id_sandbox_sandbox_id_telemetry_traces_get(
-        connection,
-        organization_id,
-        sandbox_id,
-        from,
-        to,
-        opts \\ []
-      ) do
+  @spec get_organization_sandbox_traces(Tesla.Env.client(), String.t(), String.t(), String.t(), String.t(), keyword()) ::
+          {:ok, [ExDaytona.Model.ModelsTraceSummary.t()]} | {:error, Tesla.Env.t()}
+  def get_organization_sandbox_traces(connection, organization_id, sandbox_id, from, to, opts \\ []) do
     optional_params = %{
       :limit => :query,
       :offset => :query
@@ -180,50 +174,6 @@ defmodule ExDaytona.Api.Telemetry do
     |> Connection.request(request)
     |> evaluate_response([
       {200, ExDaytona.Model.ModelsTraceSummary}
-    ])
-  end
-
-  @doc """
-  Get trace spans
-  Returns all spans belonging to a specific trace ID
-
-  ### Parameters
-
-  - `connection` (ExDaytona.Connection): Connection to server
-  - `organization_id` (String.t): Organization ID
-  - `sandbox_id` (String.t): Sandbox ID
-  - `trace_id` (String.t): Trace ID
-  - `opts` (keyword): Optional parameters
-
-  ### Returns
-
-  - `{:ok, [%ModelsSpan{}, ...]}` on success
-  - `{:error, Tesla.Env.t}` on failure
-  """
-  @spec organization_organization_id_sandbox_sandbox_id_telemetry_traces_trace_id_get(
-          Tesla.Env.client(),
-          String.t(),
-          String.t(),
-          String.t(),
-          keyword()
-        ) :: {:ok, [ExDaytona.Model.ModelsSpan.t()]} | {:error, Tesla.Env.t()}
-  def organization_organization_id_sandbox_sandbox_id_telemetry_traces_trace_id_get(
-        connection,
-        organization_id,
-        sandbox_id,
-        trace_id,
-        _opts \\ []
-      ) do
-    request =
-      %{}
-      |> method(:get)
-      |> url("/organization/#{organization_id}/sandbox/#{sandbox_id}/telemetry/traces/#{trace_id}")
-      |> Enum.into([])
-
-    connection
-    |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ModelsSpan}
     ])
   end
 end

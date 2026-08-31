@@ -28,6 +28,9 @@ defmodule LiveSmokeTest do
   @moduletag :live
   @moduletag timeout: 30_000
 
+  alias ExDaytona.Api.Sandbox, as: SandboxApi
+  alias ExDaytona.Model
+
   @connection SdkSurface.connection_module()
 
   setup_all do
@@ -111,35 +114,38 @@ defmodule LiveSmokeTest do
     end
   end
 
-  describe "typed operations (customize per SDK)" do
-    # CUSTOMIZE(live): replace with a cheap read operation from this SDK and
-    # delete the skip tag, e.g.:
-    #
-    #   assert {:ok, %YourSDK.Model.Thing{}} =
-    #            YourSDK.Api.Things.get_thing(live_client(ctx), "id")
-    #
-    # This is the test that catches spec-vs-server decode mismatches.
-    @tag :skip
-    test "a basic read operation succeeds and decodes into a typed struct", _ctx do
-      flunk("customize with a real operation from this SDK, then remove @tag :skip")
+  describe "typed operations" do
+    # Read-only: lists sandboxes without creating anything. This is the test
+    # that catches spec-vs-server decode mismatches.
+    test "a basic read operation succeeds and decodes into a typed struct", ctx do
+      assert {:ok, %Model.ListSandboxesResponse{items: items}} =
+               SandboxApi.list_sandboxes(live_client(ctx))
+
+      assert is_list(items)
+      assert Enum.all?(items, &match?(%Model.SandboxListItem{}, &1))
     end
 
-    # CUSTOMIZE(live): call an operation that takes query parameters and assert the
-    # server honored them (e.g. a limit/page size reflected in the result),
-    # then delete the skip tag. Proves query params survive the request
-    # builder + middleware stack against a real server.
-    @tag :skip
-    test "query parameters are transmitted and honored", _ctx do
-      flunk("customize with a real operation from this SDK, then remove @tag :skip")
+    # Proves query params survive the request builder + middleware stack
+    # against a real server.
+    test "query parameters are transmitted and honored", ctx do
+      assert {:ok, %Model.ListSandboxesResponse{items: items}} =
+               SandboxApi.list_sandboxes(live_client(ctx), limit: 1)
+
+      assert length(items) <= 1
     end
 
-    # CUSTOMIZE(live): trigger a spec-declared error status (e.g. a 400 from an
-    # invalid payload) and assert its shape, then delete the skip tag.
-    # Reminder: spec-mapped error statuses return `{:ok, error_struct}` —
-    # an openapi-generator convention — NOT `{:error, _}`.
-    @tag :skip
-    test "a spec-declared error status decodes into its error model", _ctx do
-      flunk("customize with a real operation from this SDK, then remove @tag :skip")
+    # The main platform spec declares almost no error statuses, so real
+    # error responses take the undeclared-status path: `{:error, env}` with
+    # the JSON body decoded to a map. Read-only: fetches a sandbox that
+    # cannot exist.
+    test "an undeclared error status surfaces as an error tuple with a decoded body", ctx do
+      bogus_id = "live-smoke-does-not-exist-#{System.unique_integer([:positive])}"
+
+      assert {:error, %Tesla.Env{status: status, body: body}} =
+               SandboxApi.get_sandbox(live_client(ctx), bogus_id)
+
+      assert status in [400, 401, 403, 404]
+      assert is_map(body) or is_binary(body)
     end
   end
 end

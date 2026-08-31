@@ -1,0 +1,49 @@
+{{>licenseInfo}}
+defmodule {{moduleName}}.Analytics do
+  @moduledoc """
+  Helpers for connecting to the Daytona analytics API.
+
+  Analytics endpoints (`{{moduleName}}.Api.Usage`, `{{moduleName}}.Api.Telemetry`)
+  are served from their own base URL, not the main platform one.
+
+      analytics = {{moduleName}}.Analytics.connection(bearer_token: token)
+
+      {:ok, usage} =
+        {{moduleName}}.Api.Usage.get_organization_usage_aggregated(
+          analytics,
+          org_id,
+          from,
+          to
+        )
+
+  The default base URL is `https://analytics.app.daytona.io`; override it with:
+
+      config {{#atom}}{{#underscored}}{{packageName}}{{/underscored}}{{/atom}}, analytics_base_url: "https://..."
+  """
+
+  alias {{moduleName}}.Connection
+
+  @analytics_base_url "https://analytics.app.daytona.io"
+
+  @doc """
+  Build a `#{inspect(Connection)}` for the analytics API.
+
+  Accepts the same options as `#{inspect(Connection)}.new/1` (e.g.
+  `bearer_token`). The base URL comes from the
+  `:analytics_base_url` application env, falling back to
+  `#{inspect(@analytics_base_url)}`.
+  """
+  @spec connection(Connection.options()) :: Tesla.Env.client()
+  def connection(options \\ []) do
+    base_url =
+      Application.get_env(
+        {{#atom}}{{#underscored}}{{packageName}}{{/underscored}}{{/atom}},
+        :analytics_base_url,
+        @analytics_base_url
+      )
+
+    # Prepending wins: Connection.new reads options with Keyword.get, which
+    # returns the first occurrence.
+    Connection.new([base_url: base_url] ++ options)
+  end
+end

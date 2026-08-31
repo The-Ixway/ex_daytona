@@ -155,12 +155,42 @@ EOF
   done
 }
 
+# Remove orphaned generated files. The generator only writes files — it
+# never deletes ones a previous run created (e.g. models renamed away by an
+# operationId change linger forever). lib/ is wholly generated (see the
+# golden rule in AGENTS.md), so anything under it that this run's manifest
+# (.openapi-generator/FILES) doesn't list is a stale leftover.
+prune_orphaned_files() {
+  local manifest="$PROJECT_ROOT/.openapi-generator/FILES"
+
+  if [[ ! -f "$manifest" ]]; then
+    echo_warn "No .openapi-generator/FILES manifest; skipping orphan pruning."
+    return 0
+  fi
+
+  local pruned=0
+  while IFS= read -r file; do
+    if ! grep -qxF "${file#"$PROJECT_ROOT"/}" "$manifest"; then
+      rm "$file"
+      echo_info "Pruned orphaned generated file: ${file#"$PROJECT_ROOT"/}"
+      pruned=$((pruned + 1))
+    fi
+  done < <(find "$PROJECT_ROOT/lib" -type f -name "*.ex" 2>/dev/null)
+
+  if [[ $pruned -gt 0 ]]; then
+    echo_info "Pruned $pruned orphaned file(s) from lib/"
+    # Drop directories the pruning emptied out
+    find "$PROJECT_ROOT/lib" -type d -empty -delete 2>/dev/null || true
+  fi
+}
+
 # Main execution
 main() {
   echo_info "Running post-generation processing..."
 
   fix_generated_code
   update_version_file
+  prune_orphaned_files
   ensure_test_structure
   report_module_name
   generate_test_templates

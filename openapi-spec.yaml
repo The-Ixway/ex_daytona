@@ -12132,7 +12132,7 @@
     },
     "/config": {
       "get": {
-        "operationId": "ConfigController_getConfig",
+        "operationId": "getConfig",
         "parameters": [],
         "responses": {
           "200": {
@@ -14235,7 +14235,7 @@
     },
     "/health": {
       "get": {
-        "operationId": "HealthController_live",
+        "operationId": "live",
         "parameters": [],
         "responses": {
           "200": {
@@ -14249,7 +14249,7 @@
     },
     "/health/ready": {
       "get": {
-        "operationId": "HealthController_check",
+        "operationId": "check",
         "parameters": [],
         "responses": {
           "200": {
@@ -15035,6 +15035,7 @@
     "/organization/{organizationId}/sandbox/{sandboxId}/telemetry/logs": {
       "get": {
         "description": "Returns paginated log entries with optional severity and search filters",
+        "operationId": "getOrganizationSandboxLogs",
         "parameters": [
           {
             "description": "Organization ID",
@@ -15136,6 +15137,7 @@
     "/organization/{organizationId}/sandbox/{sandboxId}/telemetry/metrics": {
       "get": {
         "description": "Returns gauge metrics aggregated in 1-minute intervals",
+        "operationId": "getOrganizationSandboxMetrics",
         "parameters": [
           {
             "description": "Organization ID",
@@ -15211,6 +15213,7 @@
     "/organization/{organizationId}/sandbox/{sandboxId}/telemetry/traces": {
       "get": {
         "description": "Returns paginated trace summaries with span counts and root span info",
+        "operationId": "getOrganizationSandboxTraces",
         "parameters": [
           {
             "description": "Organization ID",
@@ -15296,6 +15299,7 @@
     "/organization/{organizationId}/sandbox/{sandboxId}/telemetry/traces/{traceId}": {
       "get": {
         "description": "Returns all spans belonging to a specific trace ID",
+        "operationId": "getOrganizationSandboxTraceSpans",
         "parameters": [
           {
             "description": "Organization ID",
@@ -15354,6 +15358,7 @@
     "/organization/{organizationId}/sandbox/{sandboxId}/usage": {
       "get": {
         "description": "Returns individual usage records for a specific sandbox within a time range",
+        "operationId": "getOrganizationSandboxUsage",
         "parameters": [
           {
             "description": "Organization ID",
@@ -15421,6 +15426,7 @@
     "/organization/{organizationId}/usage/aggregated": {
       "get": {
         "description": "Returns organization-level resource usage totals for a given time period",
+        "operationId": "getOrganizationUsageAggregated",
         "parameters": [
           {
             "description": "Organization ID",
@@ -15476,6 +15482,7 @@
     "/organization/{organizationId}/usage/chart": {
       "get": {
         "description": "Returns resource usage data points for a given time period with auto-scaled resolution",
+        "operationId": "getOrganizationUsageChart",
         "parameters": [
           {
             "description": "Organization ID",
@@ -15542,6 +15549,7 @@
     "/organization/{organizationId}/usage/sandbox": {
       "get": {
         "description": "Returns resource usage aggregated per sandbox for a given time period",
+        "operationId": "getOrganizationUsagePerSandbox",
         "parameters": [
           {
             "description": "Organization ID",
@@ -25218,7 +25226,7 @@
     },
     "/webhooks/organizations/{organizationId}/app-portal-access": {
       "post": {
-        "operationId": "WebhookController_getAppPortalAccess",
+        "operationId": "getAppPortalAccess",
         "parameters": [
           {
             "description": "Use with JWT to specify the organization ID",
@@ -25270,7 +25278,7 @@
     },
     "/webhooks/organizations/{organizationId}/initialization-status": {
       "get": {
-        "operationId": "WebhookController_getInitializationStatus",
+        "operationId": "getInitializationStatus",
         "parameters": [
           {
             "description": "Use with JWT to specify the organization ID",
@@ -25325,7 +25333,7 @@
     },
     "/webhooks/organizations/{organizationId}/initialize": {
       "post": {
-        "operationId": "WebhookController_initializeWebhooks",
+        "operationId": "initializeWebhooks",
         "parameters": [
           {
             "description": "Use with JWT to specify the organization ID",
@@ -25378,7 +25386,7 @@
     },
     "/webhooks/organizations/{organizationId}/refresh-endpoints": {
       "post": {
-        "operationId": "WebhookController_refreshEndpoints",
+        "operationId": "refreshEndpoints",
         "parameters": [
           {
             "description": "Use with JWT to specify the organization ID",

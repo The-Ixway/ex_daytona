@@ -15,3 +15,15 @@ inserts new sections below this marker:
 ### Added
 - Initial SDK generated from Daytona's OpenAPI specifications (main
   platform, toolbox, and analytics APIs merged by `scripts/fetch-spec.sh`)
+- `ExDaytona.Toolbox.connection/2` — builds a connection to a sandbox's
+  toolbox API from its `toolboxProxyUrl`
+- `ExDaytona.Analytics.connection/1` — builds a connection to the analytics
+  API (base URL configurable via `config :ex_daytona, :analytics_base_url`)
+
+### Changed
+- Cleaned generated function names via a spec patch: analytics endpoints
+  that ship without operationIds get descriptive ones
+  (`get_organization_usage_aggregated/5` instead of
+  `organization_organization_id_usage_aggregated_get/5`), and leaked NestJS
+  controller prefixes are stripped (`Health.check/2` instead of
+  `Health.health_controller_check/2`)

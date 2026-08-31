@@ -1,0 +1,56 @@
+{{>licenseInfo}}
+defmodule {{moduleName}}.Toolbox do
+  @moduledoc """
+  Helpers for connecting to a sandbox's toolbox API.
+
+  Toolbox endpoints (`{{moduleName}}.Api.Process`, `FileSystem`, `Git`,
+  `Lsp`, `ComputerUse`, …) are not served from the main platform base URL —
+  each sandbox exposes them at `{toolboxProxyUrl}/{sandboxId}`, where
+  `toolboxProxyUrl` comes from the sandbox DTO returned by the platform API.
+
+      conn = {{moduleName}}.Connection.new(bearer_token: token)
+      {:ok, sandbox} = {{moduleName}}.Api.Sandbox.get_sandbox(conn, "my-sandbox")
+
+      toolbox = {{moduleName}}.Toolbox.connection(sandbox, bearer_token: token)
+
+      {:ok, result} =
+        {{moduleName}}.Api.Process.execute_command(
+          toolbox,
+          %{{moduleName}}.Model.ExecuteRequest{command: "echo hello"}
+        )
+  """
+
+  alias {{moduleName}}.Connection
+  alias {{moduleName}}.Model.Sandbox
+
+  @doc """
+  Build a `#{inspect(Connection)}` for a sandbox's toolbox API.
+
+  Accepts the same options as `#{inspect(Connection)}.new/1` (e.g.
+  `bearer_token`); the `base_url` is derived from the sandbox and cannot be
+  overridden here.
+  """
+  @spec connection(Sandbox.t(), Connection.options()) :: Tesla.Env.client()
+  def connection(%Sandbox{} = sandbox, options \\ []) do
+    # Prepending wins: Connection.new reads options with Keyword.get, which
+    # returns the first occurrence.
+    Connection.new([base_url: base_url(sandbox)] ++ options)
+  end
+
+  @doc """
+  The toolbox base URL for a sandbox: `{toolboxProxyUrl}/{sandboxId}`.
+
+  Raises `ArgumentError` if the sandbox has no `toolboxProxyUrl` (e.g. a
+  sandbox that is still starting or was built from a sparse fixture).
+  """
+  @spec base_url(Sandbox.t()) :: String.t()
+  def base_url(%Sandbox{toolboxProxyUrl: proxy_url, id: id})
+      when is_binary(proxy_url) and proxy_url != "" and is_binary(id) do
+    String.trim_trailing(proxy_url, "/") <> "/" <> id
+  end
+
+  def base_url(%Sandbox{id: id}) do
+    raise ArgumentError,
+          "sandbox #{inspect(id)} has no toolboxProxyUrl — is it still starting?"
+  end
+end

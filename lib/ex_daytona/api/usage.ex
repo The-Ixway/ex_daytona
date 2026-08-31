@@ -28,22 +28,9 @@ defmodule ExDaytona.Api.Usage do
   - `{:ok, [%ModelsUsagePeriod{}, ...]}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec organization_organization_id_sandbox_sandbox_id_usage_get(
-          Tesla.Env.client(),
-          String.t(),
-          String.t(),
-          String.t(),
-          String.t(),
-          keyword()
-        ) :: {:ok, [ExDaytona.Model.ModelsUsagePeriod.t()]} | {:error, Tesla.Env.t()}
-  def organization_organization_id_sandbox_sandbox_id_usage_get(
-        connection,
-        organization_id,
-        sandbox_id,
-        from,
-        to,
-        _opts \\ []
-      ) do
+  @spec get_organization_sandbox_usage(Tesla.Env.client(), String.t(), String.t(), String.t(), String.t(), keyword()) ::
+          {:ok, [ExDaytona.Model.ModelsUsagePeriod.t()]} | {:error, Tesla.Env.t()}
+  def get_organization_sandbox_usage(connection, organization_id, sandbox_id, from, to, _opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -76,14 +63,9 @@ defmodule ExDaytona.Api.Usage do
   - `{:ok, ExDaytona.Model.ModelsAggregatedUsage.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec organization_organization_id_usage_aggregated_get(
-          Tesla.Env.client(),
-          String.t(),
-          String.t(),
-          String.t(),
-          keyword()
-        ) :: {:ok, ExDaytona.Model.ModelsAggregatedUsage.t()} | {:error, Tesla.Env.t()}
-  def organization_organization_id_usage_aggregated_get(connection, organization_id, from, to, _opts \\ []) do
+  @spec get_organization_usage_aggregated(Tesla.Env.client(), String.t(), String.t(), String.t(), keyword()) ::
+          {:ok, ExDaytona.Model.ModelsAggregatedUsage.t()} | {:error, Tesla.Env.t()}
+  def get_organization_usage_aggregated(connection, organization_id, from, to, _opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -117,9 +99,9 @@ defmodule ExDaytona.Api.Usage do
   - `{:ok, [%ModelsUsageChartPoint{}, ...]}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec organization_organization_id_usage_chart_get(Tesla.Env.client(), String.t(), String.t(), String.t(), keyword()) ::
+  @spec get_organization_usage_chart(Tesla.Env.client(), String.t(), String.t(), String.t(), keyword()) ::
           {:ok, [ExDaytona.Model.ModelsUsageChartPoint.t()]} | {:error, Tesla.Env.t()}
-  def organization_organization_id_usage_chart_get(connection, organization_id, from, to, opts \\ []) do
+  def get_organization_usage_chart(connection, organization_id, from, to, opts \\ []) do
     optional_params = %{
       :region => :query
     }
@@ -157,14 +139,9 @@ defmodule ExDaytona.Api.Usage do
   - `{:ok, [%ModelsSandboxUsage{}, ...]}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec organization_organization_id_usage_sandbox_get(
-          Tesla.Env.client(),
-          String.t(),
-          String.t(),
-          String.t(),
-          keyword()
-        ) :: {:ok, [ExDaytona.Model.ModelsSandboxUsage.t()]} | {:error, Tesla.Env.t()}
-  def organization_organization_id_usage_sandbox_get(connection, organization_id, from, to, _opts \\ []) do
+  @spec get_organization_usage_per_sandbox(Tesla.Env.client(), String.t(), String.t(), String.t(), keyword()) ::
+          {:ok, [ExDaytona.Model.ModelsSandboxUsage.t()]} | {:error, Tesla.Env.t()}
+  def get_organization_usage_per_sandbox(connection, organization_id, from, to, _opts \\ []) do
     request =
       %{}
       |> method(:get)

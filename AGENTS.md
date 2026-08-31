@@ -20,7 +20,17 @@ own base URLs — see the README's "Base URLs" section:
 
 - main platform API → `https://app.daytona.io/api` (the configured default)
 - toolbox API → `{toolboxProxyUrl}/{sandboxId}`, per sandbox
+  (`ExDaytona.Toolbox.connection/2` builds this; template
+  `toolbox.ex.mustache`)
 - analytics API → `https://analytics.app.daytona.io`
+  (`ExDaytona.Analytics.connection/1`; template `analytics.ex.mustache`)
+
+Upstream operationId defects (missing ids on analytics paths, leaked NestJS
+controller prefixes) are fixed durably in
+`spec-patches/10-clean-operation-ids.sh` — extend that patch for future
+naming defects rather than accepting ugly generated function names.
+`scripts/post-generate.sh` prunes lib/ files the generator's FILES manifest
+no longer lists, so renamed-away modules don't linger.
 
 ## Commands
 

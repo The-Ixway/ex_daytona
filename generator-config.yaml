@@ -33,6 +33,14 @@ files:
     folder: lib/ex_daytona
     destinationFilename: application.ex
     templateType: SupportingFiles
+  toolbox.ex.mustache:
+    folder: lib/ex_daytona
+    destinationFilename: toolbox.ex
+    templateType: SupportingFiles
+  analytics.ex.mustache:
+    folder: lib/ex_daytona
+    destinationFilename: analytics.ex
+    templateType: SupportingFiles
 
 # Additional properties for the elixir generator
 additionalProperties:

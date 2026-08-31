@@ -1,3 +1,4 @@
+lib/ex_daytona/analytics.ex
 lib/ex_daytona/api/admin.ex
 lib/ex_daytona/api/api_keys.ex
 lib/ex_daytona/api/audit.ex
@@ -52,6 +53,9 @@ lib/ex_daytona/model/available_sandbox_class.ex
 lib/ex_daytona/model/build_info.ex
 lib/ex_daytona/model/chart.ex
 lib/ex_daytona/model/chart_element.ex
+lib/ex_daytona/model/check_200_response.ex
+lib/ex_daytona/model/check_200_response_details_value.ex
+lib/ex_daytona/model/check_503_response.ex
 lib/ex_daytona/model/code_run_artifacts.ex
 lib/ex_daytona/model/code_run_request.ex
 lib/ex_daytona/model/code_run_response.ex
@@ -121,9 +125,6 @@ lib/ex_daytona/model/git_restore_request.ex
 lib/ex_daytona/model/git_set_config_request.ex
 lib/ex_daytona/model/git_status.ex
 lib/ex_daytona/model/gpu_type.ex
-lib/ex_daytona/model/health_controller_check_200_response.ex
-lib/ex_daytona/model/health_controller_check_200_response_details_value.ex
-lib/ex_daytona/model/health_controller_check_503_response.ex
 lib/ex_daytona/model/identity_provider.ex
 lib/ex_daytona/model/initialize_request.ex
 lib/ex_daytona/model/int_filter.ex
@@ -296,4 +297,5 @@ lib/ex_daytona/model/window_info.ex
 lib/ex_daytona/model/windows_response.ex
 lib/ex_daytona/model/work_dir_response.ex
 lib/ex_daytona/request_builder.ex
+lib/ex_daytona/toolbox.ex
 mix.exs
