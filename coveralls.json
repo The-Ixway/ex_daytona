@@ -1,0 +1,9 @@
+{
+  "coverage_options": {
+    "minimum_coverage": 90
+  },
+  "skip_files": [
+    "test/support"
+  ],
+  "__comment": "The floor is enforced by CI (mix coveralls). The generated surface is covered by the reflection-driven model/API surface tests in test/unit; raise the floor further as hand-written tests grow."
+}

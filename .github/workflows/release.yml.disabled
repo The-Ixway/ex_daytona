@@ -1,0 +1,92 @@
+# Release automation via git_ops
+#
+# Run this workflow (Actions tab → Release → Run workflow) when you want to
+# cut a release. It uses conventional commit history to determine the next
+# version (`fix:` → patch, `feat:` → minor, `BREAKING CHANGE`/`!` → major),
+# bumps @version in mix.exs, updates CHANGELOG.md, commits, tags, pushes,
+# and then triggers the publish workflow for the new tag.
+#
+# Requirements:
+# - Conventional commit messages (enforced on PR titles by
+#   conventional-commits.yml — use squash merges so PR titles become commits)
+# - CHANGELOG.md must contain the `<!-- changelog -->` marker (the fresh
+#   changelog written by scripts/setup.sh includes it)
+name: Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  release:
+    name: Version, changelog, tag
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify CHANGELOG has the git_ops marker
+        run: |
+          if ! grep -q '<!-- changelog -->' CHANGELOG.md; then
+            echo "::error::CHANGELOG.md is missing the '<!-- changelog -->' marker required by git_ops."
+            echo "::error::Add the marker below your changelog header (setup.sh writes it into fresh SDK changelogs)."
+            exit 1
+          fi
+
+      - name: Set up BEAM
+        uses: erlef/setup-beam@v1
+        with:
+          version-file: .tool-versions
+          version-type: strict
+
+      - name: Cache deps and build
+        uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: mix-release-${{ runner.os }}-${{ hashFiles('mix.lock') }}
+          restore-keys: |
+            mix-release-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Configure git author
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      # First release: no v* tag exists yet, so just tag the current mix.exs
+      # version (git_ops needs a previous tag to compute the next version).
+      # Subsequent releases: git_ops derives the bump from conventional
+      # commits, updates mix.exs + CHANGELOG.md, commits, and tags.
+      - name: Run release
+        run: |
+          if [ -z "$(git tag --list 'v*')" ]; then
+            VERSION=$(grep -E '^\s*@version "' mix.exs | head -1 | sed -E 's/.*"([^"]+)".*/\1/')
+            echo "No previous release tag — tagging current version v$VERSION"
+            git tag -a "v$VERSION" -m "Release v$VERSION"
+          else
+            mix git_ops.release --yes
+          fi
+
+      - name: Push commit and tag
+        run: git push origin HEAD --follow-tags
+
+      # Events created with GITHUB_TOKEN don't trigger other workflows, so the
+      # tag push above will NOT fire publish.yml by itself. Dispatch it
+      # explicitly for the new tag instead.
+      - name: Trigger publish workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG=$(git describe --tags --abbrev=0)
+          echo "Triggering publish for $TAG"
+          gh workflow run publish.yml --ref "$TAG"

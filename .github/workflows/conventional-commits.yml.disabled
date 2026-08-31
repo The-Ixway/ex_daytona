@@ -1,0 +1,38 @@
+# Enforce conventional-commit PR titles
+#
+# Release automation (release.yml / git_ops) derives version bumps from
+# conventional commit messages. With squash merges, the PR title becomes the
+# commit message, so validating titles here keeps the history releasable:
+#   fix: ...              -> patch
+#   feat: ...             -> minor
+#   feat!: ... / BREAKING CHANGE -> major
+#   chore:/docs:/test:/ci:/refactor: ... -> no release
+name: Conventional Commits
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+
+permissions: {}
+
+jobs:
+  lint-pr-title:
+    name: Validate PR title
+    runs-on: ubuntu-latest
+
+    steps:
+      # Validates the title from the event payload — no API calls, no token,
+      # no third-party action, and immune to GitHub API incidents (which
+      # repeatedly failed the previous action-based check on unrelated PRs).
+      - name: Check title against Conventional Commits
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          types='feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert'
+          if printf '%s' "$TITLE" | grep -qE "^($types)(\([a-zA-Z0-9_-]+\))?!?: .+"; then
+            echo "PR title OK: $TITLE"
+          else
+            echo "::error::PR title must follow Conventional Commits (e.g. 'feat: add X', 'fix(scope)!: change Y')."
+            echo "::error::Got: $TITLE"
+            exit 1
+          fi

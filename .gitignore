@@ -1,0 +1,27 @@
+# Build artifacts
+/_build/
+/deps/
+/doc/
+/cover/
+erl_crash.dump
+*.ez
+*.beam
+
+# Dialyzer PLTs
+/priv/plts/
+
+# Regeneration backups (created by scripts/regenerate.sh)
+/.backup/
+/.last_backup
+
+# Generated on `mix hex.build`
+*.tar
+
+# Language server / editor
+/.elixir_ls/
+/.elixir-tools/
+.DS_Store
+
+# Node (if using npx openapi-generator-cli)
+/node_modules/
+openapitools.json

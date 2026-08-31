@@ -1,0 +1,52 @@
+# OpenAPI Generator Ignore File
+# Files and directories that should NOT be overwritten during regeneration
+
+# Configuration files (custom)
+config/**
+.formatter.exs
+.tool-versions
+.gitignore
+
+# Test infrastructure (completely custom)
+test/**
+
+# Coverage and lint configuration
+coveralls.json
+.credo.exs
+
+# Scripts (custom automation)
+scripts/**
+
+# GitHub workflows (custom CI/CD)
+.github/**
+
+# Documentation (custom)
+CONTRIBUTING.md
+CHANGELOG.md
+README.md
+LICENSE
+
+# Agent guidance and editor config
+AGENTS.md
+CLAUDE.md
+.claude/**
+.editorconfig
+
+# Git hooks and SBOM
+.githooks/**
+bom.cdx.json
+
+# Spec source URL and local spec patches (used by spec-sync/regenerate)
+.spec-source
+spec-patches/**
+
+# Template configuration
+setup.example.json
+generator-config.yaml
+.openapi-generator-ignore
+
+# Custom templates
+.openapi-generator/templates/**
+
+# Mix lock file (let dependency resolution handle this)
+mix.lock

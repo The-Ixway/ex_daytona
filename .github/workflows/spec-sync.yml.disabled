@@ -1,0 +1,142 @@
+# Weekly OpenAPI spec sync
+#
+# If the SDK was set up with a spec URL (recorded in .spec-source by
+# scripts/setup.sh), this workflow fetches the latest version of the spec
+# every week, and — when it differs from the committed openapi-spec.yaml —
+# regenerates the SDK and opens a pull request with the changes.
+name: Spec Sync
+
+on:
+  # Manual trigger
+  workflow_dispatch:
+
+  # Weekly: Monday 9 AM UTC
+  schedule:
+    - cron: "0 9 * * 1"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    name: Check upstream spec for changes
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check for a recorded spec source
+        id: source
+        run: |
+          if [ -f .spec-source ]; then
+            SPEC_URL=$(head -1 .spec-source | tr -d '[:space:]')
+            if [ -n "$SPEC_URL" ]; then
+              echo "url=$SPEC_URL" >> "$GITHUB_OUTPUT"
+              echo "found=true" >> "$GITHUB_OUTPUT"
+              echo "Spec source: $SPEC_URL"
+            else
+              echo "found=false" >> "$GITHUB_OUTPUT"
+              echo "::notice::.spec-source is empty; nothing to sync."
+            fi
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No .spec-source file. Record your spec URL there (or re-run scripts/setup.sh with a URL) to enable weekly spec sync."
+          fi
+
+      - name: Fetch latest spec
+        if: steps.source.outputs.found == 'true'
+        id: fetch
+        run: |
+          # Convert GitHub blob URLs to raw URLs so curl gets the file, not HTML
+          SPEC_URL="${{ steps.source.outputs.url }}"
+          if printf '%s' "$SPEC_URL" | grep -qE '^https://github\.com/[^/]+/[^/]+/blob/'; then
+            SPEC_URL=$(printf '%s' "$SPEC_URL" | sed -E 's|^https://github\.com/([^/]+)/([^/]+)/blob/|https://raw.githubusercontent.com/\1/\2/|')
+            echo "Converted to raw URL: $SPEC_URL"
+          fi
+
+          curl -fsSL "$SPEC_URL" -o /tmp/latest-spec.yaml
+
+          # The committed spec has local patches applied (spec-patches/);
+          # patch the fresh download the same way before comparing, so
+          # unchanged upstream specs don't register as permanent drift.
+          ./scripts/apply-spec-patches.sh /tmp/latest-spec.yaml
+
+          if cmp -s /tmp/latest-spec.yaml openapi-spec.yaml; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Spec is up to date."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            cp /tmp/latest-spec.yaml openapi-spec.yaml
+            echo "Upstream spec has changed."
+          fi
+
+      - name: Summarize spec changes
+        if: steps.fetch.outputs.changed == 'true'
+        id: diff
+        run: |
+          npm install -g oasdiff 2>/dev/null || true
+          {
+            echo 'summary<<SPEC_DIFF_EOF'
+            oasdiff changelog <(git show HEAD:openapi-spec.yaml) openapi-spec.yaml 2>/dev/null | head -80 || echo "(diff summary unavailable)"
+            echo 'SPEC_DIFF_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Set up BEAM
+        if: steps.fetch.outputs.changed == 'true'
+        uses: erlef/setup-beam@v1
+        with:
+          version-file: .tool-versions
+          version-type: strict
+
+      - name: Setup Java (for OpenAPI Generator)
+        if: steps.fetch.outputs.changed == 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Node.js (for OpenAPI Generator)
+        if: steps.fetch.outputs.changed == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install OpenAPI Generator
+        if: steps.fetch.outputs.changed == 'true'
+        run: npm install -g @openapitools/openapi-generator-cli
+
+      - name: Regenerate SDK
+        if: steps.fetch.outputs.changed == 'true'
+        run: ./scripts/regenerate.sh
+
+      # NOTE: PRs created with the default GITHUB_TOKEN do not trigger other
+      # workflows (e.g. test.yml). To get CI runs on these PRs, create a
+      # fine-grained PAT, store it as a secret (e.g. SPEC_SYNC_PAT), and use
+      # it as the token below.
+      - name: Create Pull Request
+        if: steps.fetch.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: sync SDK with upstream OpenAPI spec"
+          title: "🔄 Upstream OpenAPI spec changed — regenerated SDK"
+          branch: "auto/spec-sync"
+          body: |
+            The weekly spec-sync workflow found changes in the upstream
+            OpenAPI spec (`${{ steps.source.outputs.url }}`) and regenerated
+            the SDK.
+
+            ## Spec changes
+
+            ```
+            ${{ steps.diff.outputs.summary }}
+            ```
+
+            ## Checklist
+            - [ ] Review generated code changes
+            - [ ] Check the breaking-changes workflow result
+            - [ ] Update tests for new/changed endpoints
+            - [ ] Update CHANGELOG.md
+            - [ ] Bump version in generator-config.yaml / mix.exs if needed

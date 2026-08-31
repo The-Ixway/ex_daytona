@@ -1,0 +1,10 @@
+{
+  "package_name": "my_api_client",
+  "module_name": "MyAPIClient",
+  "description": "Elixir client for the My API service",
+  "git_user": "your-github-username",
+  "git_repo": "my-api-client",
+  "base_url": "https://api.example.com/v1",
+  "openapi_spec_path": "",
+  "license": "MIT"
+}

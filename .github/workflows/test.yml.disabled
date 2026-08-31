@@ -1,0 +1,178 @@
+name: Test
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MIX_ENV: test
+
+jobs:
+  test:
+    name: Lint & test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up BEAM
+        id: beam
+        uses: erlef/setup-beam@v1
+        with:
+          version-file: .tool-versions
+          version-type: strict
+
+      - name: Cache deps and build
+        uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: mix-${{ runner.os }}-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-${{ hashFiles('mix.lock') }}
+          restore-keys: |
+            mix-${{ runner.os }}-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Check for unused dependencies
+        run: mix deps.unlock --check-unused
+
+      # Informational: also flags advisories in test-only transitive deps
+      # (e.g. cowlib via bypass) that don't ship with the SDK and may have no
+      # fixed release yet. Review the log; it does not fail the build.
+      - name: Audit dependencies (informational)
+        run: mix hex.audit
+        continue-on-error: true
+
+      - name: Compile (warnings as errors)
+        run: mix compile --warnings-as-errors
+
+      - name: Check formatting
+        run: mix format --check-formatted
+
+      - name: Credo
+        run: mix credo --strict
+
+      # Coverage threshold is configured in coveralls.json (minimum_coverage).
+      # It defaults to 0 so a freshly generated SDK passes; raise it once you
+      # have added tests for your API operations.
+      - name: Run tests with coverage
+        run: mix coveralls
+
+      # The SBOM (bom.cdx.json) is committed and kept in sync by the
+      # pre-commit hook; this check catches drift (e.g. dep changes committed
+      # with hooks disabled). Only fields deterministically derived from
+      # mix.exs/mix.lock are compared (root component + pkg:hex components +
+      # pruned dependency graph): mix sbom enriches metadata from the hex.pm
+      # API (network-dependent) and OTP system components carry the versions
+      # of whichever Erlang build generated the bom, so neither can compare
+      # stably between machines. The committed SBOM stays the enriched copy
+      # produced locally by the pre-commit hook.
+      - name: Verify SBOM is up to date
+        run: |
+          cp bom.cdx.json /tmp/committed-bom.json
+          # The hex.pm metadata fetch can crash mix sbom on a slow response
+          # (5s task timeout inside the fetcher) — retry transient failures.
+          for attempt in 1 2 3; do
+            if MIX_ENV=dev mix sbom; then break; fi
+            if [ "$attempt" = 3 ]; then
+              echo "::error::mix sbom failed after 3 attempts"
+              exit 1
+            fi
+            echo "mix sbom failed (attempt $attempt) — retrying"
+            sleep 10
+          done
+          elixir scripts/verify_sbom.exs /tmp/committed-bom.json bom.cdx.json
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: bom.cdx.json
+
+  # The SDK declares `elixir: "~> 1.18"` in mix.exs; this job proves it still
+  # works on the minimum supported toolchain.
+  compat:
+    name: Minimum supported (Elixir 1.18 / OTP 27)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up BEAM
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: "1.18"
+          otp-version: "27"
+
+      - name: Cache deps and build
+        uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: mix-compat-${{ runner.os }}-${{ hashFiles('mix.lock') }}
+          restore-keys: |
+            mix-compat-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Compile (warnings as errors)
+        run: mix compile --warnings-as-errors
+
+      - name: Run tests
+        run: mix test
+
+  dialyzer:
+    name: Dialyzer
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up BEAM
+        id: beam
+        uses: erlef/setup-beam@v1
+        with:
+          version-file: .tool-versions
+          version-type: strict
+
+      - name: Cache deps and build
+        uses: actions/cache@v4
+        with:
+          path: |
+            deps
+            _build
+          key: mix-${{ runner.os }}-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-${{ hashFiles('mix.lock') }}
+          restore-keys: |
+            mix-${{ runner.os }}-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-
+
+      # PLTs are expensive to build; cache them separately so a mix.lock
+      # change doesn't force a full rebuild.
+      - name: Cache PLTs
+        uses: actions/cache@v4
+        with:
+          path: priv/plts
+          key: plt-${{ runner.os }}-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-${{ hashFiles('mix.lock') }}
+          restore-keys: |
+            plt-${{ runner.os }}-${{ steps.beam.outputs.otp-version }}-${{ steps.beam.outputs.elixir-version }}-
+
+      - name: Install dependencies
+        run: mix deps.get
+
+      - name: Dialyzer
+        run: mix dialyzer --format github

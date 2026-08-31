@@ -1,0 +1,55 @@
+# OpenAPI Generator Configuration
+# This file configures how the elixir generator creates SDK code
+#
+# NOTE: The elixir generator does NOT fall back to its built-in templates when
+# templateDir is set, so .openapi-generator/templates must contain the COMPLETE
+# template set (vendored from openapi-generator 7.23.0) with our customizations
+# applied on top. If you upgrade openapi-generator, re-vendor the templates:
+#   unzip -j <openapi-generator-cli.jar> 'elixir/*' -d .openapi-generator/templates
+# and re-apply the custom changes to connection.ex.mustache and mix.exs.mustache.
+
+# Generator type
+generatorName: elixir
+
+# Output directory (relative to this file)
+outputDir: .
+
+# Input OpenAPI specification
+inputSpec: openapi-spec.yaml
+
+# Template directory (complete vendored template set)
+templateDir: .openapi-generator/templates
+
+# GitHub coordinates for source/package links in mix.exs. These MUST be
+# top-level keys: the generator ignores them under additionalProperties and
+# emits its GIT_USER_ID/GIT_REPO_ID placeholder defaults instead.
+gitUserId: "{{GIT_USER}}"
+gitRepoId: "{{GIT_REPO}}"
+
+# Extra template files not part of the stock elixir generator.
+# The lib/ path is filled in by scripts/setup.sh (underscored module name).
+files:
+  application.ex.mustache:
+    folder: lib/{{LIB_DIR}}
+    destinationFilename: application.ex
+    templateType: SupportingFiles
+
+# Additional properties for the elixir generator
+additionalProperties:
+  # Package name (will be replaced by setup.sh)
+  packageName: "{{PACKAGE_NAME}}"
+
+  # Module namespace for generated code. Defaults to the camelized
+  # package name, e.g. my_api -> MyAPI. (will be replaced by setup.sh)
+  invokerPackage: "{{MODULE_NAME}}"
+
+  # Package version
+  packageVersion: "0.1.0"
+
+  # Description used in mix.exs (will be replaced by setup.sh).
+  # Falls back to the spec's info.description when empty.
+  sdkDescription: "{{DESCRIPTION}}"
+
+  # SPDX license id used in mix.exs (will be replaced by setup.sh)
+  licenseId: "{{LICENSE_ID}}"
+

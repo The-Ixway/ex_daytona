@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+# Pre-commit hook (activated by `git config core.hooksPath .githooks`,
+# which scripts/setup.sh does automatically).
+#
+# Keeps the committed SBOM (bom.cdx.json) in sync: whenever the dependency
+# set changes (mix.exs / mix.lock staged), the SBOM is regenerated and added
+# to the same commit.
+
+set -e
+
+if git diff --cached --name-only | grep -qE '^(mix\.exs|mix\.lock)$'; then
+  if [ -f mix.exs ] && command -v mix >/dev/null 2>&1; then
+    echo "[pre-commit] Dependency change detected — regenerating bom.cdx.json"
+    if mix sbom >/dev/null 2>&1; then
+      git add bom.cdx.json
+    else
+      echo "[pre-commit] SBOM generation failed — run 'mix sbom' to see why" >&2
+      exit 1
+    fi
+  fi
+fi

@@ -1,0 +1,136 @@
+name: Breaking Changes Detection
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "openapi-spec.yaml"
+      - "lib/**/*.ex"
+
+jobs:
+  detect-breaking-changes:
+    name: Detect Breaking Changes
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get base branch spec
+        id: base_spec
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          if git show "origin/${{ github.base_ref }}:openapi-spec.yaml" > openapi-spec.base.yaml 2>/dev/null; then
+            echo "found=true" >> $GITHUB_OUTPUT
+          else
+            echo "found=false" >> $GITHUB_OUTPUT
+            echo "No OpenAPI spec found on base branch"
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install OpenAPI diff tool
+        run: npm install -g oasdiff
+
+      - name: Check for breaking changes in spec
+        id: spec_check
+        run: |
+          if [ "${{ steps.base_spec.outputs.found }}" == "true" ] && [ -f openapi-spec.yaml ]; then
+            oasdiff breaking openapi-spec.base.yaml openapi-spec.yaml > breaking-changes.txt || true
+
+            if [ -s breaking-changes.txt ]; then
+              echo "breaking=true" >> $GITHUB_OUTPUT
+              echo "Breaking changes detected:"
+              cat breaking-changes.txt
+            else
+              echo "breaking=false" >> $GITHUB_OUTPUT
+              echo "No breaking changes detected"
+            fi
+          else
+            echo "breaking=false" >> $GITHUB_OUTPUT
+            echo "No base spec to compare against"
+          fi
+
+      # Informational only: a changed `def` line shows up as removed+added in a
+      # diff, so this cannot reliably distinguish removals from modifications.
+      - name: Check for removed public functions (informational)
+        id: signature_check
+        run: |
+          REMOVED_FUNCTIONS=$(git diff "origin/${{ github.base_ref }}...HEAD" -- lib/ | grep -c "^-[[:space:]]*def " || true)
+
+          if [ "$REMOVED_FUNCTIONS" -gt 0 ]; then
+            echo "functions_removed=true" >> $GITHUB_OUTPUT
+            echo "$REMOVED_FUNCTIONS public function definition(s) removed or modified"
+          else
+            echo "functions_removed=false" >> $GITHUB_OUTPUT
+          fi
+
+      # The PR comment is a nicety — the authoritative gate is the local
+      # "Fail if spec has breaking changes" step below. Don't let a GitHub
+      # API hiccup on the comment fail the whole check.
+      - name: Comment on PR with results
+        continue-on-error: true
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const breaking = '${{ steps.spec_check.outputs.breaking }}' === 'true';
+            const functionsRemoved = '${{ steps.signature_check.outputs.functions_removed }}' === 'true';
+
+            let body = '## 🔍 Breaking Changes Analysis\n\n';
+
+            if (breaking || functionsRemoved) {
+              body += '⚠️ **Potential breaking changes detected!**\n\n';
+
+              if (breaking) {
+                body += '### OpenAPI Spec Changes\n';
+                try {
+                  const changes = fs.readFileSync('breaking-changes.txt', 'utf8');
+                  body += '```\n' + changes + '\n```\n\n';
+                } catch (e) {
+                  body += 'Breaking changes detected but details unavailable.\n\n';
+                }
+              }
+
+              if (functionsRemoved) {
+                body += '### Function Definition Changes (informational)\n';
+                body += 'Public `def` lines were removed or modified in lib/. ';
+                body += 'Review whether any public functions were actually removed.\n\n';
+              }
+
+              body += '### ⚡ Action Required\n';
+              body += '- Review all changes carefully\n';
+              body += '- Update CHANGELOG.md with breaking changes\n';
+              body += '- Consider incrementing major version\n';
+              body += '- Add migration guide if needed\n';
+            } else {
+              body += '✅ **No breaking changes detected**\n\n';
+              body += 'The changes appear to be backward compatible.\n';
+            }
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body
+            });
+
+      - name: Fail if spec has breaking changes
+        if: steps.spec_check.outputs.breaking == 'true'
+        run: |
+          echo "::error::Breaking changes detected in the OpenAPI spec. Please review and document them."
+          exit 1
+
+      - name: Upload breaking changes report
+        if: steps.spec_check.outputs.breaking == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: breaking-changes-report
+          path: breaking-changes.txt

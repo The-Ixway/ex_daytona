@@ -1,0 +1,43 @@
+{{>licenseInfo}}
+defmodule {{moduleName}}.Application do
+  @moduledoc """
+  OTP application for {{moduleName}}.
+
+  Starts the Finch HTTP connection pool used by the default
+  `{{moduleName}}.Connection` adapter.
+
+  Pool settings can be tuned via application configuration:
+
+      config {{#atom}}{{#underscored}}{{packageName}}{{/underscored}}{{/atom}},
+        pool_size: 25,
+        pool_count: 1,
+        connect_timeout: 5_000
+  """
+
+  use Application
+
+  @impl true
+  def start(_type, _args) do
+    children = [
+      {Finch, name: {{moduleName}}.Finch, pools: pool_config()}
+    ]
+
+    Supervisor.start_link(children, strategy: :one_for_one, name: {{moduleName}}.Supervisor)
+  end
+
+  defp pool_config do
+    app = {{#atom}}{{#underscored}}{{packageName}}{{/underscored}}{{/atom}}
+
+    %{
+      default: [
+        size: Application.get_env(app, :pool_size, 25),
+        count: Application.get_env(app, :pool_count, 1),
+        conn_opts: [
+          transport_opts: [
+            timeout: Application.get_env(app, :connect_timeout, 5_000)
+          ]
+        ]
+      ]
+    }
+  end
+end
