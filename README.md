@@ -3,7 +3,7 @@
 [![Hex.pm](https://img.shields.io/hexpm/v/ex_daytona.svg)](https://hex.pm/packages/ex_daytona)
 [![Documentation](https://img.shields.io/badge/hexdocs-ex__daytona-blue.svg)](https://hexdocs.pm/ex_daytona)
 [![CI](https://github.com/The-Ixway/ex_daytona/actions/workflows/test.yml/badge.svg)](https://github.com/The-Ixway/ex_daytona/actions/workflows/test.yml)
-[![License](https://img.shields.io/badge/license-Apache--2.0-green.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-Apache--2.0-green.svg)](https://github.com/The-Ixway/ex_daytona/blob/main/LICENSE)
 
 Unofficial Elixir SDK for the [Daytona](https://www.daytona.io) AI sandbox
 platform — covering the main platform API, the per-sandbox toolbox API, and
@@ -207,7 +207,7 @@ mix dialyzer              # type check
 
 ## License
 
-See [LICENSE](LICENSE) for details.
+See [LICENSE](https://github.com/The-Ixway/ex_daytona/blob/main/LICENSE) for details.
 
 ---
 
