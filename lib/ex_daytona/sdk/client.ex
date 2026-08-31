@@ -84,4 +84,18 @@ defmodule ExDaytona.Client do
   """
   @spec conn(t()) :: Tesla.Env.client()
   def conn(%__MODULE__{conn: conn}), do: conn
+
+  @doc """
+  The platform base URL this client targets, resolved the same way
+  `ExDaytona.Connection.new/1` resolves it (explicit option, then the
+  `:base_url` application env, then the production default).
+  """
+  @spec base_url(t()) :: String.t()
+  def base_url(%__MODULE__{options: options}) do
+    Keyword.get(
+      options,
+      :base_url,
+      Application.get_env(:ex_daytona, :base_url, "https://app.daytona.io/api")
+    )
+  end
 end

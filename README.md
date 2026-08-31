@@ -60,6 +60,51 @@ and set `DAYTONA_API_KEY` (or pass `api_key:` explicitly).
 Facade calls return `{:ok, value}` or `{:error, %ExDaytona.Error{status, message, code, details}}` —
 all of the generated client's response conventions are normalized away.
 
+### Sessions — long-running commands with streamed logs
+
+A session is a persistent shell inside the sandbox: commands share state
+and can run asynchronously with real-time log streaming.
+
+```elixir
+{:ok, session} = ExDaytona.Session.create(sandbox)
+
+# Commands share environment and working directory
+{:ok, %{exit_code: 0}} = ExDaytona.Session.run(session, "export TARGET=prod")
+{:ok, %{output: "prod\n"}} = ExDaytona.Session.run(session, "echo $TARGET")
+
+# Long-running: start it, stream the logs live, reap the exit code
+{:ok, cmd_id} = ExDaytona.Session.run_async(session, "mix test 2>&1")
+:ok = ExDaytona.Session.stream_logs(session, cmd_id, &IO.write/1)
+{:ok, %{exit_code: 0}} = ExDaytona.Session.await(session, cmd_id)
+
+{:ok, logs} = ExDaytona.Session.logs(session, cmd_id)   # everything so far
+:ok = ExDaytona.Session.delete(session)
+```
+
+`ExDaytona.Sandbox.stream_build_logs/3` streams a building sandbox's build
+logs the same way.
+
+### Git
+
+```elixir
+:ok = ExDaytona.Git.clone(sandbox, "https://github.com/org/repo.git", "/tmp/repo")
+
+{:ok, status} = ExDaytona.Git.status(sandbox, "/tmp/repo")
+{:ok, %{branches: _, current: "main"}} = ExDaytona.Git.branches(sandbox, "/tmp/repo")
+{:ok, commits} = ExDaytona.Git.history(sandbox, "/tmp/repo")
+
+:ok = ExDaytona.Git.create_branch(sandbox, "/tmp/repo", "feature/x")
+:ok = ExDaytona.Git.checkout(sandbox, "/tmp/repo", "feature/x")
+:ok = ExDaytona.Git.add(sandbox, "/tmp/repo", ["README.md"])
+
+{:ok, %{hash: _}} =
+  ExDaytona.Git.commit(sandbox, "/tmp/repo", "docs: update",
+    author: "Dev", email: "dev@example.com")
+
+# push/pull take :username/:password (use a token as the password)
+:ok = ExDaytona.Git.push(sandbox, "/tmp/repo", username: "bot", password: token)
+```
+
 ### Low-level generated API (full surface)
 
 Every endpoint of all three APIs is available through the generated

@@ -180,6 +180,49 @@ defmodule LiveSmokeTest do
           assert :ok = ExDaytona.Sandbox.write_file(sandbox, "/tmp/live.txt", "roundtrip")
           assert {:ok, "roundtrip"} = ExDaytona.Sandbox.read_file(sandbox, "/tmp/live.txt")
 
+          # Sessions: shared state, async command, real-time log streaming
+          {:ok, session} = ExDaytona.Session.create(sandbox)
+          {:ok, %{exit_code: 0}} = ExDaytona.Session.run(session, "export LIVE_MARKER=ok")
+          {:ok, %{output: marker_out}} = ExDaytona.Session.run(session, "echo $LIVE_MARKER")
+          assert marker_out =~ "ok"
+
+          {:ok, cmd_id} = ExDaytona.Session.run_async(session, "echo s1; sleep 1; echo s2")
+
+          {:ok, chunks} = Agent.start_link(fn -> [] end)
+
+          assert :ok =
+                   ExDaytona.Session.stream_logs(
+                     session,
+                     cmd_id,
+                     fn chunk -> Agent.update(chunks, &[chunk | &1]) end,
+                     timeout: 60_000
+                   )
+
+          streamed = chunks |> Agent.get(& &1) |> Enum.reverse() |> Enum.join()
+          assert streamed =~ "s1"
+          assert streamed =~ "s2"
+
+          assert {:ok, %{exit_code: 0}} =
+                   ExDaytona.Session.await(session, cmd_id, poll_interval: 500)
+
+          assert {:ok, logs} = ExDaytona.Session.logs(session, cmd_id)
+          assert logs =~ "s1"
+          assert :ok = ExDaytona.Session.delete(session)
+
+          # Git: clone a small public repo and inspect it
+          repo = "/tmp/live-repo"
+
+          assert :ok =
+                   ExDaytona.Git.clone(
+                     sandbox,
+                     "https://github.com/octocat/Hello-World.git",
+                     repo
+                   )
+
+          assert {:ok, git_status} = ExDaytona.Git.status(sandbox, repo)
+          assert is_binary(git_status.currentBranch)
+          assert {:ok, [_ | _]} = ExDaytona.Git.history(sandbox, repo)
+
           assert {:ok, stopped} = ExDaytona.Sandbox.stop(sandbox, poll_interval: 2_000)
           assert ExDaytona.Sandbox.state(stopped) == "stopped"
 

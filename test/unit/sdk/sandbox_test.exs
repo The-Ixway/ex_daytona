@@ -240,6 +240,44 @@ defmodule ExDaytona.SandboxTest do
       assert {:ok, [%Model.FileInfo{name: "hello.txt"}]} = Sandbox.list_files(sandbox)
     end
 
+    test "stream_build_logs/3 follows the platform build-logs stream", %{
+      bypass: bypass,
+      client: client
+    } do
+      sandbox = mock_sandbox(bypass, client)
+
+      Bypass.expect_once(bypass, "GET", "/sandbox/sb-1/build-logs", fn conn ->
+        assert URI.decode_query(conn.query_string)["follow"] == "true"
+        assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer dtn_test"]
+
+        conn = Plug.Conn.send_chunked(conn, 200)
+        {:ok, conn} = Plug.Conn.chunk(conn, "step 1/3\n")
+        {:ok, conn} = Plug.Conn.chunk(conn, "step 2/3\n")
+        conn
+      end)
+
+      {:ok, chunks} = Agent.start_link(fn -> [] end)
+
+      assert :ok =
+               Sandbox.stream_build_logs(sandbox, fn chunk ->
+                 Agent.update(chunks, &[chunk | &1])
+               end)
+
+      assert Agent.get(chunks, &Enum.reverse/1) == ["step 1/3\n", "step 2/3\n"]
+    end
+
+    test "build_logs/1 returns the logs as a binary", %{bypass: bypass, client: client} do
+      sandbox = mock_sandbox(bypass, client)
+
+      Bypass.expect_once(bypass, "GET", "/sandbox/sb-1/build-logs", fn conn ->
+        conn
+        |> Plug.Conn.put_resp_content_type("text/plain")
+        |> Plug.Conn.resp(200, "built ok\n")
+      end)
+
+      assert {:ok, "built ok\n"} = Sandbox.build_logs(sandbox)
+    end
+
     test "toolbox operations on a sandbox without a toolbox URL fail cleanly", %{client: client} do
       sandbox = %Sandbox{client: client, info: %Model.Sandbox{id: "sb-x", toolboxProxyUrl: nil}}
 

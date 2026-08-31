@@ -192,6 +192,34 @@ defmodule ExDaytona.Sandbox do
   @spec state(t()) :: String.t() | nil
   def state(%__MODULE__{info: %{state: state}}), do: state
 
+  @doc """
+  The sandbox's build logs so far, as a binary. Only sandboxes built from
+  build info have build logs; snapshot-based sandboxes return an error.
+  """
+  @spec build_logs(t()) :: {:ok, binary()} | {:error, Error.t()}
+  def build_logs(%__MODULE__{client: client, info: %{id: id}}) do
+    with {:ok, %Tesla.Env{body: body}} <-
+           Error.normalize(Api.Sandbox.get_build_logs(client.conn, id)) do
+      {:ok, body}
+    end
+  end
+
+  @doc """
+  Follow the sandbox's build logs in real time: `fun` is invoked with
+  each chunk as it is produced, and the call returns `:ok` when the build
+  finishes and the stream closes.
+
+  Options: `:timeout` — max milliseconds to wait between chunks
+  (default `:infinity`).
+  """
+  @spec stream_build_logs(t(), (binary() -> any()), keyword()) :: :ok | {:error, Error.t()}
+  def stream_build_logs(%__MODULE__{client: client, info: %{id: id}}, fun, opts \\ [])
+      when is_function(fun, 1) do
+    url = Client.base_url(client) <> "/sandbox/#{id}/build-logs?follow=true"
+
+    ExDaytona.HTTPStream.get(url, client.api_key, fun, opts)
+  end
+
   ## Toolbox operations ------------------------------------------------------
 
   @doc """

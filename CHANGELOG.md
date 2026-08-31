@@ -25,6 +25,15 @@ inserts new sections below this marker:
   `{:error, %ExDaytona.Error{}}`), and `ExDaytona.Sandbox`
   (create/get/list/start/stop/delete with state waiting, `exec/3`,
   `write_file/3`, `read_file/2`, `list_files/2`)
+- `ExDaytona.Session` — persistent shell sessions with shared state:
+  synchronous `run/2`, asynchronous `run_async/2` + `await/3`, raw
+  `logs/2`, and real-time `stream_logs/4` (incremental chunked-HTTP
+  streaming)
+- `ExDaytona.Git` — clone/status/branches/create_branch/checkout/add/
+  commit/push/pull/history inside a sandbox, with credential options for
+  authenticated remotes
+- `ExDaytona.Sandbox.build_logs/1` and `stream_build_logs/3` — fetch or
+  follow a building sandbox's build logs
 
 ### Fixed
 - Request bodies no longer send explicit JSON `null`s for unset optional
