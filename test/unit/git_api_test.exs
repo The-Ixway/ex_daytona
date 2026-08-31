@@ -16,7 +16,7 @@ defmodule ExDaytona.Api.GitTest do
       bypass: bypass,
       conn: conn
     } do
-      Bypass.expect_once(bypass, "GET", "/git/status", fn conn ->
+      MockServer.expect_once(bypass, "GET", "/git/status", fn conn ->
         assert URI.decode_query(conn.query_string)["path"] == "/workspace/repo"
 
         conn
@@ -46,7 +46,7 @@ defmodule ExDaytona.Api.GitTest do
 
   describe "commit_changes/3" do
     test "posts the commit request and decodes the hash", %{bypass: bypass, conn: conn} do
-      Bypass.expect_once(bypass, "POST", "/git/commit", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/git/commit", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
         assert %{"message" => "feat: add thing", "path" => "/workspace/repo"} = JSON.decode!(body)
 

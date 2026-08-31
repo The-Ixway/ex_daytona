@@ -26,7 +26,7 @@ defmodule ExDaytona.Api.OrganizationsTest do
 
   describe "create_organization/3" do
     test "posts the body and decodes the 201 response", %{bypass: bypass, conn: conn} do
-      Bypass.expect_once(bypass, "POST", "/organizations", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/organizations", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
         assert %{"name" => "Acme"} = JSON.decode!(body)
 
@@ -54,8 +54,8 @@ defmodule ExDaytona.Api.OrganizationsTest do
 
   describe "leave_organization/3" do
     test "a 204 mapped as passthrough returns the raw env", %{bypass: bypass, conn: conn} do
-      # 204 responses must have an empty body (Cowboy rejects them otherwise)
-      Bypass.expect_once(bypass, "POST", "/organizations/org-1/leave", fn conn ->
+      # 204 responses must have an empty body per the HTTP spec
+      MockServer.expect_once(bypass, "POST", "/organizations/org-1/leave", fn conn ->
         Plug.Conn.resp(conn, 204, "")
       end)
 

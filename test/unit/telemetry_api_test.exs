@@ -16,7 +16,7 @@ defmodule ExDaytona.Api.TelemetryTest do
       bypass: bypass,
       conn: conn
     } do
-      Bypass.expect_once(
+      MockServer.expect_once(
         bypass,
         "GET",
         "/organization/org-1/sandbox/sb-1/telemetry/logs",

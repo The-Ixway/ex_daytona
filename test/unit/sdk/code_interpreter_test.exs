@@ -73,7 +73,7 @@ defmodule ExDaytona.CodeInterpreterTest do
     end
 
     test "create_context/2 posts cwd and decodes", %{bypass: bypass, sandbox: sandbox} do
-      Bypass.expect_once(bypass, "POST", "/toolbox/sb-1/process/interpreter/context", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/toolbox/sb-1/process/interpreter/context", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
         assert %{"cwd" => "/workspace", "language" => "python"} = JSON.decode!(body)
 
@@ -94,7 +94,7 @@ defmodule ExDaytona.CodeInterpreterTest do
       assert {:ok, [%Model.InterpreterContext{id: "ctx-1"}]} =
                CodeInterpreter.list_contexts(sandbox)
 
-      Bypass.expect_once(
+      MockServer.expect_once(
         bypass,
         "DELETE",
         "/toolbox/sb-1/process/interpreter/context/ctx-1",

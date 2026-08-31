@@ -26,7 +26,7 @@ defmodule ExDaytona.Api.InterpreterTest do
 
   describe "create_interpreter_context/3" do
     test "posts the request and decodes the InterpreterContext", %{bypass: bypass, conn: conn} do
-      Bypass.expect_once(bypass, "POST", "/process/interpreter/context", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/process/interpreter/context", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
         assert %{"language" => "python"} = JSON.decode!(body)
 

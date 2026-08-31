@@ -48,7 +48,7 @@ defmodule ExDaytona.ToolboxTest do
       bypass = MockServer.setup()
       sandbox = %Sandbox{id: "sb-1", toolboxProxyUrl: MockServer.url(bypass)}
 
-      Bypass.expect_once(bypass, "GET", "/sb-1/files", fn conn ->
+      MockServer.expect_once(bypass, "GET", "/sb-1/files", fn conn ->
         assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer tb-token"]
 
         conn

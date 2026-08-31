@@ -16,7 +16,7 @@ defmodule ExDaytona.Api.AuditTest do
       bypass: bypass,
       conn: conn
     } do
-      Bypass.expect_once(bypass, "GET", "/audit/organizations/org-1", fn conn ->
+      MockServer.expect_once(bypass, "GET", "/audit/organizations/org-1", fn conn ->
         query = URI.decode_query(conn.query_string)
         assert query["page"] == "2"
         assert query["limit"] == "10"

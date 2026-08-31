@@ -16,7 +16,7 @@ defmodule ExDaytona.Api.FileSystemTest do
       bypass: bypass,
       conn: conn
     } do
-      Bypass.expect_once(bypass, "GET", "/files", fn conn ->
+      MockServer.expect_once(bypass, "GET", "/files", fn conn ->
         assert URI.decode_query(conn.query_string)["path"] == "/home/user"
 
         conn

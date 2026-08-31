@@ -37,7 +37,7 @@ defmodule ExDaytona.Api.ComputerUseTest do
       bypass: bypass,
       conn: conn
     } do
-      Bypass.expect_once(bypass, "POST", "/computeruse/keyboard/key", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/computeruse/keyboard/key", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
         assert %{"key" => "Return"} = JSON.decode!(body)
 

@@ -66,13 +66,13 @@ defmodule ConnectionRuntimeTest do
 
   describe "retry behavior" do
     setup do
-      bypass = Bypass.open()
+      bypass = MockServer.open()
       {:ok, counter} = Agent.start_link(fn -> 0 end)
       {:ok, bypass: bypass, counter: counter}
     end
 
     test "retries idempotent requests on retriable statuses", %{bypass: bypass, counter: counter} do
-      Bypass.expect(bypass, "GET", "/thing", fn conn ->
+      MockServer.expect(bypass, "GET", "/thing", fn conn ->
         attempt = Agent.get_and_update(counter, &{&1, &1 + 1})
         status = if attempt == 0, do: 503, else: 200
         Plug.Conn.resp(conn, status, "{}")
@@ -87,7 +87,7 @@ defmodule ConnectionRuntimeTest do
     end
 
     test "never retries POST requests", %{bypass: bypass, counter: counter} do
-      Bypass.expect(bypass, "POST", "/thing", fn conn ->
+      MockServer.expect(bypass, "POST", "/thing", fn conn ->
         Agent.update(counter, &(&1 + 1))
         Plug.Conn.resp(conn, 503, "{}")
       end)
@@ -101,14 +101,14 @@ defmodule ConnectionRuntimeTest do
     end
 
     test "retries transport errors for idempotent methods and gives up", %{bypass: bypass} do
-      Bypass.down(bypass)
+      MockServer.down(bypass)
       client = client(bypass, retry: [delay: 1, max_retries: 1])
 
       assert {:error, _reason} = @connection.request(client, method: :get, url: "/thing")
     end
 
     test "does not retry transport errors for POST", %{bypass: bypass} do
-      Bypass.down(bypass)
+      MockServer.down(bypass)
       client = client(bypass, retry: [delay: 1, max_retries: 1])
 
       assert {:error, _reason} =

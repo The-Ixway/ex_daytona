@@ -289,6 +289,62 @@
       "version": "1.20.4"
     },
     {
+      "bom-ref": "otp:component:websock:hex:95532479",
+      "cpe": "cpe:2.3:a:phoenixframework:websock:0.5.3:*:*:*:*:*:*:*",
+      "description": "A specification for WebSocket connections",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/phoenixframework/websock"
+        },
+        {
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "6105453d7fac22c712ad66fab1d45abdf049868f253cf719b625151460b8b453"
+            }
+          ],
+          "type": "distribution",
+          "url": "https://repo.hex.pm/tarballs/websock-0.5.3.tar"
+        },
+        {
+          "comment": "docs",
+          "type": "documentation",
+          "url": "https://websock.hexdocs.pm/0.5.3/"
+        },
+        {
+          "comment": "github",
+          "type": "vcs",
+          "url": "https://github.com/phoenixframework/websock"
+        },
+        {
+          "comment": "homepage",
+          "type": "website",
+          "url": "https://hex.pm/packages/websock/0.5.3"
+        }
+      ],
+      "group": "hexpm",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "6105453d7fac22c712ad66fab1d45abdf049868f253cf719b625151460b8b453"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "websock",
+      "purl": "pkg:hex/websock@0.5.3?checksum=sha256:6105453d7fac22c712ad66fab1d45abdf049868f253cf719b625151460b8b453&download_url=https://repo.hex.pm/tarballs/websock-0.5.3.tar&vcs_url=https://github.com/phoenixframework/websock",
+      "scope": "required",
+      "type": "library",
+      "version": "0.5.3"
+    },
+    {
       "bom-ref": "otp:component:sbom:hex:84832432",
       "cpe": "cpe:2.3:a:erlef:sbom:0.10.0:*:*:*:*:*:*:*",
       "description": "Mix task to generate a Software Bill-of-Materials (SBoM) in CycloneDX format",
@@ -638,72 +694,6 @@
       "type": "library"
     },
     {
-      "bom-ref": "otp:component:ranch:hex:28170494",
-      "cpe": "cpe:2.3:a:ninenines:ranch:1.8.1:*:*:*:*:*:*:*",
-      "description": "Socket acceptor pool for TCP protocols.",
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/ninenines/ranch"
-        },
-        {
-          "hashes": [
-            {
-              "alg": "SHA-256",
-              "content": "aed58910f4e21deea992a67bf51632b6d60114895eb03bb392bb733064594dd0"
-            }
-          ],
-          "type": "distribution",
-          "url": "https://repo.hex.pm/tarballs/ranch-1.8.1.tar"
-        },
-        {
-          "comment": "function reference",
-          "type": "other",
-          "url": "https://ninenines.eu/docs/en/ranch/2.2/manual/"
-        },
-        {
-          "comment": "github",
-          "type": "vcs",
-          "url": "https://github.com/ninenines/ranch"
-        },
-        {
-          "comment": "homepage",
-          "type": "website",
-          "url": "https://hex.pm/packages/ranch/1.8.1"
-        },
-        {
-          "comment": "sponsor",
-          "type": "other",
-          "url": "https://github.com/sponsors/essen"
-        },
-        {
-          "comment": "user guide",
-          "type": "other",
-          "url": "https://ninenines.eu/docs/en/ranch/2.2/guide/"
-        }
-      ],
-      "group": "hexpm",
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "aed58910f4e21deea992a67bf51632b6d60114895eb03bb392bb733064594dd0"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "acknowledgement": "declared",
-            "id": "ISC"
-          }
-        }
-      ],
-      "name": "ranch",
-      "purl": "pkg:hex/ranch@1.8.1?checksum=sha256:aed58910f4e21deea992a67bf51632b6d60114895eb03bb392bb733064594dd0&download_url=https://repo.hex.pm/tarballs/ranch-1.8.1.tar&vcs_url=https://github.com/ninenines/ranch",
-      "scope": "required",
-      "type": "library",
-      "version": "1.8.1"
-    },
-    {
       "bom-ref": "otp:component:syntax_tools:otp:25983030",
       "cpe": "cpe:2.3:a:erlang:syntax_tools:*:*:*:*:*:*:*:*",
       "externalReferences": [
@@ -995,67 +985,6 @@
       "scope": "required",
       "type": "library",
       "version": "1.21.2"
-    },
-    {
-      "bom-ref": "otp:component:cowlib:hex:67849849",
-      "cpe": "cpe:2.3:a:ninenines:cowlib:2.19.0:*:*:*:*:*:*:*",
-      "description": "Support library for manipulating Web protocols.",
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/ninenines/cowlib"
-        },
-        {
-          "hashes": [
-            {
-              "alg": "SHA-256",
-              "content": "6dc66e3135b229193ea4dcb14294e79520c923d391315c9c962ef0b4bea72356"
-            }
-          ],
-          "type": "distribution",
-          "url": "https://repo.hex.pm/tarballs/cowlib-2.19.0.tar"
-        },
-        {
-          "comment": "function reference",
-          "type": "other",
-          "url": "https://ninenines.eu/docs/en/cowlib/2.19/manual/"
-        },
-        {
-          "comment": "github",
-          "type": "vcs",
-          "url": "https://github.com/ninenines/cowlib"
-        },
-        {
-          "comment": "homepage",
-          "type": "website",
-          "url": "https://hex.pm/packages/cowlib/2.19.0"
-        },
-        {
-          "comment": "sponsor",
-          "type": "other",
-          "url": "https://github.com/sponsors/essen"
-        }
-      ],
-      "group": "hexpm",
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "6dc66e3135b229193ea4dcb14294e79520c923d391315c9c962ef0b4bea72356"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "acknowledgement": "declared",
-            "id": "ISC"
-          }
-        }
-      ],
-      "name": "cowlib",
-      "purl": "pkg:hex/cowlib@2.19.0?checksum=sha256:6dc66e3135b229193ea4dcb14294e79520c923d391315c9c962ef0b4bea72356&download_url=https://repo.hex.pm/tarballs/cowlib-2.19.0.tar&vcs_url=https://github.com/ninenines/cowlib",
-      "scope": "required",
-      "type": "library",
-      "version": "2.19.0"
     },
     {
       "bom-ref": "otp:component:purl:hex:34644079",
@@ -1439,60 +1368,65 @@
       "version": "0.3.0"
     },
     {
-      "bom-ref": "otp:component:plug_cowboy:hex:83939669",
-      "cpe": "cpe:2.3:a:elixir-plug:plug_cowboy:2.9.0:*:*:*:*:*:*:*",
-      "description": "A Plug adapter for Cowboy",
+      "bom-ref": "otp:component:bandit:hex:8976513",
+      "cpe": "cpe:2.3:a:mtrudel:bandit:1.12.5:*:*:*:*:*:*:*",
+      "description": "A pure-Elixir HTTP server built for Plug & WebSock apps",
       "externalReferences": [
         {
           "type": "vcs",
-          "url": "https://github.com/elixir-plug/plug_cowboy"
+          "url": "https://github.com/mtrudel/bandit"
         },
         {
           "hashes": [
             {
               "alg": "SHA-256",
-              "content": "2002bafba4f3a45b55a58e68d70211b153a7ed18d37edb1ceb6e96e7a92c422e"
+              "content": "c5684ca062fa407cac115aec3256383f3e2ec9fdced7904d59cf5a7bb7ed6181"
             }
           ],
           "type": "distribution",
-          "url": "https://repo.hex.pm/tarballs/plug_cowboy-2.9.0.tar"
+          "url": "https://repo.hex.pm/tarballs/bandit-1.12.5.tar"
+        },
+        {
+          "comment": "changelog",
+          "type": "documentation",
+          "url": "https://bandit.hexdocs.pm/changelog.html"
         },
         {
           "comment": "docs",
           "type": "documentation",
-          "url": "https://plug-cowboy.hexdocs.pm/2.9.0/"
+          "url": "https://bandit.hexdocs.pm/1.12.5/"
         },
         {
           "comment": "github",
           "type": "vcs",
-          "url": "https://github.com/elixir-plug/plug_cowboy"
+          "url": "https://github.com/mtrudel/bandit"
         },
         {
           "comment": "homepage",
           "type": "website",
-          "url": "https://hex.pm/packages/plug_cowboy/2.9.0"
+          "url": "https://hex.pm/packages/bandit/1.12.5"
         }
       ],
       "group": "hexpm",
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "2002bafba4f3a45b55a58e68d70211b153a7ed18d37edb1ceb6e96e7a92c422e"
+          "content": "c5684ca062fa407cac115aec3256383f3e2ec9fdced7904d59cf5a7bb7ed6181"
         }
       ],
       "licenses": [
         {
           "license": {
             "acknowledgement": "declared",
-            "id": "Apache-2.0"
+            "id": "MIT"
           }
         }
       ],
-      "name": "plug_cowboy",
-      "purl": "pkg:hex/plug_cowboy@2.9.0?checksum=sha256:2002bafba4f3a45b55a58e68d70211b153a7ed18d37edb1ceb6e96e7a92c422e&download_url=https://repo.hex.pm/tarballs/plug_cowboy-2.9.0.tar&vcs_url=https://github.com/elixir-plug/plug_cowboy",
-      "scope": "required",
+      "name": "bandit",
+      "purl": "pkg:hex/bandit@1.12.5?checksum=sha256:c5684ca062fa407cac115aec3256383f3e2ec9fdced7904d59cf5a7bb7ed6181&download_url=https://repo.hex.pm/tarballs/bandit-1.12.5.tar&vcs_url=https://github.com/mtrudel/bandit",
+      "scope": "excluded",
       "type": "library",
-      "version": "2.9.0"
+      "version": "1.12.5"
     },
     {
       "bom-ref": "otp:component:earmark_parser:hex:104838958",
@@ -1707,62 +1641,6 @@
       "scope": "required",
       "type": "library",
       "version": "0.23.0"
-    },
-    {
-      "bom-ref": "otp:component:cowboy_telemetry:hex:1321192",
-      "cpe": "cpe:2.3:a:beam-telemetry:cowboy_telemetry:0.4.0:*:*:*:*:*:*:*",
-      "description": "Telemetry instrumentation for Cowboy",
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/beam-telemetry/cowboy_telemetry"
-        },
-        {
-          "hashes": [
-            {
-              "alg": "SHA-256",
-              "content": "7d98bac1ee4565d31b62d59f8823dfd8356a169e7fcbb83831b8a5397404c9de"
-            }
-          ],
-          "type": "distribution",
-          "url": "https://repo.hex.pm/tarballs/cowboy_telemetry-0.4.0.tar"
-        },
-        {
-          "comment": "docs",
-          "type": "documentation",
-          "url": "https://cowboy-telemetry.hexdocs.pm/"
-        },
-        {
-          "comment": "github",
-          "type": "vcs",
-          "url": "https://github.com/beam-telemetry/cowboy_telemetry"
-        },
-        {
-          "comment": "homepage",
-          "type": "website",
-          "url": "https://hex.pm/packages/cowboy_telemetry/0.4.0"
-        }
-      ],
-      "group": "hexpm",
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "7d98bac1ee4565d31b62d59f8823dfd8356a169e7fcbb83831b8a5397404c9de"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "acknowledgement": "declared",
-            "id": "Apache 2.0"
-          }
-        }
-      ],
-      "name": "cowboy_telemetry",
-      "purl": "pkg:hex/cowboy_telemetry@0.4.0?checksum=sha256:7d98bac1ee4565d31b62d59f8823dfd8356a169e7fcbb83831b8a5397404c9de&download_url=https://repo.hex.pm/tarballs/cowboy_telemetry-0.4.0.tar&vcs_url=https://github.com/beam-telemetry/cowboy_telemetry",
-      "scope": "required",
-      "type": "library",
-      "version": "0.4.0"
     },
     {
       "bom-ref": "otp:component:mint_web_socket:hex:91229639",
@@ -2212,6 +2090,62 @@
       "version": "8.0.3"
     },
     {
+      "bom-ref": "otp:component:websock_adapter:hex:16123157",
+      "cpe": "cpe:2.3:a:phoenixframework:websock_adapter:0.6.0:*:*:*:*:*:*:*",
+      "description": "A set of WebSock adapters for common web servers",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/phoenixframework/websock_adapter"
+        },
+        {
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "50021a85bce8f203b086705d9e0c5415e2c7eb05d319111b0428fe71f9934617"
+            }
+          ],
+          "type": "distribution",
+          "url": "https://repo.hex.pm/tarballs/websock_adapter-0.6.0.tar"
+        },
+        {
+          "comment": "docs",
+          "type": "documentation",
+          "url": "https://websock-adapter.hexdocs.pm/0.6.0/"
+        },
+        {
+          "comment": "github",
+          "type": "vcs",
+          "url": "https://github.com/phoenixframework/websock_adapter"
+        },
+        {
+          "comment": "homepage",
+          "type": "website",
+          "url": "https://hex.pm/packages/websock_adapter/0.6.0"
+        }
+      ],
+      "group": "hexpm",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "50021a85bce8f203b086705d9e0c5415e2c7eb05d319111b0428fe71f9934617"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "websock_adapter",
+      "purl": "pkg:hex/websock_adapter@0.6.0?checksum=sha256:50021a85bce8f203b086705d9e0c5415e2c7eb05d319111b0428fe71f9934617&download_url=https://repo.hex.pm/tarballs/websock_adapter-0.6.0.tar&vcs_url=https://github.com/phoenixframework/websock_adapter",
+      "scope": "excluded",
+      "type": "library",
+      "version": "0.6.0"
+    },
+    {
       "bom-ref": "otp:component:mime:hex:92200854",
       "cpe": "cpe:2.3:a:elixir-plug:mime:2.0.7:*:*:*:*:*:*:*",
       "description": "A MIME type module for Elixir",
@@ -2399,138 +2333,6 @@
       "version": "1.4.2"
     },
     {
-      "bom-ref": "otp:component:bypass:hex:15702215",
-      "cpe": "cpe:2.3:a:pspdfkit-labs:bypass:2.1.0:*:*:*:*:*:*:*",
-      "description": "Bypass provides a quick way to create a custom plug that can be put in place instead of an\nactual HTTP server to return prebaked responses to client requests. This is helpful when you\nwant to create a mock HTTP server and test how your HTTP client handles different types of\nserver responses.",
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/PSPDFKit-labs/bypass"
-        },
-        {
-          "hashes": [
-            {
-              "alg": "SHA-256",
-              "content": "d9b5df8fa5b7a6efa08384e9bbecfe4ce61c77d28a4282f79e02f1ef78d96b80"
-            }
-          ],
-          "type": "distribution",
-          "url": "https://repo.hex.pm/tarballs/bypass-2.1.0.tar"
-        },
-        {
-          "comment": "changelog",
-          "type": "documentation",
-          "url": "https://github.com/PSPDFKit-labs/bypass/blob/master/CHANGELOG.md"
-        },
-        {
-          "comment": "docs",
-          "type": "documentation",
-          "url": "https://bypass.hexdocs.pm/2.1.0/"
-        },
-        {
-          "comment": "github",
-          "type": "vcs",
-          "url": "https://github.com/PSPDFKit-labs/bypass"
-        },
-        {
-          "comment": "homepage",
-          "type": "website",
-          "url": "https://hex.pm/packages/bypass/2.1.0"
-        },
-        {
-          "comment": "pspdfkit",
-          "type": "other",
-          "url": "https://pspdfkit.com"
-        }
-      ],
-      "group": "hexpm",
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "d9b5df8fa5b7a6efa08384e9bbecfe4ce61c77d28a4282f79e02f1ef78d96b80"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "acknowledgement": "declared",
-            "id": "MIT"
-          }
-        }
-      ],
-      "name": "bypass",
-      "purl": "pkg:hex/bypass@2.1.0?checksum=sha256:d9b5df8fa5b7a6efa08384e9bbecfe4ce61c77d28a4282f79e02f1ef78d96b80&download_url=https://repo.hex.pm/tarballs/bypass-2.1.0.tar&vcs_url=https://github.com/PSPDFKit-labs/bypass",
-      "scope": "excluded",
-      "type": "library",
-      "version": "2.1.0"
-    },
-    {
-      "bom-ref": "otp:component:cowboy:hex:62585085",
-      "cpe": "cpe:2.3:a:ninenines:cowboy:2.18.0:*:*:*:*:*:*:*",
-      "description": "Small, fast, modern HTTP server.",
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "https://github.com/ninenines/cowboy"
-        },
-        {
-          "hashes": [
-            {
-              "alg": "SHA-256",
-              "content": "62d0b26abcf455054972b0da242389c69d5982ce5914afb8c344517f667b9600"
-            }
-          ],
-          "type": "distribution",
-          "url": "https://repo.hex.pm/tarballs/cowboy-2.18.0.tar"
-        },
-        {
-          "comment": "function reference",
-          "type": "other",
-          "url": "https://ninenines.eu/docs/en/cowboy/2.18/manual/"
-        },
-        {
-          "comment": "github",
-          "type": "vcs",
-          "url": "https://github.com/ninenines/cowboy"
-        },
-        {
-          "comment": "homepage",
-          "type": "website",
-          "url": "https://hex.pm/packages/cowboy/2.18.0"
-        },
-        {
-          "comment": "sponsor",
-          "type": "other",
-          "url": "https://github.com/sponsors/essen"
-        },
-        {
-          "comment": "user guide",
-          "type": "other",
-          "url": "https://ninenines.eu/docs/en/cowboy/2.18/guide/"
-        }
-      ],
-      "group": "hexpm",
-      "hashes": [
-        {
-          "alg": "SHA-256",
-          "content": "62d0b26abcf455054972b0da242389c69d5982ce5914afb8c344517f667b9600"
-        }
-      ],
-      "licenses": [
-        {
-          "license": {
-            "acknowledgement": "declared",
-            "id": "ISC"
-          }
-        }
-      ],
-      "name": "cowboy",
-      "purl": "pkg:hex/cowboy@2.18.0?checksum=sha256:62d0b26abcf455054972b0da242389c69d5982ce5914afb8c344517f667b9600&download_url=https://repo.hex.pm/tarballs/cowboy-2.18.0.tar&vcs_url=https://github.com/ninenines/cowboy",
-      "scope": "required",
-      "type": "library",
-      "version": "2.18.0"
-    },
-    {
       "bom-ref": "otp:component:credo:hex:95473491",
       "cpe": "cpe:2.3:a:rrrene:credo:1.7.19:*:*:*:*:*:*:*",
       "description": "A static code analysis tool with a focus on code consistency and teaching.",
@@ -2678,6 +2480,67 @@
       "scope": "excluded",
       "type": "library",
       "version": "0.18.5"
+    },
+    {
+      "bom-ref": "otp:component:thousand_island:hex:46742362",
+      "cpe": "cpe:2.3:a:mtrudel:thousand_island:1.5.0:*:*:*:*:*:*:*",
+      "description": "A simple & modern pure Elixir socket server",
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/mtrudel/thousand_island"
+        },
+        {
+          "hashes": [
+            {
+              "alg": "SHA-256",
+              "content": "708923d40523e43cf99041ab37a0d4b0ec426ac6438fa3716ab23d919eaeb412"
+            }
+          ],
+          "type": "distribution",
+          "url": "https://repo.hex.pm/tarballs/thousand_island-1.5.0.tar"
+        },
+        {
+          "comment": "changelog",
+          "type": "documentation",
+          "url": "https://hexdocs.pm/thousand_island/changelog.html"
+        },
+        {
+          "comment": "docs",
+          "type": "documentation",
+          "url": "https://thousand-island.hexdocs.pm/1.5.0/"
+        },
+        {
+          "comment": "github",
+          "type": "vcs",
+          "url": "https://github.com/mtrudel/thousand_island"
+        },
+        {
+          "comment": "homepage",
+          "type": "website",
+          "url": "https://hex.pm/packages/thousand_island/1.5.0"
+        }
+      ],
+      "group": "hexpm",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "708923d40523e43cf99041ab37a0d4b0ec426ac6438fa3716ab23d919eaeb412"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "acknowledgement": "declared",
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "thousand_island",
+      "purl": "pkg:hex/thousand_island@1.5.0?checksum=sha256:708923d40523e43cf99041ab37a0d4b0ec426ac6438fa3716ab23d919eaeb412&download_url=https://repo.hex.pm/tarballs/thousand_island-1.5.0.tar&vcs_url=https://github.com/mtrudel/thousand_island",
+      "scope": "required",
+      "type": "library",
+      "version": "1.5.0"
     }
   ],
   "dependencies": [
@@ -2716,6 +2579,7 @@
       "ref": "otp:component:mox:hex:133772067"
     },
     { "ref": "otp:component:eex:otp:45483983" },
+    { "ref": "otp:component:websock:hex:95532479" },
     {
       "dependsOn": [
         "otp:component:hex_core:hex:65565843",
@@ -2757,7 +2621,6 @@
     { "ref": "otp:component:logger:otp:72055478" },
     { "ref": "otp:component:inets:otp:121672126" },
     { "ref": "otp:component:erts:otp:112605601" },
-    { "ref": "otp:component:ranch:hex:28170494" },
     { "ref": "otp:component:syntax_tools:otp:25983030" },
     {
       "dependsOn": [
@@ -2802,7 +2665,6 @@
       ],
       "ref": "otp:component:tesla:hex:106181469"
     },
-    { "ref": "otp:component:cowlib:hex:67849849" },
     {
       "dependsOn": [
         "otp:component:kernel:otp:41009003",
@@ -2864,7 +2726,8 @@
         "otp:component:git_ops:hex:12179310",
         "otp:component:sbom:hex:84832432",
         "otp:component:mox:hex:133772067",
-        "otp:component:bypass:hex:15702215"
+        "otp:component:bandit:hex:8976513",
+        "otp:component:websock_adapter:hex:16123157"
       ],
       "ref": "otp:component:ex_daytona:github:45985666"
     },
@@ -2889,11 +2752,13 @@
     },
     {
       "dependsOn": [
-        "otp:component:cowboy:hex:62585085",
-        "otp:component:cowboy_telemetry:hex:1321192",
-        "otp:component:plug:hex:15594346"
+        "otp:component:hpax:hex:13049320",
+        "otp:component:plug:hex:15594346",
+        "otp:component:telemetry:hex:111137185",
+        "otp:component:thousand_island:hex:46742362",
+        "otp:component:websock:hex:95532479"
       ],
-      "ref": "otp:component:plug_cowboy:hex:83939669"
+      "ref": "otp:component:bandit:hex:8976513"
     },
     {
       "dependsOn": [
@@ -2927,13 +2792,6 @@
         "otp:component:logger:otp:72055478"
       ],
       "ref": "otp:component:finch:hex:63700879"
-    },
-    {
-      "dependsOn": [
-        "otp:component:cowboy:hex:62585085",
-        "otp:component:telemetry:hex:111137185"
-      ],
-      "ref": "otp:component:cowboy_telemetry:hex:1321192"
     },
     {
       "dependsOn": [
@@ -3021,6 +2879,14 @@
     },
     {
       "dependsOn": [
+        "otp:component:bandit:hex:8976513",
+        "otp:component:plug:hex:15594346",
+        "otp:component:websock:hex:95532479"
+      ],
+      "ref": "otp:component:websock_adapter:hex:16123157"
+    },
+    {
+      "dependsOn": [
         "otp:component:kernel:otp:41009003",
         "otp:component:stdlib:otp:33644561",
         "otp:component:elixir:otp:91030763",
@@ -3047,21 +2913,6 @@
     },
     {
       "dependsOn": [
-        "otp:component:plug:hex:15594346",
-        "otp:component:plug_cowboy:hex:83939669",
-        "otp:component:ranch:hex:28170494"
-      ],
-      "ref": "otp:component:bypass:hex:15702215"
-    },
-    {
-      "dependsOn": [
-        "otp:component:cowlib:hex:67849849",
-        "otp:component:ranch:hex:28170494"
-      ],
-      "ref": "otp:component:cowboy:hex:62585085"
-    },
-    {
-      "dependsOn": [
         "otp:component:bunt:hex:49979295",
         "otp:component:file_system:hex:5267745",
         "otp:component:jason:hex:87655102",
@@ -3082,6 +2933,12 @@
         "otp:component:jason:hex:87655102"
       ],
       "ref": "otp:component:excoveralls:hex:39185539"
+    },
+    {
+      "dependsOn": [
+        "otp:component:telemetry:hex:111137185"
+      ],
+      "ref": "otp:component:thousand_island:hex:46742362"
     }
   ],
   "metadata": {
@@ -3124,7 +2981,7 @@
       "type": "library",
       "version": "0.1.0"
     },
-    "timestamp": "2026-08-31T23:13:03Z",
+    "timestamp": "2026-08-31T23:37:46Z",
     "tools": {
       "components": [
         {
@@ -3137,7 +2994,7 @@
       ]
     }
   },
-  "serialNumber": "urn:uuid:e57cdaa2-cc36-41e0-9aa7-71997483b65b",
+  "serialNumber": "urn:uuid:5e3d4acd-2d0d-40c6-9a69-afa697d7865e",
   "specVersion": "1.6",
   "version": 1
 }

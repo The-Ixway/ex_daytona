@@ -68,7 +68,7 @@ defmodule ApiIntegrationTest do
 
   describe "POST requests" do
     test "encodes request body as JSON", %{bypass: bypass, client: client} do
-      Bypass.expect_once(bypass, "POST", "/users", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/users", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
         assert JSON.decode!(body) == %{"name" => "New User"}
 
@@ -85,7 +85,7 @@ defmodule ApiIntegrationTest do
 
   describe "error handling" do
     test "returns an error tuple when the server is down", %{bypass: bypass, client: client} do
-      Bypass.down(bypass)
+      MockServer.down(bypass)
 
       assert {:error, _reason} = Tesla.get(client, "/users/1")
     end

@@ -37,7 +37,7 @@ defmodule ExDaytona.WebhooksTest do
     end
 
     test "refresh_endpoints/2 returns :ok", %{bypass: bypass, client: client} do
-      Bypass.expect_once(
+      MockServer.expect_once(
         bypass,
         "POST",
         "/webhooks/organizations/org-1/refresh-endpoints",

@@ -27,7 +27,7 @@ defmodule ExDaytona.GitTest do
 
   describe "clone/4" do
     test "posts the clone request and returns :ok", %{bypass: bypass, sandbox: sandbox} do
-      Bypass.expect_once(bypass, "POST", "/toolbox/sb-1/git/clone", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/toolbox/sb-1/git/clone", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
 
         assert %{
@@ -64,7 +64,7 @@ defmodule ExDaytona.GitTest do
 
   describe "status/2 and branches/2" do
     test "decode into ergonomic shapes", %{bypass: bypass, sandbox: sandbox} do
-      Bypass.expect_once(bypass, "GET", "/toolbox/sb-1/git/status", fn conn ->
+      MockServer.expect_once(bypass, "GET", "/toolbox/sb-1/git/status", fn conn ->
         assert URI.decode_query(conn.query_string)["path"] == "/tmp/repo"
 
         conn
@@ -87,7 +87,7 @@ defmodule ExDaytona.GitTest do
 
   describe "add/3 + commit/4" do
     test "stages files and commits with author info", %{bypass: bypass, sandbox: sandbox} do
-      Bypass.expect_once(bypass, "POST", "/toolbox/sb-1/git/add", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/toolbox/sb-1/git/add", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
         assert %{"path" => "/tmp/repo", "files" => ["a.txt"]} = JSON.decode!(body)
 
@@ -98,7 +98,7 @@ defmodule ExDaytona.GitTest do
 
       assert :ok = Git.add(sandbox, "/tmp/repo", ["a.txt"])
 
-      Bypass.expect_once(bypass, "POST", "/toolbox/sb-1/git/commit", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/toolbox/sb-1/git/commit", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
 
         assert %{
@@ -128,7 +128,7 @@ defmodule ExDaytona.GitTest do
 
   describe "push/3 and pull/3" do
     test "forward credentials in the request body", %{bypass: bypass, sandbox: sandbox} do
-      Bypass.expect_once(bypass, "POST", "/toolbox/sb-1/git/push", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/toolbox/sb-1/git/push", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
 
         assert %{"path" => "/tmp/repo", "username" => "bot", "password" => "token"} =
@@ -141,7 +141,7 @@ defmodule ExDaytona.GitTest do
 
       assert :ok = Git.push(sandbox, "/tmp/repo", username: "bot", password: "token")
 
-      Bypass.expect_once(bypass, "POST", "/toolbox/sb-1/git/pull", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/toolbox/sb-1/git/pull", fn conn ->
         conn
         |> Plug.Conn.put_resp_content_type("application/json")
         |> Plug.Conn.resp(200, JSON.encode!(%{}))
@@ -153,7 +153,7 @@ defmodule ExDaytona.GitTest do
 
   describe "branch management + history" do
     test "create_branch, checkout, and history", %{bypass: bypass, sandbox: sandbox} do
-      Bypass.expect_once(bypass, "POST", "/toolbox/sb-1/git/branches", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/toolbox/sb-1/git/branches", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
         assert %{"name" => "feature/x"} = JSON.decode!(body)
 
@@ -162,7 +162,7 @@ defmodule ExDaytona.GitTest do
 
       assert :ok = Git.create_branch(sandbox, "/tmp/repo", "feature/x")
 
-      Bypass.expect_once(bypass, "POST", "/toolbox/sb-1/git/checkout", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/toolbox/sb-1/git/checkout", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
         assert %{"branch" => "feature/x"} = JSON.decode!(body)
 

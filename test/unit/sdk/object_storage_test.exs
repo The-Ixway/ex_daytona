@@ -87,7 +87,7 @@ defmodule ExDaytona.ObjectStorageTest do
       hash = ObjectStorage.hash_path(file, archive_path)
       key = "/daytona-builds/org-1/#{hash}/context.tar"
 
-      Bypass.expect_once(bypass, "HEAD", key, fn conn ->
+      MockServer.expect_once(bypass, "HEAD", key, fn conn ->
         # SigV4 headers present
         assert [auth] = Plug.Conn.get_req_header(conn, "authorization")
         assert auth =~ "AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE/"
@@ -97,7 +97,7 @@ defmodule ExDaytona.ObjectStorageTest do
         Plug.Conn.resp(conn, 404, "")
       end)
 
-      Bypass.expect_once(bypass, "PUT", key, fn conn ->
+      MockServer.expect_once(bypass, "PUT", key, fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn, length: 10_000_000)
 
         # The body is a tar containing the file under its archive path
@@ -117,7 +117,7 @@ defmodule ExDaytona.ObjectStorageTest do
                ObjectStorage.upload_context_with_access(access, file, archive_path: archive_path)
 
       # Second call: HEAD hits, no PUT expected
-      Bypass.expect_once(bypass, "HEAD", key, fn conn -> Plug.Conn.resp(conn, 200, "") end)
+      MockServer.expect_once(bypass, "HEAD", key, fn conn -> Plug.Conn.resp(conn, 200, "") end)
 
       assert {:ok, ^hash} =
                ObjectStorage.upload_context_with_access(access, file, archive_path: archive_path)

@@ -13,7 +13,7 @@ defmodule ExDaytona.Api.ProcessTest do
 
   describe "execute_command/3" do
     test "posts the command and decodes the result", %{bypass: bypass, conn: conn} do
-      Bypass.expect_once(bypass, "POST", "/process/execute", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/process/execute", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
         assert %{"command" => "echo hello"} = JSON.decode!(body)
 

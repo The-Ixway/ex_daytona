@@ -13,7 +13,7 @@ defmodule ExDaytona.Api.LspTest do
 
   describe "completions/3" do
     test "posts the params and decodes the CompletionList", %{bypass: bypass, conn: conn} do
-      Bypass.expect_once(bypass, "POST", "/lsp/completions", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/lsp/completions", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
         assert %{"languageId" => "elixir"} = JSON.decode!(body)
 

@@ -1,54 +1,45 @@
 defmodule WsEchoServer do
   @moduledoc """
-  Minimal local websocket server for exercising `ExDaytona.WebSocket` in
-  tests (Bypass can't upgrade to websockets; cowboy — already here as a
-  Bypass dependency — can).
+  Local websocket servers for exercising `ExDaytona.WebSocket` in tests,
+  running on Bandit + WebSock (pure Elixir).
 
-  Every path upgrades. Frames are echoed back prefixed with `"echo:"`,
-  and the request's `authorization` header is reported on connect as
-  `auth:<value>` so tests can assert authentication reached the server.
+  `start/0` serves an echo handler: every path upgrades, frames come back
+  prefixed with `"echo:"`, and the request's `authorization` header is
+  reported on connect as `auth:<value>`.
+
+  `start_interpreter/0` speaks the Daytona code-interpreter protocol
+  instead: the client sends a JSON request, the server streams JSON
+  chunks (`{"type": "stdout"|"stderr"|"error", ...}`) and closes.
   """
 
-  defmodule Handler do
+  defmodule EchoSock do
     @moduledoc false
-    @behaviour :cowboy_websocket
+    @behaviour WebSock
 
     @impl true
-    def init(req, _state) do
-      auth = :cowboy_req.header("authorization", req, "none")
-      {:cowboy_websocket, req, %{auth: auth}}
-    end
+    def init(state), do: {:push, {:text, "auth:" <> state.auth}, state}
 
     @impl true
-    def websocket_init(state) do
-      {[{:text, "auth:" <> state.auth}], state}
-    end
+    def handle_in({data, opcode: :text}, state), do: {:push, {:text, "echo:" <> data}, state}
+    def handle_in({data, opcode: :binary}, state), do: {:push, {:binary, "echo:" <> data}, state}
 
     @impl true
-    def websocket_handle({:text, data}, state), do: {[{:text, "echo:" <> data}], state}
-    def websocket_handle({:binary, data}, state), do: {[{:binary, "echo:" <> data}], state}
-    def websocket_handle(_frame, state), do: {[], state}
+    def handle_info(_message, state), do: {:ok, state}
 
     @impl true
-    def websocket_info(_message, state), do: {[], state}
+    def terminate(_reason, _state), do: :ok
   end
 
-  defmodule InterpreterHandler do
+  defmodule InterpreterSock do
     @moduledoc false
-    # Speaks the Daytona code-interpreter websocket protocol: the client
-    # sends a JSON request; the server streams JSON chunks
-    # ({"type": "stdout"|"stderr"|"error", ...}) and closes. Replies are
-    # derived from the request's code so tests can assert round-tripping.
-    @behaviour :cowboy_websocket
+    # Replies to the request's code so tests can assert round-tripping.
+    @behaviour WebSock
 
     @impl true
-    def init(req, _state), do: {:cowboy_websocket, req, %{}}
+    def init(state), do: {:ok, state}
 
     @impl true
-    def websocket_init(state), do: {[], state}
-
-    @impl true
-    def websocket_handle({:text, data}, state) do
+    def handle_in({data, opcode: :text}, state) do
       request = JSON.decode!(data)
       code = request["code"] || ""
 
@@ -63,35 +54,66 @@ defmodule WsEchoServer do
             [%{type: "stderr", text: "warn\n"}]
           end
 
-      frames = Enum.map(chunks, &{:text, JSON.encode!(&1)}) ++ [{:close, 1000, ""}]
-      {frames, state}
+      frames = Enum.map(chunks, &{:text, JSON.encode!(&1)})
+      {:stop, :normal, {1000, ""}, frames, state}
     end
 
-    def websocket_handle(_frame, state), do: {[], state}
+    def handle_in(_frame, state), do: {:ok, state}
 
     @impl true
-    def websocket_info(_message, state), do: {[], state}
+    def handle_info(_message, state), do: {:ok, state}
+
+    @impl true
+    def terminate(_reason, _state), do: :ok
+  end
+
+  defmodule UpgradePlug do
+    @moduledoc false
+    @behaviour Plug
+
+    @impl true
+    def init(handler), do: handler
+
+    @impl true
+    def call(conn, handler) do
+      auth =
+        case Plug.Conn.get_req_header(conn, "authorization") do
+          [value | _] -> value
+          [] -> "none"
+        end
+
+      WebSockAdapter.upgrade(conn, handler, %{auth: auth}, [])
+    end
   end
 
   @doc """
   Start a websocket echo listener on an ephemeral port. Returns the port;
   the listener is stopped automatically via `ExUnit.Callbacks.on_exit/1`.
   """
-  def start, do: start_with(Handler)
+  def start, do: start_with(EchoSock)
 
   @doc """
   Start a listener speaking the code-interpreter protocol instead of
-  echoing (see `InterpreterHandler`).
+  echoing (see `InterpreterSock`).
   """
-  def start_interpreter, do: start_with(InterpreterHandler)
+  def start_interpreter, do: start_with(InterpreterSock)
 
   defp start_with(handler) do
-    name = :"ws_echo_#{System.unique_integer([:positive])}"
-    dispatch = :cowboy_router.compile([{:_, [{:_, handler, []}]}])
+    {:ok, server} =
+      Bandit.start_link(plug: {UpgradePlug, handler}, port: 0, startup_log: false)
 
-    {:ok, _pid} = :cowboy.start_clear(name, [port: 0], %{env: %{dispatch: dispatch}})
-    ExUnit.Callbacks.on_exit(fn -> :cowboy.stop_listener(name) end)
+    {:ok, {_address, port}} = ThousandIsland.listener_info(server)
 
-    :ranch.get_port(name)
+    ExUnit.Callbacks.on_exit(fn -> stop_server(server) end)
+
+    port
+  end
+
+  # Stopping a listener with live websocket connections can exit with
+  # :shutdown as the acceptors are torn down — that's fine in teardown.
+  defp stop_server(server) do
+    if Process.alive?(server), do: Supervisor.stop(server)
+  catch
+    :exit, _ -> :ok
   end
 end

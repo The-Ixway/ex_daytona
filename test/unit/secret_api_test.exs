@@ -27,7 +27,7 @@ defmodule ExDaytona.Api.SecretTest do
 
   describe "create_secret/3" do
     test "posts the body and decodes the 201 Secret", %{bypass: bypass, conn: conn} do
-      Bypass.expect_once(bypass, "POST", "/secret", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/secret", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
         assert %{"name" => "API_TOKEN"} = JSON.decode!(body)
 
@@ -43,7 +43,7 @@ defmodule ExDaytona.Api.SecretTest do
 
   describe "update_secret/4" do
     test "PATCHes the secret", %{bypass: bypass, conn: conn} do
-      Bypass.expect_once(bypass, "PATCH", "/secret/sec-1", fn conn ->
+      MockServer.expect_once(bypass, "PATCH", "/secret/sec-1", fn conn ->
         conn
         |> Plug.Conn.put_resp_content_type("application/json")
         |> Plug.Conn.resp(200, JSON.encode!(%{id: "sec-1", name: "API_TOKEN"}))

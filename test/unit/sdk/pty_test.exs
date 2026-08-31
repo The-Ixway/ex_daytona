@@ -24,7 +24,7 @@ defmodule ExDaytona.PtyTest do
       bypass = MockServer.setup()
       sandbox = build_sandbox(MockServer.url(bypass))
 
-      Bypass.expect_once(bypass, "POST", "/toolbox/sb-1/process/pty", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/toolbox/sb-1/process/pty", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
 
         assert %{"id" => "term-1", "cols" => 120, "rows" => 30, "cwd" => "/workspace"} =
@@ -62,7 +62,7 @@ defmodule ExDaytona.PtyTest do
       sandbox = build_sandbox(MockServer.url(bypass))
       pty = %Pty{sandbox: sandbox, id: "term-1"}
 
-      Bypass.expect_once(bypass, "POST", "/toolbox/sb-1/process/pty/term-1/resize", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/toolbox/sb-1/process/pty/term-1/resize", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
         assert %{"cols" => 200, "rows" => 50} = JSON.decode!(body)
 
@@ -86,7 +86,7 @@ defmodule ExDaytona.PtyTest do
 
       assert {:ok, [%Model.PtySessionInfo{id: "term-1"}]} = Pty.list(sandbox)
 
-      Bypass.expect_once(bypass, "DELETE", "/toolbox/sb-1/process/pty/term-1", fn conn ->
+      MockServer.expect_once(bypass, "DELETE", "/toolbox/sb-1/process/pty/term-1", fn conn ->
         conn
         |> Plug.Conn.put_resp_content_type("application/json")
         |> Plug.Conn.resp(200, JSON.encode!(%{}))

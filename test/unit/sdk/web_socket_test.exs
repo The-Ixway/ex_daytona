@@ -43,7 +43,7 @@ defmodule ExDaytona.WebSocketTest do
     test "a non-websocket endpoint fails the upgrade with a normalized error" do
       bypass = MockServer.setup()
 
-      Bypass.expect_once(bypass, "GET", "/no-ws", fn conn ->
+      MockServer.expect_once(bypass, "GET", "/no-ws", fn conn ->
         Plug.Conn.resp(conn, 404, "not here")
       end)
 

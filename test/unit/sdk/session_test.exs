@@ -27,7 +27,7 @@ defmodule ExDaytona.SessionTest do
 
   describe "create/2" do
     test "posts the session id and returns the session", %{bypass: bypass, sandbox: sandbox} do
-      Bypass.expect_once(bypass, "POST", "/toolbox/sb-1/process/session", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/toolbox/sb-1/process/session", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
         assert %{"sessionId" => "my-session"} = JSON.decode!(body)
 
@@ -39,7 +39,7 @@ defmodule ExDaytona.SessionTest do
     end
 
     test "generates an id when none is given", %{bypass: bypass, sandbox: sandbox} do
-      Bypass.expect_once(bypass, "POST", "/toolbox/sb-1/process/session", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/toolbox/sb-1/process/session", fn conn ->
         Plug.Conn.resp(conn, 201, "")
       end)
 
@@ -54,7 +54,7 @@ defmodule ExDaytona.SessionTest do
     } do
       session = %Session{sandbox: sandbox, id: "s-1"}
 
-      Bypass.expect_once(bypass, "POST", "/toolbox/sb-1/process/session/s-1/exec", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/toolbox/sb-1/process/session/s-1/exec", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
         assert %{"command" => "echo hi", "runAsync" => false} = JSON.decode!(body)
 
@@ -72,7 +72,7 @@ defmodule ExDaytona.SessionTest do
     test "starts a command and polls it to completion", %{bypass: bypass, sandbox: sandbox} do
       session = %Session{sandbox: sandbox, id: "s-1"}
 
-      Bypass.expect_once(bypass, "POST", "/toolbox/sb-1/process/session/s-1/exec", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/toolbox/sb-1/process/session/s-1/exec", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
         assert %{"runAsync" => true} = JSON.decode!(body)
 
@@ -86,7 +86,7 @@ defmodule ExDaytona.SessionTest do
       # First poll: still running (exitCode null); second poll: finished.
       {:ok, polls} = Agent.start_link(fn -> 0 end)
 
-      Bypass.expect(bypass, "GET", "/toolbox/sb-1/process/session/s-1/command/cmd-9", fn conn ->
+      MockServer.expect(bypass, "GET", "/toolbox/sb-1/process/session/s-1/command/cmd-9", fn conn ->
         count = Agent.get_and_update(polls, &{&1 + 1, &1 + 1})
         exit_code = if count == 1, do: nil, else: 0
 
@@ -102,7 +102,7 @@ defmodule ExDaytona.SessionTest do
                Session.await(session, "cmd-9", poll_interval: 10)
 
       # Logs come back as plain text (the spec's JSON model is wrong here)
-      Bypass.expect_once(
+      MockServer.expect_once(
         bypass,
         "GET",
         "/toolbox/sb-1/process/session/s-1/command/cmd-9/logs",
@@ -119,7 +119,7 @@ defmodule ExDaytona.SessionTest do
     test "await/3 times out with a clear error", %{bypass: bypass, sandbox: sandbox} do
       session = %Session{sandbox: sandbox, id: "s-1"}
 
-      Bypass.expect(bypass, "GET", "/toolbox/sb-1/process/session/s-1/command/cmd-9", fn conn ->
+      MockServer.expect(bypass, "GET", "/toolbox/sb-1/process/session/s-1/command/cmd-9", fn conn ->
         conn
         |> Plug.Conn.put_resp_content_type("application/json")
         |> Plug.Conn.resp(200, JSON.encode!(%{id: "cmd-9", exitCode: nil}))
@@ -136,7 +136,7 @@ defmodule ExDaytona.SessionTest do
     test "delivers chunks incrementally as they arrive", %{bypass: bypass, sandbox: sandbox} do
       session = %Session{sandbox: sandbox, id: "s-1"}
 
-      Bypass.expect_once(
+      MockServer.expect_once(
         bypass,
         "GET",
         "/toolbox/sb-1/process/session/s-1/command/cmd-9/logs",
@@ -164,7 +164,7 @@ defmodule ExDaytona.SessionTest do
     test "a non-2xx response becomes a normalized error", %{bypass: bypass, sandbox: sandbox} do
       session = %Session{sandbox: sandbox, id: "s-1"}
 
-      Bypass.expect_once(
+      MockServer.expect_once(
         bypass,
         "GET",
         "/toolbox/sb-1/process/session/s-1/command/nope/logs",
@@ -184,7 +184,7 @@ defmodule ExDaytona.SessionTest do
     test "posts the data to the command's stdin", %{bypass: bypass, sandbox: sandbox} do
       session = %Session{sandbox: sandbox, id: "s-1"}
 
-      Bypass.expect_once(
+      MockServer.expect_once(
         bypass,
         "POST",
         "/toolbox/sb-1/process/session/s-1/command/cmd-9/input",
@@ -212,7 +212,7 @@ defmodule ExDaytona.SessionTest do
     end
 
     test "entrypoint_logs/1 returns the raw body", %{bypass: bypass, sandbox: sandbox} do
-      Bypass.expect_once(
+      MockServer.expect_once(
         bypass,
         "GET",
         "/toolbox/sb-1/process/session/entrypoint/logs",
@@ -231,7 +231,7 @@ defmodule ExDaytona.SessionTest do
     test "returns :ok", %{bypass: bypass, sandbox: sandbox} do
       session = %Session{sandbox: sandbox, id: "s-1"}
 
-      Bypass.expect_once(bypass, "DELETE", "/toolbox/sb-1/process/session/s-1", fn conn ->
+      MockServer.expect_once(bypass, "DELETE", "/toolbox/sb-1/process/session/s-1", fn conn ->
         Plug.Conn.resp(conn, 204, "")
       end)
 

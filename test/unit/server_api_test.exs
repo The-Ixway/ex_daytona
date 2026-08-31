@@ -16,7 +16,7 @@ defmodule ExDaytona.Api.ServerTest do
       bypass: bypass,
       conn: conn
     } do
-      Bypass.expect_once(bypass, "POST", "/env", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/env", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
         assert %{"set" => %{"FOO" => "bar"}, "unset" => ["OLD"]} = JSON.decode!(body)
 
@@ -35,7 +35,7 @@ defmodule ExDaytona.Api.ServerTest do
 
   describe "initialize/3" do
     test "posts the token", %{bypass: bypass, conn: conn} do
-      Bypass.expect_once(bypass, "POST", "/init", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/init", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
         assert %{"token" => "tok"} = JSON.decode!(body)
 

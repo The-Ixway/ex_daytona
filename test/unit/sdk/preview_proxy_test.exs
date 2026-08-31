@@ -40,7 +40,7 @@ defmodule ExDaytona.PreviewProxyTest do
 
   describe "resolve_signed_token/3 and signing_key/2" do
     test "extract from bare-string and object bodies", %{bypass: bypass, client: client} do
-      Bypass.expect_once(bypass, "GET", "/preview/signed-tok/3000/sandbox-id", fn conn ->
+      MockServer.expect_once(bypass, "GET", "/preview/signed-tok/3000/sandbox-id", fn conn ->
         conn
         |> Plug.Conn.put_resp_content_type("text/plain")
         |> Plug.Conn.resp(200, "sb-42")

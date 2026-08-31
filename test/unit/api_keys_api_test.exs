@@ -24,7 +24,7 @@ defmodule ExDaytona.Api.ApiKeysTest do
 
   describe "create_api_key/3" do
     test "posts the body and decodes the 201 ApiKeyResponse", %{bypass: bypass, conn: conn} do
-      Bypass.expect_once(bypass, "POST", "/api-keys", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/api-keys", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
         assert %{"name" => "ci"} = JSON.decode!(body)
 

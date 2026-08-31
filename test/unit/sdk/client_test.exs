@@ -43,7 +43,7 @@ defmodule ExDaytona.ClientTest do
     test "authenticates requests with the key and honors base_url", %{} do
       bypass = MockServer.setup()
 
-      Bypass.expect_once(bypass, "GET", "/sandbox", fn conn ->
+      MockServer.expect_once(bypass, "GET", "/sandbox", fn conn ->
         assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer dtn_test"]
 
         conn

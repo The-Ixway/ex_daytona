@@ -30,7 +30,7 @@ defmodule ExDaytona.SandboxTest do
 
   describe "create/2" do
     test "creates and returns immediately with wait: false", %{bypass: bypass, client: client} do
-      Bypass.expect_once(bypass, "POST", "/sandbox", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/sandbox", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
         assert %{"snapshot" => "base", "ttlMinutes" => 30} = JSON.decode!(body)
 
@@ -47,7 +47,7 @@ defmodule ExDaytona.SandboxTest do
     end
 
     test "waits for the started state by default", %{bypass: bypass, client: client} do
-      Bypass.expect_once(bypass, "POST", "/sandbox", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/sandbox", fn conn ->
         conn
         |> Plug.Conn.put_resp_content_type("application/json")
         |> Plug.Conn.resp(200, JSON.encode!(%{id: "sb-new", state: "creating"}))
@@ -56,7 +56,7 @@ defmodule ExDaytona.SandboxTest do
       # First poll: still starting; second poll: started.
       {:ok, poll_count} = Agent.start_link(fn -> 0 end)
 
-      Bypass.expect(bypass, "GET", "/sandbox/sb-new", fn conn ->
+      MockServer.expect(bypass, "GET", "/sandbox/sb-new", fn conn ->
         count = Agent.get_and_update(poll_count, &{&1 + 1, &1 + 1})
         state = if count == 1, do: "starting", else: "started"
 
@@ -78,13 +78,13 @@ defmodule ExDaytona.SandboxTest do
     end
 
     test "fails fast when the sandbox enters an error state", %{bypass: bypass, client: client} do
-      Bypass.expect_once(bypass, "POST", "/sandbox", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/sandbox", fn conn ->
         conn
         |> Plug.Conn.put_resp_content_type("application/json")
         |> Plug.Conn.resp(200, JSON.encode!(%{id: "sb-bad", state: "creating"}))
       end)
 
-      Bypass.expect(bypass, "GET", "/sandbox/sb-bad", fn conn ->
+      MockServer.expect(bypass, "GET", "/sandbox/sb-bad", fn conn ->
         conn
         |> Plug.Conn.put_resp_content_type("application/json")
         |> Plug.Conn.resp(
@@ -105,7 +105,7 @@ defmodule ExDaytona.SandboxTest do
     test "sends the Dockerfile as buildInfo", %{bypass: bypass, client: client} do
       image = ExDaytona.Image.from("alpine") |> ExDaytona.Image.run("apk add git")
 
-      Bypass.expect_once(bypass, "POST", "/sandbox", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/sandbox", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
 
         assert %{"buildInfo" => %{"dockerfileContent" => "FROM alpine\nRUN apk add git\n"}} =
@@ -145,11 +145,11 @@ defmodule ExDaytona.SandboxTest do
       })
 
       # 2. context upload (miss -> put)
-      Bypass.expect_once(bypass, "HEAD", s3_key, fn conn -> Plug.Conn.resp(conn, 404, "") end)
-      Bypass.expect_once(bypass, "PUT", s3_key, fn conn -> Plug.Conn.resp(conn, 200, "") end)
+      MockServer.expect_once(bypass, "HEAD", s3_key, fn conn -> Plug.Conn.resp(conn, 404, "") end)
+      MockServer.expect_once(bypass, "PUT", s3_key, fn conn -> Plug.Conn.resp(conn, 200, "") end)
 
       # 3. create with contextHashes + the COPY in the dockerfile
-      Bypass.expect_once(bypass, "POST", "/sandbox", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/sandbox", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
         decoded = JSON.decode!(body)
 
@@ -175,7 +175,7 @@ defmodule ExDaytona.SandboxTest do
     test "ssh_access/2 sends expiry and normalizes the DTO", %{bypass: bypass, client: client} do
       sandbox = mock_sandbox(bypass, client)
 
-      Bypass.expect_once(bypass, "POST", "/sandbox/sb-1/ssh-access", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/sandbox/sb-1/ssh-access", fn conn ->
         assert URI.decode_query(conn.query_string)["expiresInMinutes"] == "60"
 
         conn
@@ -197,7 +197,7 @@ defmodule ExDaytona.SandboxTest do
     test "revoke_ssh_access/1 returns :ok", %{bypass: bypass, client: client} do
       sandbox = mock_sandbox(bypass, client)
 
-      Bypass.expect_once(bypass, "DELETE", "/sandbox/sb-1/ssh-access", fn conn ->
+      MockServer.expect_once(bypass, "DELETE", "/sandbox/sb-1/ssh-access", fn conn ->
         conn
         |> Plug.Conn.put_resp_content_type("application/json")
         |> Plug.Conn.resp(200, JSON.encode!(%{id: "sb-1"}))
@@ -210,7 +210,7 @@ defmodule ExDaytona.SandboxTest do
       bypass: bypass,
       client: client
     } do
-      Bypass.expect_once(bypass, "GET", "/sandbox/ssh-access/validate", fn conn ->
+      MockServer.expect_once(bypass, "GET", "/sandbox/ssh-access/validate", fn conn ->
         assert URI.decode_query(conn.query_string)["token"] == "ssh-tok"
 
         conn
@@ -242,7 +242,7 @@ defmodule ExDaytona.SandboxTest do
     } do
       sandbox = mock_sandbox(bypass, client)
 
-      Bypass.expect_once(bypass, "GET", "/sandbox/sb-1/ports/3000/signed-preview-url", fn conn ->
+      MockServer.expect_once(bypass, "GET", "/sandbox/sb-1/ports/3000/signed-preview-url", fn conn ->
         assert URI.decode_query(conn.query_string)["expiresInSeconds"] == "600"
 
         conn
@@ -256,7 +256,7 @@ defmodule ExDaytona.SandboxTest do
       assert {:ok, %{url: "https://signed.example", token: "signed-tok"}} =
                Sandbox.signed_preview_url(sandbox, 3000, expires_in_seconds: 600)
 
-      Bypass.expect_once(
+      MockServer.expect_once(
         bypass,
         "POST",
         "/sandbox/sb-1/ports/3000/signed-preview-url/signed-tok/expire",
@@ -273,7 +273,7 @@ defmodule ExDaytona.SandboxTest do
 
   describe "await_state/3" do
     test "times out with a clear error", %{bypass: bypass, client: client} do
-      Bypass.expect(bypass, "GET", "/sandbox/sb-slow", fn conn ->
+      MockServer.expect(bypass, "GET", "/sandbox/sb-slow", fn conn ->
         conn
         |> Plug.Conn.put_resp_content_type("application/json")
         |> Plug.Conn.resp(200, JSON.encode!(%{id: "sb-slow", state: "starting"}))
@@ -356,7 +356,7 @@ defmodule ExDaytona.SandboxTest do
     } do
       sandbox = mock_sandbox(bypass, client)
 
-      Bypass.expect_once(bypass, "POST", "/toolbox/sb-1/process/code-run", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/toolbox/sb-1/process/code-run", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
 
         assert %{
@@ -386,7 +386,7 @@ defmodule ExDaytona.SandboxTest do
     test "exec/3 posts to the sandbox's toolbox URL", %{bypass: bypass, client: client} do
       sandbox = mock_sandbox(bypass, client)
 
-      Bypass.expect_once(bypass, "POST", "/toolbox/sb-1/process/execute", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/toolbox/sb-1/process/execute", fn conn ->
         assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer dtn_test"]
         {:ok, body, conn} = Plug.Conn.read_body(conn)
         assert %{"command" => "echo hi", "cwd" => "/workspace"} = JSON.decode!(body)
@@ -403,7 +403,7 @@ defmodule ExDaytona.SandboxTest do
     test "write_file/3 uploads multipart content", %{bypass: bypass, client: client} do
       sandbox = mock_sandbox(bypass, client)
 
-      Bypass.expect_once(bypass, "POST", "/toolbox/sb-1/files/upload-v2", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/toolbox/sb-1/files/upload-v2", fn conn ->
         assert URI.decode_query(conn.query_string)["path"] == "/workspace/hello.txt"
         assert [content_type] = Plug.Conn.get_req_header(conn, "content-type")
         assert content_type =~ "multipart/form-data"
@@ -422,7 +422,7 @@ defmodule ExDaytona.SandboxTest do
     test "read_file/2 returns the raw body", %{bypass: bypass, client: client} do
       sandbox = mock_sandbox(bypass, client)
 
-      Bypass.expect_once(bypass, "GET", "/toolbox/sb-1/files/download", fn conn ->
+      MockServer.expect_once(bypass, "GET", "/toolbox/sb-1/files/download", fn conn ->
         assert URI.decode_query(conn.query_string)["path"] == "/workspace/hello.txt"
 
         conn
@@ -449,7 +449,7 @@ defmodule ExDaytona.SandboxTest do
     } do
       sandbox = mock_sandbox(bypass, client)
 
-      Bypass.expect_once(bypass, "GET", "/sandbox/sb-1/build-logs", fn conn ->
+      MockServer.expect_once(bypass, "GET", "/sandbox/sb-1/build-logs", fn conn ->
         assert URI.decode_query(conn.query_string)["follow"] == "true"
         assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer dtn_test"]
 
@@ -472,7 +472,7 @@ defmodule ExDaytona.SandboxTest do
     test "build_logs/1 returns the logs as a binary", %{bypass: bypass, client: client} do
       sandbox = mock_sandbox(bypass, client)
 
-      Bypass.expect_once(bypass, "GET", "/sandbox/sb-1/build-logs", fn conn ->
+      MockServer.expect_once(bypass, "GET", "/sandbox/sb-1/build-logs", fn conn ->
         conn
         |> Plug.Conn.put_resp_content_type("text/plain")
         |> Plug.Conn.resp(200, "built ok\n")

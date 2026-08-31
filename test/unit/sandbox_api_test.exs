@@ -28,7 +28,7 @@ defmodule ExDaytona.Api.SandboxTest do
     end
 
     test "sends optional filters as query parameters", %{bypass: bypass, conn: conn} do
-      Bypass.expect_once(bypass, "GET", "/sandbox", fn conn ->
+      MockServer.expect_once(bypass, "GET", "/sandbox", fn conn ->
         query = URI.decode_query(conn.query_string)
         assert query["limit"] == "5"
         assert query["name"] == "my-sandbox"
@@ -60,7 +60,7 @@ defmodule ExDaytona.Api.SandboxTest do
 
   describe "create_sandbox/3" do
     test "posts the request body and decodes the created sandbox", %{bypass: bypass, conn: conn} do
-      Bypass.expect_once(bypass, "POST", "/sandbox", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/sandbox", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
         assert %{"snapshot" => "my-snapshot"} = JSON.decode!(body)
 

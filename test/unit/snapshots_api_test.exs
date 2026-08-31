@@ -40,7 +40,7 @@ defmodule ExDaytona.Api.SnapshotsTest do
 
   describe "create_snapshot/3" do
     test "posts the body and decodes the SnapshotDto", %{bypass: bypass, conn: conn} do
-      Bypass.expect_once(bypass, "POST", "/snapshots", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/snapshots", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
         assert %{"name" => "base"} = JSON.decode!(body)
 

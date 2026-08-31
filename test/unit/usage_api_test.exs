@@ -16,7 +16,7 @@ defmodule ExDaytona.Api.UsageTest do
       bypass: bypass,
       conn: conn
     } do
-      Bypass.expect_once(bypass, "GET", "/organization/org-1/usage/aggregated", fn conn ->
+      MockServer.expect_once(bypass, "GET", "/organization/org-1/usage/aggregated", fn conn ->
         query = URI.decode_query(conn.query_string)
         assert query["from"] == "2026-01-01T00:00:00Z"
         assert query["to"] == "2026-02-01T00:00:00Z"

@@ -14,9 +14,9 @@ defmodule ApiSurfaceTest do
   @connection SdkSurface.connection_module()
 
   test "every operation performs a request and returns an ok or error tuple" do
-    bypass = Bypass.open()
+    bypass = MockServer.open()
 
-    Bypass.expect(bypass, fn conn ->
+    MockServer.expect(bypass, fn conn ->
       conn
       |> Plug.Conn.put_resp_content_type("application/json")
       |> Plug.Conn.resp(200, "{}")

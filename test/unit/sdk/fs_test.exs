@@ -27,7 +27,7 @@ defmodule ExDaytona.FSTest do
 
   describe "directories & metadata" do
     test "mkdir/3 sends path and mode", %{bypass: bypass, sandbox: sandbox} do
-      Bypass.expect_once(bypass, "POST", "/toolbox/sb-1/files/folder", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/toolbox/sb-1/files/folder", fn conn ->
         query = URI.decode_query(conn.query_string)
         assert query["path"] == "/workspace/data"
         assert query["mode"] == "700"
@@ -39,7 +39,7 @@ defmodule ExDaytona.FSTest do
     end
 
     test "stat/2 decodes FileInfo", %{bypass: bypass, sandbox: sandbox} do
-      Bypass.expect_once(bypass, "GET", "/toolbox/sb-1/files/info", fn conn ->
+      MockServer.expect_once(bypass, "GET", "/toolbox/sb-1/files/info", fn conn ->
         assert URI.decode_query(conn.query_string)["path"] == "/workspace/a.txt"
 
         conn
@@ -55,7 +55,7 @@ defmodule ExDaytona.FSTest do
     end
 
     test "delete/3 forwards recursive", %{bypass: bypass, sandbox: sandbox} do
-      Bypass.expect_once(bypass, "DELETE", "/toolbox/sb-1/files", fn conn ->
+      MockServer.expect_once(bypass, "DELETE", "/toolbox/sb-1/files", fn conn ->
         query = URI.decode_query(conn.query_string)
         assert query["path"] == "/workspace/old"
         assert query["recursive"] == "true"
@@ -67,7 +67,7 @@ defmodule ExDaytona.FSTest do
     end
 
     test "move/3 sends source and destination", %{bypass: bypass, sandbox: sandbox} do
-      Bypass.expect_once(bypass, "POST", "/toolbox/sb-1/files/move", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/toolbox/sb-1/files/move", fn conn ->
         query = URI.decode_query(conn.query_string)
         assert query["source"] == "/a.txt"
         assert query["destination"] == "/b.txt"
@@ -81,7 +81,7 @@ defmodule ExDaytona.FSTest do
     end
 
     test "chmod/3 sends mode/owner/group", %{bypass: bypass, sandbox: sandbox} do
-      Bypass.expect_once(bypass, "POST", "/toolbox/sb-1/files/permissions", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/toolbox/sb-1/files/permissions", fn conn ->
         query = URI.decode_query(conn.query_string)
         assert query["path"] == "/a.txt"
         assert query["mode"] == "644"
@@ -98,7 +98,7 @@ defmodule ExDaytona.FSTest do
 
   describe "search & replace" do
     test "search/3 returns matching paths", %{bypass: bypass, sandbox: sandbox} do
-      Bypass.expect_once(bypass, "GET", "/toolbox/sb-1/files/search", fn conn ->
+      MockServer.expect_once(bypass, "GET", "/toolbox/sb-1/files/search", fn conn ->
         query = URI.decode_query(conn.query_string)
         assert query["path"] == "/workspace"
         assert query["pattern"] == "*.ex"
@@ -125,7 +125,7 @@ defmodule ExDaytona.FSTest do
       bypass: bypass,
       sandbox: sandbox
     } do
-      Bypass.expect_once(bypass, "POST", "/toolbox/sb-1/files/replace", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/toolbox/sb-1/files/replace", fn conn ->
         {:ok, body, conn} = Plug.Conn.read_body(conn)
 
         assert %{"files" => ["/a.txt"], "pattern" => "old", "newValue" => "new"} =
@@ -157,7 +157,7 @@ defmodule ExDaytona.FSTest do
       local = Path.join(dir, "up.txt")
       File.write!(local, "local content")
 
-      Bypass.expect_once(bypass, "POST", "/toolbox/sb-1/files/upload-v2", fn conn ->
+      MockServer.expect_once(bypass, "POST", "/toolbox/sb-1/files/upload-v2", fn conn ->
         assert URI.decode_query(conn.query_string)["path"] == "/workspace/up.txt"
         {:ok, body, conn} = Plug.Conn.read_body(conn)
         assert body =~ "local content"
@@ -182,7 +182,7 @@ defmodule ExDaytona.FSTest do
       sandbox: sandbox,
       dir: dir
     } do
-      Bypass.expect_once(bypass, "GET", "/toolbox/sb-1/files/download", fn conn ->
+      MockServer.expect_once(bypass, "GET", "/toolbox/sb-1/files/download", fn conn ->
         conn
         |> Plug.Conn.put_resp_content_type("application/octet-stream")
         |> Plug.Conn.resp(200, "remote bytes")
@@ -197,7 +197,7 @@ defmodule ExDaytona.FSTest do
       bypass: bypass,
       sandbox: sandbox
     } do
-      Bypass.expect(bypass, "POST", "/toolbox/sb-1/files/upload-v2", fn conn ->
+      MockServer.expect(bypass, "POST", "/toolbox/sb-1/files/upload-v2", fn conn ->
         case URI.decode_query(conn.query_string)["path"] do
           "/ok.txt" ->
             conn

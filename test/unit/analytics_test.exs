@@ -53,7 +53,7 @@ defmodule ExDaytona.AnalyticsTest do
       bypass = MockServer.setup()
       Application.put_env(:ex_daytona, :analytics_base_url, MockServer.url(bypass))
 
-      Bypass.expect_once(bypass, "GET", "/organization/org-1/usage/aggregated", fn conn ->
+      MockServer.expect_once(bypass, "GET", "/organization/org-1/usage/aggregated", fn conn ->
         assert Plug.Conn.get_req_header(conn, "authorization") == ["Bearer an-token"]
 
         conn
