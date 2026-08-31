@@ -121,9 +121,14 @@ defmodule ExDaytona.Session do
   `{:ok, cmd_id}` — follow it with `stream_logs/4`, `logs/2`, and
   `await/3`.
   """
-  @spec run_async(t(), String.t()) :: {:ok, String.t()} | {:error, Error.t()}
-  def run_async(%__MODULE__{sandbox: sandbox, id: id}, command) when is_binary(command) do
-    request = %Model.SessionExecuteRequest{command: command, runAsync: true}
+  @spec run_async(t(), String.t(), keyword()) :: {:ok, String.t()} | {:error, Error.t()}
+  def run_async(%__MODULE__{sandbox: sandbox, id: id}, command, opts \\ [])
+      when is_binary(command) do
+    request = %Model.SessionExecuteRequest{
+      command: command,
+      runAsync: true,
+      suppressInputEcho: opts[:suppress_input_echo]
+    }
 
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox),
          {:ok, %Model.SessionExecuteResponse{cmdId: cmd_id}} <-
@@ -200,6 +205,63 @@ defmodule ExDaytona.Session do
           "/process/session/#{id}/command/#{cmd_id}/logs?follow=true"
 
       HTTPStream.get(url, sandbox.client.api_key, fun, opts)
+    end
+  end
+
+  @doc """
+  Send input to an interactive command's stdin (e.g. answering a
+  confirmation prompt). Returns `:ok`.
+  """
+  @spec send_input(t(), String.t(), iodata()) :: :ok | {:error, Error.t()}
+  def send_input(%__MODULE__{sandbox: sandbox, id: id}, cmd_id, data) when is_binary(cmd_id) do
+    request = %Model.SessionSendInputRequest{data: IO.iodata_to_binary(data)}
+
+    with {:ok, conn} <- Sandbox.toolbox_conn(sandbox) do
+      attempt_send_input(conn, id, cmd_id, request, 6)
+    end
+  end
+
+  # The daemon creates a command's stdin pipe shortly after the command
+  # starts; input sent immediately after run_async/3 can race it ("failed
+  # to open input pipe ... no such file or directory") — observed to take
+  # over a second on a fresh command. Retry that specific failure for a
+  # couple of seconds instead of surfacing the race to callers.
+  defp attempt_send_input(conn, id, cmd_id, request, attempts_left) do
+    case Error.normalize(Api.Process.send_input(conn, id, cmd_id, request)) do
+      {:ok, _} ->
+        :ok
+
+      {:error, %Error{message: message} = error} ->
+        if attempts_left > 1 and is_binary(message) and message =~ "input.pipe" do
+          Process.sleep(500)
+          attempt_send_input(conn, id, cmd_id, request, attempts_left - 1)
+        else
+          {:error, error}
+        end
+    end
+  end
+
+  @doc """
+  The sandbox's entrypoint session (where a configured entrypoint runs),
+  as an `ExDaytona.Model.Session`.
+  """
+  @spec entrypoint(Sandbox.t()) :: {:ok, Model.Session.t()} | {:error, Error.t()}
+  def entrypoint(%Sandbox{} = sandbox) do
+    with {:ok, conn} <- Sandbox.toolbox_conn(sandbox) do
+      Error.normalize(Api.Process.get_entrypoint_session(conn))
+    end
+  end
+
+  @doc """
+  The entrypoint's logs so far, as a binary (fetched raw — see `logs/2`
+  for why the generated operation is bypassed).
+  """
+  @spec entrypoint_logs(Sandbox.t()) :: {:ok, binary()} | {:error, Error.t()}
+  def entrypoint_logs(%Sandbox{} = sandbox) do
+    with {:ok, conn} <- Sandbox.toolbox_conn(sandbox),
+         {:ok, %Tesla.Env{body: body}} <-
+           Error.normalize(Connection.request(conn, method: :get, url: "/process/session/entrypoint/logs")) do
+      {:ok, body}
     end
   end
 

@@ -180,6 +180,53 @@ defmodule ExDaytona.SessionTest do
     end
   end
 
+  describe "send_input/3" do
+    test "posts the data to the command's stdin", %{bypass: bypass, sandbox: sandbox} do
+      session = %Session{sandbox: sandbox, id: "s-1"}
+
+      Bypass.expect_once(
+        bypass,
+        "POST",
+        "/toolbox/sb-1/process/session/s-1/command/cmd-9/input",
+        fn conn ->
+          {:ok, body, conn} = Plug.Conn.read_body(conn)
+          assert %{"data" => "y\n"} = JSON.decode!(body)
+
+          Plug.Conn.resp(conn, 204, "")
+        end
+      )
+
+      assert :ok = Session.send_input(session, "cmd-9", "y\n")
+    end
+  end
+
+  describe "entrypoint" do
+    test "entrypoint/1 decodes the entrypoint session", %{bypass: bypass, sandbox: sandbox} do
+      MockServer.expect_get(bypass, "/toolbox/sb-1/process/session/entrypoint", 200, %{
+        sessionId: "entrypoint",
+        commands: [%{id: "c-1", command: "npm start", exitCode: nil}]
+      })
+
+      assert {:ok, %Model.Session{sessionId: "entrypoint", commands: [_]}} =
+               Session.entrypoint(sandbox)
+    end
+
+    test "entrypoint_logs/1 returns the raw body", %{bypass: bypass, sandbox: sandbox} do
+      Bypass.expect_once(
+        bypass,
+        "GET",
+        "/toolbox/sb-1/process/session/entrypoint/logs",
+        fn conn ->
+          conn
+          |> Plug.Conn.put_resp_content_type("text/plain")
+          |> Plug.Conn.resp(200, "server listening\n")
+        end
+      )
+
+      assert {:ok, "server listening\n"} = Session.entrypoint_logs(sandbox)
+    end
+  end
+
   describe "delete/1" do
     test "returns :ok", %{bypass: bypass, sandbox: sandbox} do
       session = %Session{sandbox: sandbox, id: "s-1"}

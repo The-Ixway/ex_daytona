@@ -60,6 +60,51 @@ and set `DAYTONA_API_KEY` (or pass `api_key:` explicitly).
 Facade calls return `{:ok, value}` or `{:error, %ExDaytona.Error{status, message, code, details}}` —
 all of the generated client's response conventions are normalized away.
 
+### File system
+
+`ExDaytona.FS` is the full file-system surface (the `Sandbox`
+read/write/list helpers delegate to it):
+
+```elixir
+:ok = ExDaytona.FS.mkdir(sandbox, "/workspace/data", mode: "755")
+:ok = ExDaytona.FS.write_files(sandbox, [{"/workspace/a.txt", "one"}, {"/workspace/b.txt", "two"}])
+
+{:ok, %ExDaytona.Model.FileInfo{size: _}} = ExDaytona.FS.stat(sandbox, "/workspace/a.txt")
+{:ok, paths} = ExDaytona.FS.search(sandbox, "/workspace", "*.txt")   # glob on names
+{:ok, matches} = ExDaytona.FS.grep(sandbox, "/workspace", "TODO")    # search contents
+{:ok, _report} = ExDaytona.FS.replace(sandbox, paths, "old", "new")  # per-file results
+
+:ok = ExDaytona.FS.chmod(sandbox, "/workspace/a.txt", mode: "600")
+:ok = ExDaytona.FS.move(sandbox, "/workspace/a.txt", "/workspace/archive/a.txt")
+:ok = ExDaytona.FS.upload(sandbox, "local.bin", "/workspace/remote.bin")
+:ok = ExDaytona.FS.download(sandbox, "/workspace/remote.bin", "copy.bin")
+:ok = ExDaytona.FS.delete(sandbox, "/workspace/data", recursive: true)
+```
+
+### Code execution
+
+Stateless snippets (fresh interpreter per run; Python/JavaScript/TypeScript):
+
+```elixir
+{:ok, %{exit_code: 0, result: "hello\n"}} =
+  ExDaytona.Sandbox.run_code(sandbox, "print(sys.argv[1])",
+    language: "python", argv: ["hello"], env: %{"FOO" => "BAR"}, timeout: 30)
+```
+
+Stateful Python (variables persist between runs; streams over a websocket):
+
+```elixir
+{:ok, _} = ExDaytona.CodeInterpreter.run(sandbox, "counter = 41")
+{:ok, %{stdout: "42\n"}} = ExDaytona.CodeInterpreter.run(sandbox, "counter += 1\nprint(counter)")
+
+# Stream output live, isolate state into contexts, and surface exceptions
+{:ok, ctx} = ExDaytona.CodeInterpreter.create_context(sandbox, cwd: "/workspace")
+
+{:ok, %{error: %{name: "ZeroDivisionError"}}} =
+  ExDaytona.CodeInterpreter.run(sandbox, "1/0",
+    context: ctx, on_stdout: &IO.write/1, on_stderr: &IO.write/1)
+```
+
 ### Sessions — long-running commands with streamed logs
 
 A session is a persistent shell inside the sandbox: commands share state
@@ -78,8 +123,16 @@ and can run asynchronously with real-time log streaming.
 {:ok, %{exit_code: 0}} = ExDaytona.Session.await(session, cmd_id)
 
 {:ok, logs} = ExDaytona.Session.logs(session, cmd_id)   # everything so far
+
+# Interactive commands: answer prompts over stdin
+{:ok, cmd_id} = ExDaytona.Session.run_async(session, "read a; echo got:$a", suppress_input_echo: true)
+:ok = ExDaytona.Session.send_input(session, cmd_id, "yes\n")
+
 :ok = ExDaytona.Session.delete(session)
 ```
+
+`ExDaytona.Session.entrypoint/1` and `entrypoint_logs/1` expose the
+session a configured entrypoint runs in.
 
 `ExDaytona.Sandbox.stream_build_logs/3` streams a building sandbox's build
 logs the same way.

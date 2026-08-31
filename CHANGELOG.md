@@ -51,6 +51,21 @@ inserts new sections below this marker:
   label/expose/entrypoint/cmd` + raw Dockerfiles) wired into
   `ExDaytona.Sandbox.create(client, image: ...)` for building sandboxes
   from Dockerfiles
+- `ExDaytona.FS` — the full file-system facade: `write_file`/`read_file`/
+  `write_files`, local `upload`/`download`, `mkdir`, `stat`, `delete`
+  (recursive), `move`, `chmod`, glob `search`, content `grep`, and text
+  `replace` with per-file results (the `Sandbox` file helpers delegate
+  here)
+- `ExDaytona.Sandbox.run_code/3` — stateless code snippets (Python/
+  JavaScript/TypeScript) with argv/env/timeout and chart artifacts
+- `ExDaytona.CodeInterpreter` — stateful Python execution over the
+  interpreter websocket: state persists between `run/3` calls, isolated
+  contexts (`create_context`/`list_contexts`/`delete_context`), streaming
+  `on_stdout`/`on_stderr`/`on_error` callbacks, and structured execution
+  errors
+- `ExDaytona.Session.send_input/3` (with a retry for the daemon's
+  stdin-pipe startup race and a `suppress_input_echo` option on
+  `run_async/3`), plus `entrypoint/1` and `entrypoint_logs/1`
 - Local build contexts: `ExDaytona.Image.add_local_file/3` and
   `add_local_dir/3` copy local files into declaratively built images —
   contexts are content-hashed, tarred, and uploaded to Daytona's object

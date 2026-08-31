@@ -24,7 +24,6 @@ defmodule ExDaytona.Sandbox do
 
   alias ExDaytona.Api
   alias ExDaytona.Client
-  alias ExDaytona.Connection
   alias ExDaytona.Error
   alias ExDaytona.Model
   alias ExDaytona.Toolbox
@@ -364,54 +363,68 @@ defmodule ExDaytona.Sandbox do
   end
 
   @doc """
-  Write `content` to `path` inside the sandbox (parent directories are
-  created by the API). Returns `:ok`.
+  Run a code snippet with a fresh interpreter each time (stateless).
+  Python, JavaScript, and TypeScript are supported; for persistent state
+  across runs use `ExDaytona.CodeInterpreter`.
+
+  ## Options
+
+  - `:language` — `"python"` | `"javascript"` | `"typescript"` (server
+    default when omitted)
+  - `:argv` — command-line arguments (list)
+  - `:env` — environment variables (map)
+  - `:timeout` — execution timeout in seconds (API-side)
+
+  Returns `{:ok, %{exit_code, result, artifacts}}` where `result` is the
+  combined output and `artifacts` carries chart captures when present.
+  """
+  @spec run_code(t(), String.t(), keyword()) ::
+          {:ok,
+           %{
+             exit_code: integer() | nil,
+             result: String.t() | nil,
+             artifacts: Model.CodeRunArtifacts.t() | nil
+           }}
+          | {:error, Error.t()}
+  def run_code(%__MODULE__{} = sandbox, code, opts \\ []) when is_binary(code) do
+    request = %Model.CodeRunRequest{
+      code: code,
+      language: opts[:language],
+      argv: opts[:argv],
+      envs: opts[:env],
+      timeout: opts[:timeout]
+    }
+
+    with {:ok, conn} <- toolbox_conn(sandbox),
+         {:ok, %Model.CodeRunResponse{} = response} <-
+           Error.normalize(Api.Process.code_run(conn, request)) do
+      {:ok, %{exit_code: response.exitCode, result: response.result, artifacts: response.artifacts}}
+    end
+  end
+
+  @doc """
+  Write `content` to `path` inside the sandbox. Delegates to
+  `ExDaytona.FS.write_file/3` — see `ExDaytona.FS` for the full
+  file-system surface.
   """
   @spec write_file(t(), String.t(), iodata()) :: :ok | {:error, Error.t()}
-  def write_file(%__MODULE__{} = sandbox, path, content) when is_binary(path) do
-    multipart =
-      Tesla.Multipart.new()
-      |> Tesla.Multipart.add_file_content(IO.iodata_to_binary(content), Path.basename(path), name: "file")
-
-    with {:ok, conn} <- toolbox_conn(sandbox),
-         {:ok, _} <-
-           Error.normalize(
-             Connection.request(conn,
-               method: :post,
-               url: "/files/upload-v2",
-               query: [path: path],
-               body: multipart
-             )
-           ) do
-      :ok
-    end
-  end
+  def write_file(%__MODULE__{} = sandbox, path, content),
+    do: ExDaytona.FS.write_file(sandbox, path, content)
 
   @doc """
-  Read the file at `path` inside the sandbox. Returns `{:ok, binary}`.
+  Read the file at `path` inside the sandbox. Delegates to
+  `ExDaytona.FS.read_file/2`.
   """
   @spec read_file(t(), String.t()) :: {:ok, binary()} | {:error, Error.t()}
-  def read_file(%__MODULE__{} = sandbox, path) when is_binary(path) do
-    with {:ok, conn} <- toolbox_conn(sandbox),
-         {:ok, %Tesla.Env{body: body}} <-
-           Error.normalize(Api.FileSystem.download_file(conn, path)) do
-      {:ok, body}
-    end
-  end
+  def read_file(%__MODULE__{} = sandbox, path), do: ExDaytona.FS.read_file(sandbox, path)
 
   @doc """
-  List files at `path` inside the sandbox (default: the working directory).
-  Returns `{:ok, [%ExDaytona.Model.FileInfo{}]}`.
+  List files at `path` inside the sandbox (default: the working
+  directory). Delegates to `ExDaytona.FS.list_files/2`.
   """
   @spec list_files(t(), String.t() | nil) :: {:ok, [Model.FileInfo.t()]} | {:error, Error.t()}
-  def list_files(%__MODULE__{} = sandbox, path \\ nil) do
-    opts = if path, do: [path: path], else: []
-
-    with {:ok, conn} <- toolbox_conn(sandbox),
-         {:ok, files} <- Error.normalize(Api.FileSystem.list_files(conn, opts)) do
-      {:ok, List.wrap(files)}
-    end
-  end
+  def list_files(%__MODULE__{} = sandbox, path \\ nil),
+    do: ExDaytona.FS.list_files(sandbox, path)
 
   @doc """
   The Tesla client for this sandbox's toolbox API, for generated toolbox

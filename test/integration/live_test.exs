@@ -209,6 +209,31 @@ defmodule LiveSmokeTest do
           assert logs =~ "s1"
           assert :ok = ExDaytona.Session.delete(session)
 
+          # File system: full surface
+          assert :ok = ExDaytona.FS.mkdir(sandbox, "/tmp/fs-live", mode: "755")
+          assert :ok = ExDaytona.FS.write_file(sandbox, "/tmp/fs-live/a.txt", "TODO one")
+          assert {:ok, %{size: size}} = ExDaytona.FS.stat(sandbox, "/tmp/fs-live/a.txt")
+          assert size > 0
+          assert {:ok, ["/tmp/fs-live/a.txt"]} = ExDaytona.FS.search(sandbox, "/tmp/fs-live", "*.txt")
+          assert {:ok, [%{line: _}]} = ExDaytona.FS.grep(sandbox, "/tmp/fs-live", "TODO")
+          assert {:ok, [%{success: true}]} = ExDaytona.FS.replace(sandbox, ["/tmp/fs-live/a.txt"], "TODO", "DONE")
+          assert :ok = ExDaytona.FS.move(sandbox, "/tmp/fs-live/a.txt", "/tmp/fs-live/b.txt")
+          assert {:ok, "DONE one"} = ExDaytona.FS.read_file(sandbox, "/tmp/fs-live/b.txt")
+          assert :ok = ExDaytona.FS.delete(sandbox, "/tmp/fs-live", recursive: true)
+
+          # Code execution: stateless + stateful
+          assert {:ok, %{exit_code: 0, result: code_out}} =
+                   ExDaytona.Sandbox.run_code(sandbox, "print(6*7)", language: "python")
+
+          assert code_out =~ "42"
+
+          assert {:ok, %{error: nil}} = ExDaytona.CodeInterpreter.run(sandbox, "counter = 41")
+
+          assert {:ok, %{stdout: interp_out}} =
+                   ExDaytona.CodeInterpreter.run(sandbox, "counter += 1\nprint(counter)")
+
+          assert interp_out =~ "42"
+
           # PTY: interactive terminal over a websocket
           {:ok, pty} = ExDaytona.Pty.create(sandbox, cols: 120, rows: 30)
           {:ok, ws} = ExDaytona.Pty.connect(pty)

@@ -349,6 +349,39 @@ defmodule ExDaytona.SandboxTest do
     end
   end
 
+  describe "run_code/3" do
+    test "posts code with options and normalizes the response", %{
+      bypass: bypass,
+      client: client
+    } do
+      sandbox = mock_sandbox(bypass, client)
+
+      Bypass.expect_once(bypass, "POST", "/toolbox/sb-1/process/code-run", fn conn ->
+        {:ok, body, conn} = Plug.Conn.read_body(conn)
+
+        assert %{
+                 "code" => "print(6*7)",
+                 "language" => "python",
+                 "argv" => ["--x"],
+                 "envs" => %{"FOO" => "BAR"},
+                 "timeout" => 5
+               } = JSON.decode!(body)
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, JSON.encode!(%{exitCode: 0, result: "42\n"}))
+      end)
+
+      assert {:ok, %{exit_code: 0, result: "42\n", artifacts: nil}} =
+               Sandbox.run_code(sandbox, "print(6*7)",
+                 language: "python",
+                 argv: ["--x"],
+                 env: %{"FOO" => "BAR"},
+                 timeout: 5
+               )
+    end
+  end
+
   describe "toolbox operations" do
     test "exec/3 posts to the sandbox's toolbox URL", %{bypass: bypass, client: client} do
       sandbox = mock_sandbox(bypass, client)
