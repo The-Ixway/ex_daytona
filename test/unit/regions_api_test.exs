@@ -3,6 +3,7 @@ defmodule ExDaytona.Api.RegionsTest do
 
   alias ExDaytona.Api.Regions
   alias ExDaytona.Connection
+  alias ExDaytona.Model
 
   setup do
     bypass = MockServer.setup()
@@ -10,14 +11,15 @@ defmodule ExDaytona.Api.RegionsTest do
     {:ok, bypass: bypass, conn: conn}
   end
 
-  # Add tests for each operation in ExDaytona.Api.Regions, for example:
-  #
-  #   test "lists things", %{bypass: bypass, conn: conn} do
-  #     MockServer.expect_get(bypass, "/things", 200, %{things: []})
-  #     assert {:ok, _response} = Regions.list_things(conn)
-  #   end
+  describe "list_shared_regions/2" do
+    test "decodes a list of Region structs", %{bypass: bypass, conn: conn} do
+      MockServer.expect_get(bypass, "/shared-regions", 200, [
+        %{id: "us", name: "United States", regionType: "shared"},
+        %{id: "eu", name: "Europe", regionType: "shared"}
+      ])
 
-  test "module is generated and loaded" do
-    assert Code.ensure_loaded?(Regions)
+      assert {:ok, [%Model.Region{id: "us", name: "United States"}, %Model.Region{id: "eu"}]} =
+               Regions.list_shared_regions(conn)
+    end
   end
 end

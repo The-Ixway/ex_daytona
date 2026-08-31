@@ -1,8 +1,9 @@
 defmodule ExDaytona.Api.SystemTest do
   use TestCase, async: true
 
-  alias ExDaytona.Api.System
+  alias ExDaytona.Api.System, as: SystemApi
   alias ExDaytona.Connection
+  alias ExDaytona.Model
 
   setup do
     bypass = MockServer.setup()
@@ -10,14 +11,17 @@ defmodule ExDaytona.Api.SystemTest do
     {:ok, bypass: bypass, conn: conn}
   end
 
-  # Add tests for each operation in ExDaytona.Api.System, for example:
-  #
-  #   test "lists things", %{bypass: bypass, conn: conn} do
-  #     MockServer.expect_get(bypass, "/things", 200, %{things: []})
-  #     assert {:ok, _response} = System.list_things(conn)
-  #   end
+  describe "get_system_metrics/2" do
+    test "decodes the SystemMetrics", %{bypass: bypass, conn: conn} do
+      MockServer.expect_get(bypass, "/system/metrics", 200, %{
+        cpuCount: 4,
+        cpuUsedPct: 12.5,
+        memTotal: 8_589_934_592,
+        memUsed: 1_073_741_824
+      })
 
-  test "module is generated and loaded" do
-    assert Code.ensure_loaded?(System)
+      assert {:ok, %Model.SystemMetrics{cpuCount: 4, cpuUsedPct: 12.5}} =
+               SystemApi.get_system_metrics(conn)
+    end
   end
 end

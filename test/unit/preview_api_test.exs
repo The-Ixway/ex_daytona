@@ -3,6 +3,7 @@ defmodule ExDaytona.Api.PreviewTest do
 
   alias ExDaytona.Api.Preview
   alias ExDaytona.Connection
+  alias ExDaytona.Model
 
   setup do
     bypass = MockServer.setup()
@@ -10,14 +11,20 @@ defmodule ExDaytona.Api.PreviewTest do
     {:ok, bypass: bypass, conn: conn}
   end
 
-  # Add tests for each operation in ExDaytona.Api.Preview, for example:
-  #
-  #   test "lists things", %{bypass: bypass, conn: conn} do
-  #     MockServer.expect_get(bypass, "/things", 200, %{things: []})
-  #     assert {:ok, _response} = Preview.list_things(conn)
-  #   end
+  describe "is_preview_warning_enabled/3" do
+    test "decodes the PreviewWarning flag", %{bypass: bypass, conn: conn} do
+      MockServer.expect_get(bypass, "/preview/sb-1/preview-warning", 200, %{enabled: true})
 
-  test "module is generated and loaded" do
-    assert Code.ensure_loaded?(Preview)
+      assert {:ok, %Model.PreviewWarning{enabled: true}} =
+               Preview.is_preview_warning_enabled(conn, "sb-1")
+    end
+  end
+
+  describe "is_sandbox_public/3" do
+    test "a 200 mapped as passthrough returns the raw env", %{bypass: bypass, conn: conn} do
+      MockServer.expect_get(bypass, "/preview/sb-1/public", 200, %{})
+
+      assert {:ok, %Tesla.Env{status: 200}} = Preview.is_sandbox_public(conn, "sb-1")
+    end
   end
 end

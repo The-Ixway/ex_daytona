@@ -1,8 +1,9 @@
 defmodule ExDaytona.Api.DockerRegistryTest do
   use TestCase, async: true
 
-  alias ExDaytona.Api.DockerRegistry
+  alias ExDaytona.Api.DockerRegistry, as: DockerRegistryApi
   alias ExDaytona.Connection
+  alias ExDaytona.Model
 
   setup do
     bypass = MockServer.setup()
@@ -10,14 +11,23 @@ defmodule ExDaytona.Api.DockerRegistryTest do
     {:ok, bypass: bypass, conn: conn}
   end
 
-  # Add tests for each operation in ExDaytona.Api.DockerRegistry, for example:
-  #
-  #   test "lists things", %{bypass: bypass, conn: conn} do
-  #     MockServer.expect_get(bypass, "/things", 200, %{things: []})
-  #     assert {:ok, _response} = DockerRegistry.list_things(conn)
-  #   end
+  describe "list_registries/2" do
+    test "decodes a list of DockerRegistry structs", %{bypass: bypass, conn: conn} do
+      MockServer.expect_get(bypass, "/docker-registry", 200, [
+        %{id: "reg-1", name: "ghcr", url: "https://ghcr.io", username: "bot"}
+      ])
 
-  test "module is generated and loaded" do
-    assert Code.ensure_loaded?(DockerRegistry)
+      assert {:ok, [%Model.DockerRegistry{id: "reg-1", url: "https://ghcr.io"}]} =
+               DockerRegistryApi.list_registries(conn)
+    end
+  end
+
+  describe "get_registry/3" do
+    test "decodes a single DockerRegistry", %{bypass: bypass, conn: conn} do
+      MockServer.expect_get(bypass, "/docker-registry/reg-1", 200, %{id: "reg-1", name: "ghcr"})
+
+      assert {:ok, %Model.DockerRegistry{id: "reg-1", name: "ghcr"}} =
+               DockerRegistryApi.get_registry(conn, "reg-1")
+    end
   end
 end

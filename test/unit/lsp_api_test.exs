@@ -3,6 +3,7 @@ defmodule ExDaytona.Api.LspTest do
 
   alias ExDaytona.Api.Lsp
   alias ExDaytona.Connection
+  alias ExDaytona.Model
 
   setup do
     bypass = MockServer.setup()
@@ -10,14 +11,42 @@ defmodule ExDaytona.Api.LspTest do
     {:ok, bypass: bypass, conn: conn}
   end
 
-  # Add tests for each operation in ExDaytona.Api.Lsp, for example:
-  #
-  #   test "lists things", %{bypass: bypass, conn: conn} do
-  #     MockServer.expect_get(bypass, "/things", 200, %{things: []})
-  #     assert {:ok, _response} = Lsp.list_things(conn)
-  #   end
+  describe "completions/3" do
+    test "posts the params and decodes the CompletionList", %{bypass: bypass, conn: conn} do
+      Bypass.expect_once(bypass, "POST", "/lsp/completions", fn conn ->
+        {:ok, body, conn} = Plug.Conn.read_body(conn)
+        assert %{"languageId" => "elixir"} = JSON.decode!(body)
 
-  test "module is generated and loaded" do
-    assert Code.ensure_loaded?(Lsp)
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(
+          200,
+          JSON.encode!(%{isIncomplete: false, items: [%{label: "Enum.map/2"}]})
+        )
+      end)
+
+      params = %Model.LspCompletionParams{
+        languageId: "elixir",
+        pathToProject: "/workspace/repo",
+        uri: "file:///workspace/repo/lib/foo.ex"
+      }
+
+      assert {:ok, %Model.CompletionList{isIncomplete: false, items: [_]}} =
+               Lsp.completions(conn, params)
+    end
+  end
+
+  describe "start/3" do
+    test "a spec-declared 400 decodes into the error model (as :ok)", %{
+      bypass: bypass,
+      conn: conn
+    } do
+      MockServer.expect_post(bypass, "/lsp/start", 400, %{message: "unsupported language"})
+
+      request = %Model.LspServerRequest{languageId: "cobol", pathToProject: "/workspace"}
+
+      assert {:ok, %Model.ErrorResponse{message: "unsupported language"}} =
+               Lsp.start(conn, request)
+    end
   end
 end

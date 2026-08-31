@@ -3,6 +3,7 @@ defmodule ExDaytona.Api.UsersTest do
 
   alias ExDaytona.Api.Users
   alias ExDaytona.Connection
+  alias ExDaytona.Model
 
   setup do
     bypass = MockServer.setup()
@@ -10,14 +11,28 @@ defmodule ExDaytona.Api.UsersTest do
     {:ok, bypass: bypass, conn: conn}
   end
 
-  # Add tests for each operation in ExDaytona.Api.Users, for example:
-  #
-  #   test "lists things", %{bypass: bypass, conn: conn} do
-  #     MockServer.expect_get(bypass, "/things", 200, %{things: []})
-  #     assert {:ok, _response} = Users.list_things(conn)
-  #   end
+  describe "get_authenticated_user/2" do
+    test "decodes the current User", %{bypass: bypass, conn: conn} do
+      MockServer.expect_get(bypass, "/users/me", 200, %{
+        id: "u-1",
+        email: "dev@example.com",
+        emailVerified: true
+      })
 
-  test "module is generated and loaded" do
-    assert Code.ensure_loaded?(Users)
+      assert {:ok, %Model.User{id: "u-1", email: "dev@example.com", emailVerified: true}} =
+               Users.get_authenticated_user(conn)
+    end
+  end
+
+  describe "get_available_account_providers/2" do
+    test "decodes a list of AccountProvider structs", %{bypass: bypass, conn: conn} do
+      MockServer.expect_get(bypass, "/users/account-providers", 200, [
+        %{name: "github", displayName: "GitHub"},
+        %{name: "google", displayName: "Google"}
+      ])
+
+      assert {:ok, [%Model.AccountProvider{name: "github", displayName: "GitHub"}, _]} =
+               Users.get_available_account_providers(conn)
+    end
   end
 end
