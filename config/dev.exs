@@ -6,5 +6,5 @@ config :logger,
   level: :debug
 
 # Example: Configure development-specific settings
-# config :your_package_name,
+# config :ex_daytona,
 #   base_url: "http://localhost:4000"

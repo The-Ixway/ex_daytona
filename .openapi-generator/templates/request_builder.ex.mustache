@@ -235,6 +235,12 @@ defmodule {{moduleName}}.RequestBuilder do
     {{moduleName}}.Deserializer.json_decode(body)
   end
 
+  # Arrays of primitives or untyped objects have no model module to decode
+  # into — the generator emits `[]` as their mapping. Plain JSON decode.
+  defp decode(%Tesla.Env{body: body}, []) do
+    {{moduleName}}.Deserializer.json_decode(body)
+  end
+
   defp decode(%Tesla.Env{body: body}, module) do
     {{moduleName}}.Deserializer.json_decode(body, module)
   end

@@ -1,0 +1,140 @@
+defmodule ExDaytona.MixProject do
+  use Mix.Project
+
+  @source_url "https://github.com/The-Ixway/ex_daytona"
+  @version "0.1.0"
+
+  def project do
+    [
+      app: :ex_daytona,
+      version: @version,
+      elixir: "~> 1.18",
+      elixirc_paths: elixirc_paths(Mix.env()),
+      start_permanent: Mix.env() == :prod,
+      deps: deps(),
+      aliases: aliases(),
+      description: description(),
+      package: package(),
+      docs: docs(),
+      test_coverage: [tool: ExCoveralls],
+      dialyzer: [
+        plt_add_apps: [:ex_unit],
+        plt_file: {:no_warn, "priv/plts/dialyzer.plt"}
+      ]
+    ]
+  end
+
+  def cli do
+    [
+      preferred_envs: [
+        check: :test,
+        "test.live": :test,
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test,
+        "coveralls.json": :test,
+        "coveralls.github": :test
+      ]
+    ]
+  end
+
+  def application do
+    [
+      extra_applications: [:logger],
+      mod: {ExDaytona.Application, []}
+    ]
+  end
+
+  # Test support modules (TestCase, MockServer, Fixtures) live in test/support
+  # and must be compiled in the test environment.
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
+
+  defp deps do
+    [
+      # HTTP client
+      {:tesla, "~> 1.15"},
+      {:finch, "~> 0.20"},
+
+      # Development and testing
+      {:ex_doc, "~> 0.38", only: :dev, runtime: false},
+      {:excoveralls, "~> 0.18", only: :test},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:git_ops, "~> 2.5", only: [:dev], runtime: false},
+      {:sbom, "~> 0.10", only: :dev, runtime: false},
+      {:mox, "~> 1.2", only: :test},
+      {:bypass, "~> 2.1", only: :test}
+    ]
+  end
+
+  defp aliases do
+    [
+      # Mirrors CI: run before pushing. Dialyzer is intentionally excluded
+      # (slow); run `mix dialyzer` separately when touching typespecs.
+      check: [
+        "deps.unlock --check-unused",
+        &informational_audit/1,
+        "compile --warnings-as-errors",
+        "format --check-formatted",
+        "credo --strict",
+        "test"
+      ],
+      # Canonical SBOM command — used by the pre-commit hook, CI, and the
+      # publish workflow so they all produce the same artifact.
+      sbom: "sbom.cyclonedx --force --pretty --format json --classification library --output bom.cdx.json",
+      # Live smoke tests against a real API (see test/integration/live_test.exs).
+      # Needs SDK_LIVE_BASE_URL (and usually SDK_LIVE_TOKEN) in the environment.
+      "test.live": "test --include live test/integration/live_test.exs"
+    ]
+  end
+
+  # hex.audit is informational: it also flags advisories in test-only
+  # transitive deps (e.g. cowlib via bypass) that don't ship with the SDK and
+  # may have no fixed release yet — surface the report without failing `check`.
+  # Runs in a separate OS process because in-process hex.audit marks the whole
+  # mix invocation as failed via an at-exit hook.
+  defp informational_audit(_args) do
+    case System.find_executable("mix") do
+      nil ->
+        Mix.shell().info("Skipping hex.audit (mix executable not found)")
+
+      mix ->
+        {output, status} = System.cmd(mix, ["hex.audit"], stderr_to_stdout: true)
+        Mix.shell().info(String.trim_trailing(output))
+
+        if status != 0 do
+          Mix.shell().info("hex.audit reported issues (informational — not failing `mix check`)")
+        end
+    end
+  end
+
+  defp description do
+    """
+    Unofficial Elixir SDK for the Daytona API (platform, toolbox, and analytics)
+    """
+  end
+
+  defp package do
+    [
+      name: "ex_daytona",
+      files: ~w(lib .formatter.exs mix.exs README* LICENSE* CHANGELOG*),
+      licenses: ["Apache-2.0"],
+      links: %{
+        "GitHub" => @source_url,
+        "Changelog" => "#{@source_url}/blob/main/CHANGELOG.md",
+        "Generated with" => "https://github.com/houllette/elixir-sdk-generator"
+      }
+    ]
+  end
+
+  defp docs do
+    [
+      main: "readme",
+      source_url: @source_url,
+      source_ref: "v#{@version}",
+      extras: ["README.md", "CHANGELOG.md", "CONTRIBUTING.md"]
+    ]
+  end
+end

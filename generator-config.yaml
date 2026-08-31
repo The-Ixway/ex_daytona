@@ -23,33 +23,34 @@ templateDir: .openapi-generator/templates
 # GitHub coordinates for source/package links in mix.exs. These MUST be
 # top-level keys: the generator ignores them under additionalProperties and
 # emits its GIT_USER_ID/GIT_REPO_ID placeholder defaults instead.
-gitUserId: "{{GIT_USER}}"
-gitRepoId: "{{GIT_REPO}}"
+gitUserId: "The-Ixway"
+gitRepoId: "ex_daytona"
 
 # Extra template files not part of the stock elixir generator.
-# The lib/ path is filled in by scripts/setup.sh (underscored module name).
+# The lib/ path follows the underscored module namespace.
 files:
   application.ex.mustache:
-    folder: lib/{{LIB_DIR}}
+    folder: lib/ex_daytona
     destinationFilename: application.ex
     templateType: SupportingFiles
 
 # Additional properties for the elixir generator
 additionalProperties:
-  # Package name (will be replaced by setup.sh)
-  packageName: "{{PACKAGE_NAME}}"
+  # Package name
+  packageName: "ex_daytona"
 
-  # Module namespace for generated code. Defaults to the camelized
-  # package name, e.g. my_api -> MyAPI. (will be replaced by setup.sh)
-  invokerPackage: "{{MODULE_NAME}}"
+  # Module namespace for generated code. Pinned explicitly — left unset, the
+  # generator derives it from the spec's info.title ("Daytona"), so an
+  # upstream title change would silently rename every module.
+  invokerPackage: "ExDaytona"
 
   # Package version
   packageVersion: "0.1.0"
 
-  # Description used in mix.exs (will be replaced by setup.sh).
+  # Description used in mix.exs.
   # Falls back to the spec's info.description when empty.
-  sdkDescription: "{{DESCRIPTION}}"
+  sdkDescription: "Unofficial Elixir SDK for the Daytona API (platform, toolbox, and analytics)"
 
-  # SPDX license id used in mix.exs (will be replaced by setup.sh)
-  licenseId: "{{LICENSE_ID}}"
+  # SPDX license id used in mix.exs
+  licenseId: "Apache-2.0"
 

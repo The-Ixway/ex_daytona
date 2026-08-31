@@ -38,8 +38,7 @@ defmodule VerifySbom do
       |> Enum.map(fn dep ->
         %{
           "ref" => Map.get(dep, "ref"),
-          "dependsOn" =>
-            dep |> Map.get("dependsOn", []) |> Enum.filter(&MapSet.member?(kept_refs, &1)) |> Enum.sort()
+          "dependsOn" => dep |> Map.get("dependsOn", []) |> Enum.filter(&MapSet.member?(kept_refs, &1)) |> Enum.sort()
         }
       end)
       |> Enum.sort_by(&Map.get(&1, "ref"))
@@ -69,7 +68,15 @@ else
   File.write!(fresh_dump, VerifySbom.dump(fresh))
 
   {diff, _status} =
-    System.cmd("diff", ["-u", "--label", "committed bom.cdx.json", "--label", "freshly generated bom.cdx.json", committed_dump, fresh_dump])
+    System.cmd("diff", [
+      "-u",
+      "--label",
+      "committed bom.cdx.json",
+      "--label",
+      "freshly generated bom.cdx.json",
+      committed_dump,
+      fresh_dump
+    ])
 
   IO.puts(diff)
   IO.puts("::error::bom.cdx.json is out of date. Run 'mix sbom' and commit the result")

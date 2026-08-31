@@ -1,0 +1,116 @@
+# Weekly OpenAPI spec sync
+#
+# Daytona publishes its API as three separate spec documents (main platform,
+# toolbox, analytics — URLs recorded in scripts/fetch-spec.sh). This workflow
+# re-fetches and re-merges them every week, and — when the result differs
+# from the committed openapi-spec.yaml — regenerates the SDK and opens a
+# pull request with the changes.
+name: Spec Sync
+
+on:
+  # Manual trigger
+  workflow_dispatch:
+
+  # Weekly: Monday 9 AM UTC
+  schedule:
+    - cron: "0 9 * * 1"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    name: Check upstream specs for changes
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Node is needed up front: fetch-spec.sh uses npx swagger2openapi to
+      # convert the Swagger 2.0 documents to OpenAPI 3.0.
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Fetch and merge latest specs
+        id: fetch
+        run: |
+          ./scripts/fetch-spec.sh /tmp/latest-spec.yaml
+
+          # fetch-spec.sh output is deterministic (sorted keys) and has
+          # spec-patches/ applied, so a byte comparison against the committed
+          # spec detects real upstream changes without false drift.
+          if cmp -s /tmp/latest-spec.yaml openapi-spec.yaml; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Spec is up to date."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            cp /tmp/latest-spec.yaml openapi-spec.yaml
+            echo "Upstream specs have changed."
+          fi
+
+      - name: Summarize spec changes
+        if: steps.fetch.outputs.changed == 'true'
+        id: diff
+        run: |
+          npm install -g oasdiff 2>/dev/null || true
+          {
+            echo 'summary<<SPEC_DIFF_EOF'
+            oasdiff changelog <(git show HEAD:openapi-spec.yaml) openapi-spec.yaml 2>/dev/null | head -80 || echo "(diff summary unavailable)"
+            echo 'SPEC_DIFF_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Set up BEAM
+        if: steps.fetch.outputs.changed == 'true'
+        uses: erlef/setup-beam@v1
+        with:
+          version-file: .tool-versions
+          version-type: strict
+
+      - name: Setup Java (for OpenAPI Generator)
+        if: steps.fetch.outputs.changed == 'true'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install OpenAPI Generator
+        if: steps.fetch.outputs.changed == 'true'
+        run: npm install -g @openapitools/openapi-generator-cli
+
+      - name: Regenerate SDK
+        if: steps.fetch.outputs.changed == 'true'
+        run: ./scripts/regenerate.sh
+
+      # NOTE: PRs created with the default GITHUB_TOKEN do not trigger other
+      # workflows (e.g. test.yml). To get CI runs on these PRs, create a
+      # fine-grained PAT, store it as a secret (e.g. SPEC_SYNC_PAT), and use
+      # it as the token below.
+      - name: Create Pull Request
+        if: steps.fetch.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: sync SDK with upstream OpenAPI specs"
+          title: "🔄 Upstream OpenAPI specs changed — regenerated SDK"
+          branch: "auto/spec-sync"
+          body: |
+            The weekly spec-sync workflow found changes in the upstream
+            Daytona OpenAPI specs (fetched and merged by
+            `scripts/fetch-spec.sh`) and regenerated the SDK.
+
+            ## Spec changes
+
+            ```
+            ${{ steps.diff.outputs.summary }}
+            ```
+
+            ## Checklist
+            - [ ] Review generated code changes
+            - [ ] Check the breaking-changes workflow result
+            - [ ] Update tests for new/changed endpoints
+            - [ ] Update CHANGELOG.md
+            - [ ] Bump version in generator-config.yaml / mix.exs if needed

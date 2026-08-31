@@ -41,7 +41,6 @@ bom.cdx.json
 spec-patches/**
 
 # Template configuration
-setup.example.json
 generator-config.yaml
 .openapi-generator-ignore
 

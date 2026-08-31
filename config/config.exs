@@ -22,7 +22,7 @@ if config_env() == :dev do
   config :git_ops,
     mix_project: Mix.Project.get!(),
     changelog_file: "CHANGELOG.md",
-    repository_url: "{{GIT_REPO_URL}}",
+    repository_url: "https://github.com/The-Ixway/ex_daytona",
     manage_mix_version?: true,
     manage_readme_version: false,
     version_tag_prefix: "v"

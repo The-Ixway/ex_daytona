@@ -1,26 +1,32 @@
 # Agent Guidelines
 
-## About this repo
-
-This repo starts life as the [Elixir SDK Generator](https://github.com/houllette/elixir-sdk-generator)
-*template*: it generates an Elixir SDK from an OpenAPI specification. If
-`generator-config.yaml` still contains `{{PACKAGE_NAME}}` placeholders, the
-project hasn't been configured yet — run `./scripts/setup.sh` (or the
-`/setup-sdk` skill, which is one-shot and removed by setup) first, and don't
-try to run mix tasks (there is no `mix.exs` until the first generation). Once
-configured and generated, delete this paragraph and fill in the "Project
-overview" section below. For ongoing spec/template changes use the
-`/regenerate` skill.
-
 ## Project overview
 
-<!-- After setup: one paragraph on which API this SDK wraps, the module
-     namespace, and anything non-obvious. -->
+`ex_daytona` is an **unofficial** Elixir SDK for the
+[Daytona](https://www.daytona.io) AI sandbox platform, generated with the
+[Elixir SDK Generator](https://github.com/houllette/elixir-sdk-generator)
+template. Module namespace: `ExDaytona` (pinned via `invokerPackage` in
+`generator-config.yaml` — don't let the generator re-derive it from the
+spec title). For ongoing spec/template changes use the `/regenerate` skill.
+
+**Spec source is multi-document.** Daytona publishes three separate specs
+(no combined file), so this repo diverges from the template's single-URL
+`.spec-source` flow: `scripts/fetch-spec.sh` downloads all three, converts
+the Swagger 2.0 ones to OpenAPI 3.0 (`npx swagger2openapi`), verifies there
+are no cross-spec name collisions, and merges them deterministically into
+`openapi-spec.yaml`. The source URLs live in that script, not `.spec-source`
+(the spec-sync workflow was adapted to call it). The three APIs keep their
+own base URLs — see the README's "Base URLs" section:
+
+- main platform API → `https://app.daytona.io/api` (the configured default)
+- toolbox API → `{toolboxProxyUrl}/{sandboxId}`, per sandbox
+- analytics API → `https://analytics.app.daytona.io`
 
 ## Commands
 
 | Task | Command |
 | --- | --- |
+| Refresh spec from upstream (fetch + merge) | `./scripts/fetch-spec.sh` |
 | Regenerate SDK from spec | `./scripts/regenerate.sh` |
 | Validate the OpenAPI spec | `./scripts/validate-spec.sh` |
 | Install deps | `mix deps.get` |

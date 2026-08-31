@@ -18,13 +18,15 @@ argument-hint: "[--refresh-spec]"
 
 If the user passed `--refresh-spec` or asked to sync with upstream:
 
-- Read the source URL from `.spec-source`. If it doesn't exist, ask the user
-  for the URL (and offer to record it in `.spec-source` for the weekly
-  spec-sync workflow).
-- Download it over `openapi-spec.yaml` (convert GitHub `/blob/` URLs to
-  `raw.githubusercontent.com`). If `git diff openapi-spec.yaml` is empty,
-  tell the user the spec is already up to date and stop unless they want to
-  regenerate anyway (e.g. after template changes).
+- Run `./scripts/fetch-spec.sh`. It downloads the three upstream Daytona
+  specs (main platform, toolbox, analytics — URLs are recorded in the script
+  itself, not `.spec-source`), converts the Swagger 2.0 ones to OpenAPI 3.0,
+  and merges them deterministically into `openapi-spec.yaml`. If it fails on
+  a cross-spec collision, upstream introduced a duplicate path/schema/tag —
+  resolve it with a rename inside the script's merge step.
+- If `git diff openapi-spec.yaml` is empty, tell the user the spec is
+  already up to date and stop unless they want to regenerate anyway (e.g.
+  after template changes).
 
 ## 3. Regenerate
 
