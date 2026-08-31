@@ -174,7 +174,9 @@ defmodule ExDaytona.RequestBuilder do
   end
 
   @type status_code :: :default | 100..599
-  @type response_mapping :: [{status_code, false | %{} | module()}]
+  # `[]` maps arrays of primitives/untyped objects (no model module to decode
+  # into); `%{}` maps untyped object responses. Both plain-JSON decode.
+  @type response_mapping :: [{status_code, false | [] | %{} | module()}]
 
   @doc """
   Evaluate the response from a Tesla request.
@@ -187,11 +189,13 @@ defmodule ExDaytona.RequestBuilder do
 
   ### Returns
 
-  - `{:ok, struct}`, {:ok, [struct]} or `{:ok, Tesla.Env.t()}` on success
+  - `{:ok, struct}`, `{:ok, [struct]}`, `{:ok, decoded_json}` (for `[]`/`%{}`
+    mappings) or `{:ok, Tesla.Env.t()}` on success
   - `{:error, term}` on failure
   """
   @spec evaluate_response(Tesla.Env.result(), response_mapping) ::
-          {:ok, struct() | [struct()] | Tesla.Env.t()} | {:error, Tesla.Env.t() | any()}
+          {:ok, struct() | [struct()] | list() | map() | Tesla.Env.t()}
+          | {:error, Tesla.Env.t() | any()}
   def evaluate_response({:ok, %Tesla.Env{} = env}, mapping) do
     resolve_mapping(env, mapping, nil)
   end
