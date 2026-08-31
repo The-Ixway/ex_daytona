@@ -10,7 +10,7 @@ inserts new sections below this marker:
 
 <!-- changelog -->
 
-## [Unreleased]
+## [v0.1.0](https://github.com/The-Ixway/ex_daytona/releases/tag/v0.1.0) - 2026-08-31
 
 ### Added
 - Initial SDK generated from Daytona's OpenAPI specifications (main
