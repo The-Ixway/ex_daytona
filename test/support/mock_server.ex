@@ -41,10 +41,13 @@ defmodule MockServer do
   that stops it and fails the test on unmet/unexpected requests.
   """
   def open do
-    {:ok, pid} = GenServer.start(__MODULE__, self())
+    # The expectation GenServer is registered under a name because Bandit's
+    # plug opts are typed Plug.opts() — atoms are in, pids are not.
+    name = :"mock_server_#{System.unique_integer([:positive])}"
+    {:ok, pid} = GenServer.start(__MODULE__, self(), name: name)
 
     {:ok, server} =
-      Bandit.start_link(plug: {MockServer.Plug, pid}, port: 0, startup_log: false)
+      Bandit.start_link(plug: {MockServer.Plug, name}, port: 0, startup_log: false)
 
     {:ok, {_address, port}} = ThousandIsland.listener_info(server)
     state = %__MODULE__{pid: pid, server: server, port: port}
@@ -247,11 +250,11 @@ defmodule MockServer do
     alias Elixir.Plug.Conn
 
     @impl true
-    def init(pid), do: pid
+    def init(name), do: name
 
     @impl true
-    def call(conn, pid) do
-      case GenServer.call(pid, {:claim, conn.method, conn.request_path}) do
+    def call(conn, name) do
+      case GenServer.call(name, {:claim, conn.method, conn.request_path}) do
         {:run, fun} ->
           fun.(conn)
 

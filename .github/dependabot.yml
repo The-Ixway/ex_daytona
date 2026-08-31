@@ -4,6 +4,10 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # Conventional Commits prefix so PR titles pass the commit-lint check
+    commit-message:
+      prefix: build
+      include: scope
     groups:
       dev-deps:
         dependency-type: development
@@ -12,3 +16,6 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    commit-message:
+      prefix: build
+      include: scope
