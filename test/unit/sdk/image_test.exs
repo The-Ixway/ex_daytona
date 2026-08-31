@@ -54,6 +54,70 @@ defmodule ExDaytona.ImageTest do
     end
   end
 
+  describe "local build contexts" do
+    setup do
+      dir = Path.join(System.tmp_dir!(), "ex_daytona_img_#{System.unique_integer([:positive])}")
+      File.mkdir_p!(Path.join(dir, "src"))
+      File.write!(Path.join(dir, "mix.exs"), "defmodule P.MixProject do\nend\n")
+      File.write!(Path.join(dir, "src/app.ex"), "defmodule App do\nend\n")
+      on_exit(fn -> File.rm_rf!(dir) end)
+      {:ok, dir: dir}
+    end
+
+    test "add_local_file/3 emits a COPY and records the context", %{dir: dir} do
+      file = Path.join(dir, "mix.exs")
+      archive_path = ExDaytona.ObjectStorage.archive_base_path(file)
+
+      image = Image.from("alpine") |> Image.add_local_file(file, "/workspace/mix.exs")
+
+      assert Image.dockerfile(image) =~ "COPY #{archive_path} /workspace/mix.exs"
+
+      assert [%{source_path: ^file, archive_path: ^archive_path}] = Image.contexts(image)
+    end
+
+    test "a trailing slash on remote_path keeps the file name", %{dir: dir} do
+      file = Path.join(dir, "mix.exs")
+
+      image = Image.from("alpine") |> Image.add_local_file(file, "/workspace/")
+
+      assert Image.dockerfile(image) =~ " /workspace/mix.exs\n"
+    end
+
+    test "add_local_dir/3 records the directory context", %{dir: dir} do
+      src = Path.join(dir, "src")
+
+      image = Image.from("alpine") |> Image.add_local_dir(src, "/workspace/src")
+
+      assert [%{source_path: ^src}] = Image.contexts(image)
+      assert Image.dockerfile(image) =~ " /workspace/src\n"
+    end
+
+    test "contexts preserve declaration order", %{dir: dir} do
+      image =
+        Image.from("alpine")
+        |> Image.add_local_file(Path.join(dir, "mix.exs"), "/w/mix.exs")
+        |> Image.add_local_dir(Path.join(dir, "src"), "/w/src")
+
+      assert [%{source_path: first}, %{source_path: second}] = Image.contexts(image)
+      assert String.ends_with?(first, "mix.exs")
+      assert String.ends_with?(second, "src")
+    end
+
+    test "validates paths at definition time", %{dir: dir} do
+      assert_raise ArgumentError, ~r/does not exist/, fn ->
+        Image.from("alpine") |> Image.add_local_file(Path.join(dir, "nope.txt"), "/w/")
+      end
+
+      assert_raise ArgumentError, ~r/use add_local_dir/, fn ->
+        Image.from("alpine") |> Image.add_local_file(Path.join(dir, "src"), "/w/src")
+      end
+
+      assert_raise ArgumentError, ~r/use add_local_file/, fn ->
+        Image.from("alpine") |> Image.add_local_dir(Path.join(dir, "mix.exs"), "/w/")
+      end
+    end
+  end
+
   describe "build_info/1" do
     test "produces a CreateBuildInfo from images and plain strings" do
       image = Image.from("alpine") |> Image.run("apk add git")

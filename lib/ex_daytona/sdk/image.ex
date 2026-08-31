@@ -18,22 +18,34 @@ defmodule ExDaytona.Image do
   `image: "FROM ubuntu:22.04\\n..."` directly, and `raw/1` wraps one in an
   `%ExDaytona.Image{}`.
 
-  The DSL covers instructions that need no build context (`RUN`, `ENV`,
+  Local files go in via `add_local_file/3` and `add_local_dir/3` — they
+  become `COPY` instructions backed by a build context that
+  `ExDaytona.Sandbox.create/2` uploads to Daytona's object storage
+  automatically:
+
+      image =
+        ExDaytona.Image.from("elixir:1.20-alpine")
+        |> ExDaytona.Image.add_local_file("mix.exs", "/workspace/mix.exs")
+        |> ExDaytona.Image.add_local_dir("config", "/workspace/config")
+
+  The rest of the DSL covers context-free instructions (`RUN`, `ENV`,
   `WORKDIR`, `USER`, `LABEL`, `EXPOSE`, `ENTRYPOINT`, `CMD`) plus
-  `instruction/2` as an escape hatch for anything else. `COPY`/`ADD` of
-  local files requires uploading a build context, which this SDK does not
-  manage yet — bake files in with `RUN` (curl/git) or write them into the
-  sandbox after creation.
+  `instruction/2` as an escape hatch for anything else.
   """
 
   alias ExDaytona.Model
+  alias ExDaytona.ObjectStorage
 
-  defstruct base: nil, raw: nil, instructions: []
+  defstruct base: nil, raw: nil, instructions: [], contexts: []
+
+  @typedoc "A local build context: uploaded before the build, `COPY`-able in it."
+  @type context :: %{source_path: String.t(), archive_path: String.t()}
 
   @type t :: %__MODULE__{
           base: String.t() | nil,
           raw: String.t() | nil,
-          instructions: [String.t()]
+          instructions: [String.t()],
+          contexts: [context()]
         }
 
   @doc """
@@ -120,6 +132,59 @@ defmodule ExDaytona.Image do
   def instruction(%__MODULE__{} = image, line) when is_binary(line), do: append(image, line)
 
   @doc """
+  Copy a local file into the image at `remote_path` (a trailing `/` keeps
+  the file's name). The file is uploaded as a build context when the
+  sandbox is created.
+
+  Raises `ArgumentError` if the path does not exist or is not a regular
+  file — fail at definition time, not at build time.
+  """
+  @spec add_local_file(t(), Path.t(), String.t()) :: t()
+  def add_local_file(%__MODULE__{} = image, local_path, remote_path)
+      when is_binary(remote_path) do
+    local_path = local_path |> to_string() |> Path.expand()
+
+    cond do
+      not File.exists?(local_path) ->
+        raise ArgumentError, "local file does not exist: #{local_path}"
+
+      File.dir?(local_path) ->
+        raise ArgumentError, "#{local_path} is a directory — use add_local_dir/3"
+
+      true ->
+        remote_path =
+          if String.ends_with?(remote_path, "/") do
+            remote_path <> Path.basename(local_path)
+          else
+            remote_path
+          end
+
+        add_context(image, local_path, remote_path)
+    end
+  end
+
+  @doc """
+  Copy a local directory (recursively) into the image at `remote_path`.
+  Uploaded as a build context when the sandbox is created.
+  """
+  @spec add_local_dir(t(), Path.t(), String.t()) :: t()
+  def add_local_dir(%__MODULE__{} = image, local_path, remote_path)
+      when is_binary(remote_path) do
+    local_path = local_path |> to_string() |> Path.expand()
+
+    cond do
+      not File.exists?(local_path) ->
+        raise ArgumentError, "local directory does not exist: #{local_path}"
+
+      not File.dir?(local_path) ->
+        raise ArgumentError, "#{local_path} is not a directory — use add_local_file/3"
+
+      true ->
+        add_context(image, local_path, remote_path)
+    end
+  end
+
+  @doc """
   Render the definition to Dockerfile content.
   """
   @spec dockerfile(t() | String.t()) :: String.t()
@@ -138,6 +203,22 @@ defmodule ExDaytona.Image do
   @spec build_info(t() | String.t()) :: Model.CreateBuildInfo.t()
   def build_info(image) do
     %Model.CreateBuildInfo{dockerfileContent: dockerfile(image)}
+  end
+
+  @doc false
+  # The recorded local build contexts (empty for raw Dockerfiles and
+  # plain strings).
+  def contexts(%__MODULE__{contexts: contexts}), do: Enum.reverse(contexts)
+  def contexts(dockerfile) when is_binary(dockerfile), do: []
+
+  defp add_context(image, local_path, remote_path) do
+    archive_path = ObjectStorage.archive_base_path(local_path)
+
+    image
+    |> append("COPY #{archive_path} #{remote_path}")
+    |> Map.update!(:contexts, fn contexts ->
+      [%{source_path: local_path, archive_path: archive_path} | contexts]
+    end)
   end
 
   defp append(%__MODULE__{raw: raw}, _line) when is_binary(raw) do

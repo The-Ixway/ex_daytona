@@ -51,6 +51,12 @@ inserts new sections below this marker:
   label/expose/entrypoint/cmd` + raw Dockerfiles) wired into
   `ExDaytona.Sandbox.create(client, image: ...)` for building sandboxes
   from Dockerfiles
+- Local build contexts: `ExDaytona.Image.add_local_file/3` and
+  `add_local_dir/3` copy local files into declaratively built images —
+  contexts are content-hashed, tarred, and uploaded to Daytona's object
+  storage automatically on create (`ExDaytona.ObjectStorage`), with a
+  dependency-free AWS SigV4 signer pinned by AWS's published test
+  vectors
 
 ### Fixed
 - Request bodies no longer send explicit JSON `null`s for unset optional

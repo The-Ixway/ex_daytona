@@ -181,12 +181,19 @@ image =
   |> ExDaytona.Image.run("apk add --no-cache git build-base")
   |> ExDaytona.Image.env(%{"MIX_ENV" => "dev"})
   |> ExDaytona.Image.workdir("/workspace")
+  # Local files become COPYs backed by an auto-uploaded build context:
+  |> ExDaytona.Image.add_local_file("mix.exs", "/workspace/mix.exs")
+  |> ExDaytona.Image.add_local_dir("config", "/workspace/config")
 
 {:ok, sandbox} = ExDaytona.Sandbox.create(client, image: image, timeout: 300_000)
 
 # Or a raw Dockerfile: ExDaytona.Sandbox.create(client, image: "FROM ...")
 # Watch the build: ExDaytona.Sandbox.stream_build_logs(sandbox, &IO.write/1)
 ```
+
+Context uploads speak S3 (SigV4) through the SDK's own HTTP stack — no
+AWS dependency; identical content is deduplicated by hash and skipped on
+re-upload.
 
 ### Low-level generated API (full surface)
 

@@ -118,6 +118,57 @@ defmodule ExDaytona.SandboxTest do
 
       assert {:ok, %Sandbox{}} = Sandbox.create(client, image: image, wait: false)
     end
+
+    test "uploads local build contexts and sends their hashes", %{
+      bypass: bypass,
+      client: client
+    } do
+      dir = Path.join(System.tmp_dir!(), "ex_daytona_sbx_#{System.unique_integer([:positive])}")
+      File.mkdir_p!(dir)
+      on_exit(fn -> File.rm_rf!(dir) end)
+      file = Path.join(dir, "app.txt")
+      File.write!(file, "payload")
+
+      archive_path = ExDaytona.ObjectStorage.archive_base_path(file)
+      hash = ExDaytona.ObjectStorage.hash_path(file, archive_path)
+      s3_key = "/daytona-builds/org-1/#{hash}/context.tar"
+
+      # 1. push access
+      MockServer.expect_get(bypass, "/object-storage/push-access", 200, %{
+        accessKey: "AK",
+        secret: "S",
+        sessionToken: "T",
+        bucket: "daytona-builds",
+        storageUrl: MockServer.url(bypass),
+        region: "us-east-1",
+        organizationId: "org-1"
+      })
+
+      # 2. context upload (miss -> put)
+      Bypass.expect_once(bypass, "HEAD", s3_key, fn conn -> Plug.Conn.resp(conn, 404, "") end)
+      Bypass.expect_once(bypass, "PUT", s3_key, fn conn -> Plug.Conn.resp(conn, 200, "") end)
+
+      # 3. create with contextHashes + the COPY in the dockerfile
+      Bypass.expect_once(bypass, "POST", "/sandbox", fn conn ->
+        {:ok, body, conn} = Plug.Conn.read_body(conn)
+        decoded = JSON.decode!(body)
+
+        assert %{"buildInfo" => %{"contextHashes" => [^hash], "dockerfileContent" => df}} =
+                 decoded
+
+        assert df =~ "COPY #{archive_path} /workspace/app.txt"
+
+        conn
+        |> Plug.Conn.put_resp_content_type("application/json")
+        |> Plug.Conn.resp(200, JSON.encode!(%{id: "sb-ctx", state: "pending_build"}))
+      end)
+
+      image =
+        ExDaytona.Image.from("alpine")
+        |> ExDaytona.Image.add_local_file(file, "/workspace/app.txt")
+
+      assert {:ok, %Sandbox{}} = Sandbox.create(client, image: image, wait: false)
+    end
   end
 
   describe "ssh access" do

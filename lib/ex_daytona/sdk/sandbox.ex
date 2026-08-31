@@ -91,7 +91,7 @@ defmodule ExDaytona.Sandbox do
     {image, opts} = Keyword.pop(opts, :image)
 
     with {:ok, model} <- build_create_model(opts),
-         model = apply_image(model, image),
+         {:ok, model} <- apply_image(model, image, client),
          {:ok, %Model.Sandbox{} = info} <-
            Error.normalize(Api.Sandbox.create_sandbox(client.conn, model)) do
       sandbox = %__MODULE__{client: client, info: info}
@@ -428,10 +428,36 @@ defmodule ExDaytona.Sandbox do
 
   ## Internals ---------------------------------------------------------------
 
-  defp apply_image(model, nil), do: model
+  defp apply_image(model, nil, _client), do: {:ok, model}
 
-  defp apply_image(model, image),
-    do: %{model | buildInfo: ExDaytona.Image.build_info(image)}
+  defp apply_image(model, image, client) do
+    build_info = ExDaytona.Image.build_info(image)
+
+    case ExDaytona.Image.contexts(image) do
+      [] ->
+        {:ok, %{model | buildInfo: build_info}}
+
+      contexts ->
+        # Local build contexts (add_local_file/dir) are uploaded to object
+        # storage under one credential grant; the build references them by
+        # content hash.
+        with {:ok, access} <- ExDaytona.ObjectStorage.push_access(client),
+             {:ok, hashes} <- upload_contexts(access, contexts) do
+          {:ok, %{model | buildInfo: %{build_info | contextHashes: hashes}}}
+        end
+    end
+  end
+
+  defp upload_contexts(access, contexts) do
+    Enum.reduce_while(contexts, {:ok, []}, fn context, {:ok, hashes} ->
+      case ExDaytona.ObjectStorage.upload_context_with_access(access, context.source_path,
+             archive_path: context.archive_path
+           ) do
+        {:ok, hash} -> {:cont, {:ok, hashes ++ [hash]}}
+        {:error, _} = error -> {:halt, error}
+      end
+    end)
+  end
 
   defp build_create_model(opts) do
     Enum.reduce_while(opts, {:ok, %Model.CreateSandbox{}}, fn {key, value}, {:ok, model} ->
