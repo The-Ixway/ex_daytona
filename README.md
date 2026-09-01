@@ -99,6 +99,13 @@ limits, incremental SHA-256, cancellation, and atomic downloads:
 
 # Or consume chunks yourself; return :halt to cancel mid-stream
 {:ok, _} = ExDaytona.FS.download_stream(sandbox, "/big.log", &IO.write/1, max_bytes: 100_000_000)
+
+# Or as a lazy Enumerable — one chunk in flight, enumeration speed is the
+# backpressure; halting early cancels the request; failures raise
+sandbox
+|> ExDaytona.FS.stream!("/workspace/big.log")
+|> Stream.into(File.stream!("local.log"))
+|> Stream.run()
 ```
 
 ### Code execution
@@ -165,6 +172,11 @@ case ExDaytona.LogStream.next(stream, 5_000) do
   {:ok, {:output, bytes}} -> IO.write(bytes)   # unlabeled merged stream
   {:closed, :normal} -> :done
   {:closed, {:error, %ExDaytona.Error{}}} -> :failed
+end
+
+# Or enumerate it — ends on normal close, raises on abnormal close:
+for {channel, bytes} <- ExDaytona.LogStream.events!(stream), channel != :stderr do
+  IO.write(bytes)
 end
 ```
 
@@ -256,7 +268,31 @@ Setting up (Daytona delivers through Svix):
 # open the portal to add endpoints and pick events
 ```
 
-Receiving — verify deliveries with the endpoint's `whsec_...` secret and
+Receiving — the drop-in endpoint handles the raw-body footgun for you.
+Mount `ExDaytona.Webhooks.Plug` in your Phoenix endpoint **above**
+`Plug.Parsers` (requires the optional `:plug` dependency — every Phoenix
+app has it):
+
+```elixir
+plug ExDaytona.Webhooks.Plug,
+  at: "/webhooks/daytona",
+  secret: {MyApp.Config, :daytona_webhook_secret, []},
+  handler: MyApp.DaytonaWebhooks     # implements ExDaytona.Webhooks.Handler
+
+defmodule MyApp.DaytonaWebhooks do
+  @behaviour ExDaytona.Webhooks.Handler
+
+  @impl true
+  def handle_event(%{"type" => type} = event, _conn), do: MyApp.Events.ingest(type, event)
+end
+```
+
+It verifies the Svix signature, dispatches verified events, and answers
+what the provider's retry logic expects (`204` handled, `400` bad
+signature — no retry, `500` handler failure — retried later). Other
+paths pass through untouched.
+
+Verifying by hand instead — use the endpoint's `whsec_...` secret and
 the **raw** request body:
 
 ```elixir
@@ -289,6 +325,35 @@ image =
 Context uploads speak S3 (SigV4) through the SDK's own HTTP stack — no
 AWS dependency; identical content is deduplicated by hash and skipped on
 re-upload.
+
+### Snapshots and warm pools — build once, create instantly
+
+Building on every `Sandbox.create` is the slow path. Build a **snapshot**
+from the image once and create every sandbox from it; add a **warm pool**
+to keep sandboxes pre-provisioned for millisecond creates:
+
+```elixir
+{:ok, snapshot} =
+  ExDaytona.Snapshot.build(client, "my-app-base", image,
+    log: &IO.write/1,          # live build logs while it builds
+    timeout: 600_000)
+
+# From here on, creation skips the build entirely:
+{:ok, sandbox} = ExDaytona.Sandbox.create(client, snapshot: "my-app-base")
+
+# Pre-warm 5 sandboxes so matching creates are fulfilled instantly:
+{:ok, pool} = ExDaytona.WarmPool.create(client, snapshot: "my-app-base", size: 5)
+{:ok, pool} = ExDaytona.WarmPool.resize(client, pool.id, 10)
+
+# Snapshot lifecycle: list/get/activate/deactivate/delete, plus
+# Snapshot.stream_build_logs/4 and await_state/4 for custom flows.
+{:ok, %{items: _}} = ExDaytona.Snapshot.list(client, name: "my-app")
+:ok = ExDaytona.Snapshot.deactivate(client, snapshot.id)   # frees quota
+```
+
+`Snapshot.create/3` also wraps plain registry images
+(`image_name: "ubuntu:22.04"`) and takes resources (`cpu:`, `memory:`,
+`disk:`, `gpu:`), `region_id:`, and `sandbox_class:`.
 
 ### Secrets, network policy, and platform lookups
 
@@ -363,6 +428,58 @@ envelope; facade errors always carry the same metadata:
   (`:stream_pool_size`), so they cannot starve control requests.
 - Streaming transports are injectable for tests:
   `ExDaytona.Client.new(transports: [http_stream: MyFake, websocket: MyFakeWS])`.
+- `ExDaytona.Error` is an exception — `raise error` works, and the lazy
+  stream APIs (`FS.stream!`, `LogStream.events!`) raise it on failure.
+
+### Telemetry
+
+Beyond Tesla's HTTP-level events, the facade emits **domain-level**
+`:telemetry` spans — the ones dashboards actually chart:
+
+```elixir
+:telemetry.attach_many("daytona-metrics",
+  [[:ex_daytona, :sandbox, :create, :stop], [:ex_daytona, :sandbox, :exec, :stop]],
+  &MyApp.Metrics.handle/4, nil)
+# metadata: sandbox_id, outcome (:ok | :error), error_code/error_status,
+# exit_code / bytes where relevant — never commands, paths, or payloads
+```
+
+Covered: sandbox `create`/`start`/`stop`/`delete`/`exec`/`run_code`,
+session `run`, fs `upload`/`download`, snapshot `create`/`build`/`delete`
+— each as `:start`/`:stop`/`:exception` with durations. Full event table
+in `ExDaytona.Telemetry`.
+
+### Testing your application
+
+`ExDaytona.Testing` ships **in the package**: real clients backed by
+process-owned scripts instead of the network — no API key, `async: true`
+safe, covering HTTP, chunked streams, and websockets:
+
+```elixir
+test "provisions a sandbox per tenant" do
+  client = ExDaytona.Testing.client()
+
+  ExDaytona.Testing.expect(:post, "/sandbox", fn env ->
+    assert %{"labels" => %{"acme/tenant" => "u1"}} = JSON.decode!(env.body)
+    ExDaytona.Testing.sandbox_json(%{id: "sb-1"})
+  end)
+
+  assert {:ok, _} = MyApp.Sandboxes.provision(client, tenant: "u1")
+  ExDaytona.Testing.verify!()
+end
+
+test "streams logs" do
+  sandbox = ExDaytona.Testing.sandbox()          # no HTTP needed to build one
+  ExDaytona.Testing.expect(:post, "/process/execute", %{exitCode: 0, result: "hi"})
+  ExDaytona.Testing.script_ws(frames: [{:binary, <<1, 1, 1>> <> "out"}])
+  ExDaytona.Testing.script_http_stream(chunks: ["build log"])
+  # ... exercise Sandbox.exec / LogStream / FS transfers as usual
+end
+```
+
+`expect/3` queues one-shot FIFO responses (`verify!/0` catches
+leftovers), `stub/3` registers reusable fallbacks for polled endpoints,
+and paths match as suffixes so toolbox routes need no prefixes.
 
 ### Low-level generated API (full surface)
 
