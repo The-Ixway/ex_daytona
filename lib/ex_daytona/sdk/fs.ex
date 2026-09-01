@@ -33,6 +33,11 @@ defmodule ExDaytona.FS do
   @doc """
   Write `content` to `path` inside the sandbox (parent directories are
   created by the API). Returns `:ok`.
+
+  > #### Buffered {: .info}
+  >
+  > `content` is held fully in memory — appropriate for small control
+  > files. For large payloads use `upload_stream/4` / `upload_file/4`.
   """
   @spec write_file(Sandbox.t(), String.t(), iodata()) :: :ok | {:error, Error.t()}
   def write_file(%Sandbox{} = sandbox, path, content) when is_binary(path) do
@@ -56,6 +61,11 @@ defmodule ExDaytona.FS do
 
   @doc """
   Read the file at `path`. Returns `{:ok, binary}`.
+
+  > #### Buffered {: .info}
+  >
+  > The whole file is returned as one binary. For large files use
+  > `download_stream/4` / `download_file/4`.
   """
   @spec read_file(Sandbox.t(), String.t()) :: {:ok, binary()} | {:error, Error.t()}
   def read_file(%Sandbox{} = sandbox, path) when is_binary(path) do
@@ -68,6 +78,11 @@ defmodule ExDaytona.FS do
 
   @doc """
   Upload a local file to `remote_path` inside the sandbox.
+
+  > #### Buffered {: .info}
+  >
+  > Reads the file fully into memory (`File.read/1`). For large files
+  > use `upload_file/4`, which streams with constant memory.
   """
   @spec upload(Sandbox.t(), Path.t(), String.t()) :: :ok | {:error, Error.t()}
   def upload(%Sandbox{} = sandbox, local_path, remote_path) when is_binary(remote_path) do
@@ -82,6 +97,12 @@ defmodule ExDaytona.FS do
 
   @doc """
   Download the file at `remote_path` to a local path.
+
+  > #### Buffered {: .info}
+  >
+  > Buffers the whole file in memory before writing. For large files use
+  > `download_file/4`, which streams to a temporary file and renames
+  > atomically.
   """
   @spec download(Sandbox.t(), String.t(), Path.t()) :: :ok | {:error, Error.t()}
   def download(%Sandbox{} = sandbox, remote_path, local_path) when is_binary(remote_path) do
@@ -108,6 +129,145 @@ defmodule ExDaytona.FS do
         {:error, _} = error -> {:halt, error}
       end
     end)
+  end
+
+  ## Streaming transfer (constant memory) ------------------------------------
+
+  @doc """
+  Upload from a lazy source without buffering it in memory.
+
+  `source` may be an `Enumerable` of iodata chunks, an IO device
+  (pid/atom — read with `IO.binstream/2`), or `{:file, path}` (read with
+  `File.stream!/2`; `File.read/1` is never used on this path).
+
+  ## Options
+
+  - `:max_bytes` — abort the request once the source exceeds this size
+  - `:idle_timeout` — max ms between response events (default `120_000`)
+  - `:deadline` — overall ms budget for the transfer
+  - `:cancel` — zero-arity fun checked per chunk; returning `true`
+    aborts the request
+  - `:expected_sha256` — hex digest to verify the streamed bytes against
+  - `:chunk_size` — read size for file/IO sources (default 64 KiB)
+
+  Returns `{:ok, %{bytes: n, sha256: hex}}` — the SHA-256 is computed
+  incrementally while streaming.
+  """
+  @spec upload_stream(Sandbox.t(), String.t(), term(), keyword()) ::
+          {:ok, %{bytes: non_neg_integer(), sha256: String.t()}} | {:error, Error.t()}
+  def upload_stream(%Sandbox{} = sandbox, remote_path, source, opts \\ [])
+      when is_binary(remote_path) do
+    ExDaytona.FS.Stream.upload(sandbox, remote_path, source, opts)
+  end
+
+  @doc """
+  Stream a local file to `remote_path` with constant memory. Equivalent
+  to `upload_stream(sandbox, remote_path, {:file, local_path}, opts)`.
+  """
+  @spec upload_file(Sandbox.t(), Path.t(), String.t(), keyword()) ::
+          {:ok, %{bytes: non_neg_integer(), sha256: String.t()}} | {:error, Error.t()}
+  def upload_file(%Sandbox{} = sandbox, local_path, remote_path, opts \\ [])
+      when is_binary(remote_path) do
+    upload_stream(sandbox, remote_path, {:file, to_string(local_path)}, opts)
+  end
+
+  @doc """
+  Stream a download through `consumer`, chunk by chunk, without buffering
+  the file.
+
+  `consumer` receives each binary chunk; returning `:halt` cancels the
+  transfer (the HTTP request is closed), any other return continues.
+
+  Options: `:max_bytes`, `:idle_timeout`, `:deadline`,
+  `:expected_sha256` — as in `upload_stream/4`.
+
+  Returns `{:ok, %{bytes: n, sha256: hex}}` when the stream completed.
+  """
+  @spec download_stream(Sandbox.t(), String.t(), (binary() -> any()), keyword()) ::
+          {:ok, %{bytes: non_neg_integer(), sha256: String.t()}} | {:error, Error.t()}
+  def download_stream(%Sandbox{} = sandbox, remote_path, consumer, opts \\ [])
+      when is_binary(remote_path) and is_function(consumer, 1) do
+    ExDaytona.FS.Stream.download(sandbox, remote_path, consumer, opts)
+  end
+
+  @doc """
+  Stream a download to a local path safely: chunks are written
+  incrementally to a sibling temporary file, which is synced, verified
+  (`:expected_sha256`, when given), and atomically renamed over
+  `local_path` only on success. A failed, canceled, oversized, or
+  checksum-mismatched transfer removes the temporary file and never
+  touches an existing `local_path`.
+
+  Options as in `download_stream/4`.
+  """
+  @spec download_file(Sandbox.t(), String.t(), Path.t(), keyword()) ::
+          {:ok, %{bytes: non_neg_integer(), sha256: String.t()}} | {:error, Error.t()}
+  def download_file(%Sandbox{} = sandbox, remote_path, local_path, opts \\ [])
+      when is_binary(remote_path) do
+    local_path = to_string(local_path)
+    tmp_path = local_path <> ".ex_daytona.#{System.unique_integer([:positive])}.tmp"
+
+    case File.open(tmp_path, [:write, :raw, :binary]) do
+      {:error, reason} ->
+        {:error, %Error{message: "cannot open #{tmp_path}: #{:file.format_error(reason)}"}}
+
+      {:ok, io} ->
+        result = download_stream(sandbox, remote_path, file_writer(io), opts)
+        finalize_download_file(result, io, tmp_path, local_path)
+    end
+  end
+
+  defp file_writer(io) do
+    fn chunk ->
+      case :file.write(io, chunk) do
+        :ok -> :ok
+        {:error, _reason} -> :halt
+      end
+    end
+  end
+
+  defp finalize_download_file({:ok, meta}, io, tmp_path, local_path) do
+    with :ok <- sync_close(io),
+         :ok <- verify_size(tmp_path, meta.bytes),
+         :ok <- File.rename(tmp_path, local_path) do
+      {:ok, meta}
+    else
+      {:error, %Error{} = error} ->
+        File.rm(tmp_path)
+        {:error, error}
+
+      {:error, reason} ->
+        File.rm(tmp_path)
+        {:error, %Error{message: "finalizing download failed: #{inspect(reason)}"}}
+    end
+  end
+
+  defp finalize_download_file({:error, error}, io, tmp_path, _local_path) do
+    :file.close(io)
+    File.rm(tmp_path)
+    {:error, error}
+  end
+
+  defp sync_close(io) do
+    _ = :file.datasync(io)
+
+    case :file.close(io) do
+      :ok -> :ok
+      {:error, reason} -> {:error, %Error{message: "close failed: #{:file.format_error(reason)}"}}
+    end
+  end
+
+  defp verify_size(path, expected_bytes) do
+    case File.stat(path) do
+      {:ok, %{size: ^expected_bytes}} ->
+        :ok
+
+      {:ok, %{size: size}} ->
+        {:error, %Error{message: "downloaded size mismatch: wrote #{size}, streamed #{expected_bytes}"}}
+
+      {:error, reason} ->
+        {:error, %Error{message: "stat failed: #{:file.format_error(reason)}"}}
+    end
   end
 
   ## Directories & metadata ---------------------------------------------------
