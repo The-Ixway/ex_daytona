@@ -104,18 +104,25 @@ defmodule ExDaytona.Session do
   def run(%__MODULE__{sandbox: sandbox, id: id}, command) when is_binary(command) do
     request = %Model.SessionExecuteRequest{command: command, runAsync: false}
 
-    with {:ok, conn} <- Sandbox.toolbox_conn(sandbox),
-         {:ok, %Model.SessionExecuteResponse{} = response} <-
-           Error.normalize(Api.Process.session_execute_command(conn, id, request, response: :full)) do
-      {:ok,
-       %{
-         cmd_id: response.cmdId,
-         exit_code: response.exitCode,
-         output: response.output,
-         stdout: response.stdout,
-         stderr: response.stderr
-       }}
-    end
+    ExDaytona.Telemetry.span(
+      [:session, :run],
+      %{sandbox_id: Sandbox.id(sandbox), session_id: id},
+      fn ->
+        with {:ok, conn} <- Sandbox.toolbox_conn(sandbox),
+             {:ok, %Model.SessionExecuteResponse{} = response} <-
+               Error.normalize(Api.Process.session_execute_command(conn, id, request, response: :full)) do
+          {:ok,
+           %{
+             cmd_id: response.cmdId,
+             exit_code: response.exitCode,
+             output: response.output,
+             stdout: response.stdout,
+             stderr: response.stderr
+           }}
+        end
+      end,
+      &Sandbox.exit_code_metadata/1
+    )
   end
 
   @doc """

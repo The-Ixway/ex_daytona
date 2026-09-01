@@ -211,6 +211,35 @@ defmodule ExDaytona.Image do
   def contexts(%__MODULE__{contexts: contexts}), do: Enum.reverse(contexts)
   def contexts(dockerfile) when is_binary(dockerfile), do: []
 
+  @doc false
+  # Resolve an image to a ready-to-send CreateBuildInfo: local build
+  # contexts (add_local_file/dir) are uploaded to object storage under one
+  # credential grant and referenced by content hash. Shared by
+  # ExDaytona.Sandbox.create/2 (image:) and ExDaytona.Snapshot.create/3.
+  def resolve_build_info(image, client) do
+    info = build_info(image)
+
+    case contexts(image) do
+      [] ->
+        {:ok, info}
+
+      contexts ->
+        with {:ok, access} <- ObjectStorage.push_access(client),
+             {:ok, hashes} <- upload_contexts(access, contexts) do
+          {:ok, %{info | contextHashes: hashes}}
+        end
+    end
+  end
+
+  defp upload_contexts(access, contexts) do
+    Enum.reduce_while(contexts, {:ok, []}, fn context, {:ok, hashes} ->
+      case ObjectStorage.upload_context_with_access(access, context.source_path, archive_path: context.archive_path) do
+        {:ok, hash} -> {:cont, {:ok, hashes ++ [hash]}}
+        {:error, _} = error -> {:halt, error}
+      end
+    end)
+  end
+
   defp add_context(image, local_path, remote_path) do
     archive_path = ObjectStorage.archive_base_path(local_path)
 

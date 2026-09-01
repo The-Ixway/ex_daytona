@@ -542,19 +542,14 @@
           "url": "https://repo.hex.pm/tarballs/plug-1.20.3.tar"
         },
         {
-          "comment": "docs",
+          "comment": "changelog",
           "type": "documentation",
-          "url": "https://plug.hexdocs.pm/1.20.3/"
+          "url": "https://github.com/elixir-plug/plug/blob/main/CHANGELOG.md"
         },
         {
           "comment": "github",
           "type": "vcs",
           "url": "https://github.com/elixir-plug/plug"
-        },
-        {
-          "comment": "homepage",
-          "type": "website",
-          "url": "https://hex.pm/packages/plug/1.20.3"
         }
       ],
       "group": "hexpm",
@@ -1555,19 +1550,9 @@
           "url": "https://repo.hex.pm/tarballs/plug_crypto-2.2.0.tar"
         },
         {
-          "comment": "docs",
-          "type": "documentation",
-          "url": "https://plug-crypto.hexdocs.pm/2.2.0/"
-        },
-        {
           "comment": "github",
           "type": "vcs",
           "url": "https://github.com/elixir-plug/plug_crypto"
-        },
-        {
-          "comment": "homepage",
-          "type": "website",
-          "url": "https://hex.pm/packages/plug_crypto/2.2.0"
         }
       ],
       "group": "hexpm",
@@ -2614,7 +2599,12 @@
       "dependsOn": [
         "otp:component:mime:hex:92200854",
         "otp:component:plug_crypto:hex:78240569",
-        "otp:component:telemetry:hex:111137185"
+        "otp:component:telemetry:hex:111137185",
+        "otp:component:kernel:otp:41009003",
+        "otp:component:stdlib:otp:33644561",
+        "otp:component:elixir:otp:91030763",
+        "otp:component:logger:otp:72055478",
+        "otp:component:eex:otp:45483983"
       ],
       "ref": "otp:component:plug:hex:15594346"
     },
@@ -2719,6 +2709,8 @@
         "otp:component:tesla:hex:106181469",
         "otp:component:finch:hex:63700879",
         "otp:component:mint_web_socket:hex:91229639",
+        "otp:component:telemetry:hex:111137185",
+        "otp:component:plug:hex:15594346",
         "otp:component:ex_doc:hex:3052568",
         "otp:component:excoveralls:hex:39185539",
         "otp:component:credo:hex:95473491",
@@ -2778,7 +2770,15 @@
       ],
       "ref": "otp:component:makeup:hex:26210935"
     },
-    { "ref": "otp:component:plug_crypto:hex:78240569" },
+    {
+      "dependsOn": [
+        "otp:component:kernel:otp:41009003",
+        "otp:component:stdlib:otp:33644561",
+        "otp:component:elixir:otp:91030763",
+        "otp:component:crypto:otp:69550612"
+      ],
+      "ref": "otp:component:plug_crypto:hex:78240569"
+    },
     {
       "dependsOn": [
         "otp:component:mime:hex:92200854",
@@ -2851,11 +2851,11 @@
         "otp:component:finch:hex:63700879",
         "otp:component:jason:hex:87655102",
         "otp:component:mime:hex:92200854",
+        "otp:component:plug:hex:15594346",
         "otp:component:kernel:otp:41009003",
         "otp:component:stdlib:otp:33644561",
         "otp:component:elixir:otp:91030763",
-        "otp:component:logger:otp:72055478",
-        "otp:component:plug:hex:15594346"
+        "otp:component:logger:otp:72055478"
       ],
       "ref": "otp:component:req:hex:41648200"
     },
@@ -2981,7 +2981,7 @@
       "type": "library",
       "version": "0.3.0"
     },
-    "timestamp": "2026-09-01T00:59:22Z",
+    "timestamp": "2026-09-01T01:42:28Z",
     "tools": {
       "components": [
         {
@@ -2994,7 +2994,7 @@
       ]
     }
   },
-  "serialNumber": "urn:uuid:64b42005-2f7d-45c9-a10a-c947c4914a7a",
+  "serialNumber": "urn:uuid:56796d56-0f1b-4d9f-86bd-3c560b98dcec",
   "specVersion": "1.6",
   "version": 1
 }

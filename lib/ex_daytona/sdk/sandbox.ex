@@ -140,6 +140,18 @@ defmodule ExDaytona.Sandbox do
     {wait_opts, opts} = Keyword.split(opts, [:wait, :timeout, :poll_interval])
     {image, opts} = Keyword.pop(opts, :image)
 
+    ExDaytona.Telemetry.span(
+      [:sandbox, :create],
+      %{},
+      fn -> do_create(client, image, opts, wait_opts) end,
+      fn
+        {:ok, %__MODULE__{} = sandbox} -> %{sandbox_id: id(sandbox)}
+        _other -> %{}
+      end
+    )
+  end
+
+  defp do_create(client, image, opts, wait_opts) do
     with {:ok, model} <- build_create_model(opts),
          {:ok, model} <- apply_image(model, image, client),
          {:ok, %Model.Sandbox{} = info} <-
@@ -206,7 +218,7 @@ defmodule ExDaytona.Sandbox do
   """
   @spec start(t(), keyword()) :: {:ok, t()} | {:error, Error.t()}
   def start(%__MODULE__{} = sandbox, opts \\ []) do
-    lifecycle(sandbox, &Api.Sandbox.start_sandbox/2, "started", opts)
+    lifecycle(sandbox, :start, &Api.Sandbox.start_sandbox/2, "started", opts)
   end
 
   @doc """
@@ -214,7 +226,7 @@ defmodule ExDaytona.Sandbox do
   """
   @spec stop(t(), keyword()) :: {:ok, t()} | {:error, Error.t()}
   def stop(%__MODULE__{} = sandbox, opts \\ []) do
-    lifecycle(sandbox, &Api.Sandbox.stop_sandbox/2, "stopped", opts)
+    lifecycle(sandbox, :stop, &Api.Sandbox.stop_sandbox/2, "stopped", opts)
   end
 
   @doc """
@@ -223,12 +235,14 @@ defmodule ExDaytona.Sandbox do
   @spec delete(t() | String.t(), Client.t() | nil) :: :ok | {:error, Error.t()}
   def delete(sandbox_or_id, client \\ nil)
 
-  def delete(%__MODULE__{client: client, info: %{id: id}}, _client) do
-    with {:ok, _} <- Error.normalize(Api.Sandbox.delete_sandbox(client.conn, id, response: :full)), do: :ok
-  end
+  def delete(%__MODULE__{client: client, info: %{id: id}}, _client), do: do_delete(client, id)
 
-  def delete(id, %Client{} = client) when is_binary(id) do
-    with {:ok, _} <- Error.normalize(Api.Sandbox.delete_sandbox(client.conn, id, response: :full)), do: :ok
+  def delete(id, %Client{} = client) when is_binary(id), do: do_delete(client, id)
+
+  defp do_delete(client, id) do
+    ExDaytona.Telemetry.span([:sandbox, :delete], %{sandbox_id: id}, fn ->
+      with {:ok, _} <- Error.normalize(Api.Sandbox.delete_sandbox(client.conn, id, response: :full)), do: :ok
+    end)
   end
 
   @doc """
@@ -454,11 +468,18 @@ defmodule ExDaytona.Sandbox do
       timeout: opts[:timeout]
     }
 
-    with {:ok, conn} <- toolbox_conn(sandbox),
-         {:ok, %Model.ExecuteResponse{exitCode: code, result: output}} <-
-           Error.normalize(Api.Process.execute_command(conn, request, response: :full)) do
-      {:ok, %{exit_code: code, output: output}}
-    end
+    ExDaytona.Telemetry.span(
+      [:sandbox, :exec],
+      %{sandbox_id: id(sandbox)},
+      fn ->
+        with {:ok, conn} <- toolbox_conn(sandbox),
+             {:ok, %Model.ExecuteResponse{exitCode: code, result: output}} <-
+               Error.normalize(Api.Process.execute_command(conn, request, response: :full)) do
+          {:ok, %{exit_code: code, output: output}}
+        end
+      end,
+      &exit_code_metadata/1
+    )
   end
 
   @doc """
@@ -494,12 +515,23 @@ defmodule ExDaytona.Sandbox do
       timeout: opts[:timeout]
     }
 
-    with {:ok, conn} <- toolbox_conn(sandbox),
-         {:ok, %Model.CodeRunResponse{} = response} <-
-           Error.normalize(Api.Process.code_run(conn, request, response: :full)) do
-      {:ok, %{exit_code: response.exitCode, result: response.result, artifacts: response.artifacts}}
-    end
+    ExDaytona.Telemetry.span(
+      [:sandbox, :run_code],
+      %{sandbox_id: id(sandbox), language: opts[:language]},
+      fn ->
+        with {:ok, conn} <- toolbox_conn(sandbox),
+             {:ok, %Model.CodeRunResponse{} = response} <-
+               Error.normalize(Api.Process.code_run(conn, request, response: :full)) do
+          {:ok, %{exit_code: response.exitCode, result: response.result, artifacts: response.artifacts}}
+        end
+      end,
+      &exit_code_metadata/1
+    )
   end
+
+  @doc false
+  def exit_code_metadata({:ok, %{exit_code: exit_code}}), do: %{exit_code: exit_code}
+  def exit_code_metadata(_other), do: %{}
 
   @doc """
   Write `content` to `path` inside the sandbox. Delegates to
@@ -543,32 +575,9 @@ defmodule ExDaytona.Sandbox do
   defp apply_image(model, nil, _client), do: {:ok, model}
 
   defp apply_image(model, image, client) do
-    build_info = ExDaytona.Image.build_info(image)
-
-    case ExDaytona.Image.contexts(image) do
-      [] ->
-        {:ok, %{model | buildInfo: build_info}}
-
-      contexts ->
-        # Local build contexts (add_local_file/dir) are uploaded to object
-        # storage under one credential grant; the build references them by
-        # content hash.
-        with {:ok, access} <- ExDaytona.ObjectStorage.push_access(client),
-             {:ok, hashes} <- upload_contexts(access, contexts) do
-          {:ok, %{model | buildInfo: %{build_info | contextHashes: hashes}}}
-        end
+    with {:ok, build_info} <- ExDaytona.Image.resolve_build_info(image, client) do
+      {:ok, %{model | buildInfo: build_info}}
     end
-  end
-
-  defp upload_contexts(access, contexts) do
-    Enum.reduce_while(contexts, {:ok, []}, fn context, {:ok, hashes} ->
-      case ExDaytona.ObjectStorage.upload_context_with_access(access, context.source_path,
-             archive_path: context.archive_path
-           ) do
-        {:ok, hash} -> {:cont, {:ok, hashes ++ [hash]}}
-        {:error, _} = error -> {:halt, error}
-      end
-    end)
   end
 
   defp build_create_model(opts) do
@@ -624,7 +633,13 @@ defmodule ExDaytona.Sandbox do
     end
   end
 
-  defp lifecycle(%__MODULE__{client: client, info: %{id: id}} = sandbox, api_fn, target, opts) do
+  defp lifecycle(%__MODULE__{info: %{id: id}} = sandbox, event, api_fn, target, opts) do
+    ExDaytona.Telemetry.span([:sandbox, event], %{sandbox_id: id}, fn ->
+      run_lifecycle(sandbox, api_fn, target, opts)
+    end)
+  end
+
+  defp run_lifecycle(%__MODULE__{client: client, info: %{id: id}} = sandbox, api_fn, target, opts) do
     with {:ok, %Model.Sandbox{} = info} <- Error.normalize(api_fn.(client.conn, id)) do
       updated = %{sandbox | info: info}
 

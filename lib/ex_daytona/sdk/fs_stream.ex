@@ -24,6 +24,15 @@ defmodule ExDaytona.FS.Stream do
 
   @doc false
   def upload(sandbox, remote_path, source, opts) do
+    ExDaytona.Telemetry.span(
+      [:fs, :upload],
+      %{sandbox_id: sandbox_id(sandbox)},
+      fn -> do_upload(sandbox, remote_path, source, opts) end,
+      &bytes_metadata/1
+    )
+  end
+
+  defp do_upload(sandbox, remote_path, source, opts) do
     transport = ExDaytona.Client.transport(sandbox.client, :http_stream)
     max_bytes = Keyword.get(opts, :max_bytes, :infinity)
     deadline = HTTPStream.deadline_at(Keyword.get(opts, :deadline, :infinity))
@@ -158,6 +167,15 @@ defmodule ExDaytona.FS.Stream do
 
   @doc false
   def download(sandbox, remote_path, consumer, opts) when is_function(consumer, 1) do
+    ExDaytona.Telemetry.span(
+      [:fs, :download],
+      %{sandbox_id: sandbox_id(sandbox)},
+      fn -> do_download(sandbox, remote_path, consumer, opts) end,
+      &bytes_metadata/1
+    )
+  end
+
+  defp do_download(sandbox, remote_path, consumer, opts) do
     transport = ExDaytona.Client.transport(sandbox.client, :http_stream)
     max_bytes = Keyword.get(opts, :max_bytes, :infinity)
     deadline = HTTPStream.deadline_at(Keyword.get(opts, :deadline, :infinity))
@@ -257,6 +275,102 @@ defmodule ExDaytona.FS.Stream do
 
   defp finish_download({:error, reason, _acc}, _opts), do: {:error, Error.from(reason)}
 
+  ## Lazy download ------------------------------------------------------------
+
+  @doc false
+  # Pull-based download for ExDaytona.FS.stream!/3: a producer process runs
+  # download/4 and blocks after forwarding each chunk until the enumerator
+  # acks it — one chunk in flight, so enumeration speed applies
+  # backpressure to the socket instead of buffering.
+  def lazy_download(sandbox, remote_path, opts) do
+    Stream.resource(
+      fn -> start_lazy_producer(sandbox, remote_path, opts) end,
+      &lazy_next/1,
+      &stop_lazy_producer/1
+    )
+  end
+
+  defp start_lazy_producer(sandbox, remote_path, opts) do
+    parent = self()
+    ref = make_ref()
+    callers = [parent | List.wrap(Process.get(:"$callers"))]
+
+    {pid, monitor} =
+      spawn_monitor(fn ->
+        # Propagate the caller chain (as Task does) so process-scoped test
+        # doubles can resolve their scripts across this hop.
+        Process.put(:"$callers", callers)
+
+        # If the enumerating process dies without running the stream's
+        # cleanup (brutal kill), the parent monitor unblocks the ack wait
+        # so the producer cannot leak.
+        parent_ref = Process.monitor(parent)
+
+        consumer = fn chunk ->
+          send(parent, {ref, :chunk, chunk})
+
+          receive do
+            {^ref, :ack} -> :ok
+            {^ref, :halt} -> :halt
+            {:DOWN, ^parent_ref, :process, _pid, _reason} -> :halt
+          end
+        end
+
+        send(parent, {ref, :done, download(sandbox, remote_path, consumer, opts)})
+      end)
+
+    %{pid: pid, ref: ref, monitor: monitor}
+  end
+
+  defp lazy_next(%{ref: ref, monitor: monitor} = state) do
+    receive do
+      {^ref, :chunk, chunk} ->
+        send(state.pid, {ref, :ack})
+        {[chunk], state}
+
+      {^ref, :done, {:ok, _meta}} ->
+        {:halt, state}
+
+      {^ref, :done, {:error, %Error{} = error}} ->
+        raise error
+
+      {:DOWN, ^monitor, :process, pid, reason} ->
+        # Redeliver so the cleanup below finds the DOWN it waits for.
+        send(self(), {:DOWN, monitor, :process, pid, reason})
+        raise %Error{message: "download stream producer exited: #{inspect(reason)}", details: reason}
+    end
+  end
+
+  defp stop_lazy_producer(%{pid: pid, ref: ref, monitor: monitor}) do
+    send(pid, {ref, :halt})
+
+    # Give the producer a moment to abort cleanly (it may be blocked in a
+    # transport receive that the halt message cannot interrupt), then kill.
+    unless await_producer_down(monitor, 1_000) do
+      Process.exit(pid, :kill)
+      await_producer_down(monitor, 1_000)
+    end
+
+    Process.demonitor(monitor, [:flush])
+    flush_lazy(ref)
+  end
+
+  defp await_producer_down(monitor, timeout) do
+    receive do
+      {:DOWN, ^monitor, :process, _pid, _reason} -> true
+    after
+      timeout -> false
+    end
+  end
+
+  defp flush_lazy(ref) do
+    receive do
+      {^ref, _kind, _payload} -> flush_lazy(ref)
+    after
+      0 -> :ok
+    end
+  end
+
   ## Shared -------------------------------------------------------------------
 
   @doc false
@@ -279,6 +393,11 @@ defmodule ExDaytona.FS.Stream do
       {:error, %Error{message: "upload source is not an Enumerable, IO device, or {:file, path}"}}
     end
   end
+
+  defp sandbox_id(%ExDaytona.Sandbox{info: info}), do: Map.get(info, :id)
+
+  defp bytes_metadata({:ok, %{bytes: bytes}}), do: %{bytes: bytes}
+  defp bytes_metadata(_other), do: %{}
 
   defp toolbox_base_url(%ExDaytona.Sandbox{info: info}) do
     {:ok, Toolbox.base_url(info)}

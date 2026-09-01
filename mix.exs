@@ -60,6 +60,16 @@ defmodule ExDaytona.MixProject do
       # WebSocket support (PTY sessions; Mint comes in via Finch)
       {:mint_web_socket, "~> 1.0"},
 
+      # Domain-level instrumentation ([:ex_daytona, ...] events) — already
+      # in the tree transitively via finch/tesla; declared for the direct
+      # :telemetry.span/3 calls in the SDK facade
+      {:telemetry, "~> 1.0"},
+
+      # Optional: enables the drop-in webhook endpoint
+      # (ExDaytona.Webhooks.Plug), compiled only when the host app
+      # depends on plug (any Phoenix app does)
+      {:plug, "~> 1.14", optional: true},
+
       # Development and testing
       {:ex_doc, "~> 0.38", only: :dev, runtime: false},
       {:excoveralls, "~> 0.18", only: :test},
