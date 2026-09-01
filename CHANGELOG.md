@@ -32,6 +32,13 @@ enforcement. Read primitives only — the SDK ships no tenant policy.
   sandboxes to application-defined identities via labels set at create
   time. Pre-encoded strings still pass through.
 
+### Live-verified contracts
+- The analytics metering endpoints accept plain API keys — verified
+  against production.
+- `Quota.limits/2` reads the organization record, which is JWT-gated
+  (401 with API keys, documented); API-key callers get the per-sandbox
+  maxima from `Quota.overview/2` instead.
+
 ## [v0.2.0](https://github.com/The-Ixway/ex_daytona/releases/tag/v0.2.0) - 2026-09-01
 
 Production-hardening release: constant-memory transfer, structured

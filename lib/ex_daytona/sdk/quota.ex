@@ -115,6 +115,14 @@ defmodule ExDaytona.Quota do
   @doc """
   The organization's limits: per-sandbox resource maxima, secret quota,
   and the create/lifecycle/API rate limits, normalized to snake_case.
+
+  > #### JWT only {: .warning}
+  >
+  > The provider rejects API-key authentication on the underlying
+  > organization endpoint (401 "Invalid credentials", verified live) —
+  > this works with JWT sessions. With an API key, the per-sandbox
+  > maxima are still available per region/class from `overview/2`
+  > (`max_per_sandbox`).
   """
   @spec limits(Client.t(), String.t()) ::
           {:ok,

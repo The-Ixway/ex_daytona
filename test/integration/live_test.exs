@@ -290,8 +290,16 @@ defmodule LiveSmokeTest do
           assert {:ok, quota} = ExDaytona.Quota.overview(client, org_id)
           assert is_list(quota.regions)
 
-          assert {:ok, limits} = ExDaytona.Quota.limits(client, org_id)
-          assert is_number(limits.max_cpu_per_sandbox) or is_nil(limits.max_cpu_per_sandbox)
+          # Quota.limits reads the organization record — JWT-gated (401
+          # with API keys, documented); overview above carries per-sandbox
+          # maxima for API-key callers.
+          case ExDaytona.Quota.limits(client, org_id) do
+            {:ok, limits} ->
+              assert is_number(limits.max_cpu_per_sandbox) or is_nil(limits.max_cpu_per_sandbox)
+
+            {:error, %ExDaytona.Error{status: 401}} ->
+              :jwt_gated_as_documented
+          end
 
           # Metering (analytics API): auth model unconfirmed for API keys —
           # accept data or a documented auth gate, never a crash
