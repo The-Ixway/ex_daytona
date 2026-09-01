@@ -75,6 +75,7 @@ defmodule ExDaytona.Sandbox do
     user: :user,
     cpu: :cpu,
     gpu: :gpu,
+    gpu_type: :gpuType,
     memory: :memory,
     disk: :disk,
     env: :env,
@@ -82,12 +83,19 @@ defmodule ExDaytona.Sandbox do
     public: :public,
     target: :target,
     volumes: :volumes,
+    secrets: :secrets,
+    spot: :spot,
+    linked_sandbox: :linkedSandbox,
+    outbound_proxy_url: :outboundProxyUrl,
+    otel_endpoint_override: :otelEndpointOverride,
     ttl_minutes: :ttlMinutes,
     auto_stop_interval: :autoStopInterval,
+    auto_pause_interval: :autoPauseInterval,
     auto_archive_interval: :autoArchiveInterval,
     auto_delete_interval: :autoDeleteInterval,
     network_block_all: :networkBlockAll,
-    network_allow_list: :networkAllowList
+    network_allow_list: :networkAllowList,
+    domain_allow_list: :domainAllowList
   }
 
   @error_states ~w(error build_failed destroyed destroying)
@@ -106,12 +114,26 @@ defmodule ExDaytona.Sandbox do
     than starting from a snapshot — raise `:timeout` accordingly and watch
     progress with `stream_build_logs/3`.
   - sandbox settings, all optional: `:snapshot`, `:name`, `:user`, `:cpu`,
-    `:gpu`, `:memory`, `:disk`, `:env`, `:labels`, `:public`, `:target`,
-    `:volumes`, `:ttl_minutes`, `:auto_stop_interval`,
-    `:auto_archive_interval`, `:auto_delete_interval`,
-    `:network_block_all`, `:network_allow_list`
+    `:gpu`, `:gpu_type`, `:memory`, `:disk`, `:env`, `:labels`,
+    `:public`, `:target`, `:volumes`, `:spot`, `:linked_sandbox`,
+    `:outbound_proxy_url`, `:otel_endpoint_override`, `:ttl_minutes`,
+    `:auto_stop_interval`, `:auto_pause_interval` (at most one of
+    stop/pause may be non-zero), `:auto_archive_interval`,
+    `:auto_delete_interval`
+  - network policy: `:network_block_all`, `:network_allow_list` (CIDRs),
+    `:domain_allow_list` (comma-separated domains) — changeable later
+    with `update_network_settings/2`
+  - `:secrets` — vault-backed secret bindings, a list of single-entry
+    maps `%{"ENV_VAR" => "vault-secret-name"}` (see `ExDaytona.Secrets`)
 
   With no settings the API uses the organization's default snapshot.
+
+  > #### `env` values are not secrets {: .warning}
+  >
+  > Ordinary `:env` values are stored and transmitted in plain text —
+  > they are visible to sandbox processes, in sandbox metadata, and to
+  > the provider API. Put credentials in vault secrets and mount them
+  > with `:secrets` instead.
   """
   @spec create(Client.t(), keyword()) :: {:ok, t()} | {:error, Error.t()}
   def create(%Client{} = client, opts \\ []) do
@@ -333,6 +355,37 @@ defmodule ExDaytona.Sandbox do
   end
 
   @doc """
+  Update the sandbox's network policy at runtime. At least one option is
+  required:
+
+  - `:domain_allow_list` — comma-separated allowed domains
+  - `:network_allow_list` — comma-separated allowed CIDRs
+  - `:network_block_all` — block all network access
+
+  Returns the updated sandbox.
+  """
+  @spec update_network_settings(t(), keyword()) :: {:ok, t()} | {:error, Error.t()}
+  def update_network_settings(%__MODULE__{client: client, info: %{id: id}} = sandbox, opts)
+      when opts != [] do
+    unknown = Keyword.keys(opts) -- [:domain_allow_list, :network_allow_list, :network_block_all]
+
+    if unknown != [] do
+      {:error, %Error{message: "unknown network settings: #{inspect(unknown)}"}}
+    else
+      request = %Model.UpdateSandboxNetworkSettings{
+        domainAllowList: opts[:domain_allow_list],
+        networkAllowList: opts[:network_allow_list],
+        networkBlockAll: opts[:network_block_all]
+      }
+
+      with {:ok, %Model.Sandbox{} = info} <-
+             Error.normalize(Api.Sandbox.update_network_settings(client.conn, id, request, response: :full)) do
+        {:ok, %{sandbox | info: info}}
+      end
+    end
+  end
+
+  @doc """
   The sandbox's build logs so far, as a binary. Only sandboxes built from
   build info have build logs; snapshot-based sandboxes return an error.
   """
@@ -503,20 +556,55 @@ defmodule ExDaytona.Sandbox do
 
   defp build_create_model(opts) do
     Enum.reduce_while(opts, {:ok, %Model.CreateSandbox{}}, fn {key, value}, {:ok, model} ->
-      case Map.fetch(@create_fields, key) do
-        {:ok, field} ->
-          {:cont, {:ok, Map.put(model, field, value)}}
-
-        :error ->
-          {:halt,
-           {:error,
-            %Error{
-              message:
-                "unknown sandbox option #{inspect(key)} — supported: " <>
-                  (@create_fields |> Map.keys() |> Enum.sort() |> Enum.map_join(", ", &inspect/1))
-            }}}
+      case put_create_field(model, key, value) do
+        {:ok, model} -> {:cont, {:ok, model}}
+        {:error, error} -> {:halt, {:error, error}}
       end
     end)
+  end
+
+  defp put_create_field(model, :secrets, value) do
+    with :ok <- validate_secret_bindings(value), do: {:ok, Map.put(model, :secrets, value)}
+  end
+
+  defp put_create_field(model, key, value) do
+    case Map.fetch(@create_fields, key) do
+      {:ok, field} ->
+        {:ok, Map.put(model, field, value)}
+
+      :error ->
+        {:error,
+         %Error{
+           message:
+             "unknown sandbox option #{inspect(key)} — supported: " <>
+               (@create_fields |> Map.keys() |> Enum.sort() |> Enum.map_join(", ", &inspect/1))
+         }}
+    end
+  end
+
+  # The API's binding shape: a list of single-entry maps, each mapping an
+  # env var name to a vault secret name.
+  defp validate_secret_bindings(value) do
+    valid? =
+      is_list(value) and
+        Enum.all?(value, fn
+          %{} = entry when map_size(entry) == 1 ->
+            Enum.all?(entry, fn {k, v} -> is_binary(k) and is_binary(v) end)
+
+          _ ->
+            false
+        end)
+
+    if valid? do
+      :ok
+    else
+      {:error,
+       %Error{
+         message:
+           "secrets must be a list of single-entry maps " <>
+             ~s(mapping env var to vault secret name, e.g. [%{"DB_PASSWORD" => "db-prod"}])
+       }}
+    end
   end
 
   defp lifecycle(%__MODULE__{client: client, info: %{id: id}} = sandbox, api_fn, target, opts) do
