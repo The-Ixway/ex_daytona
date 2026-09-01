@@ -76,6 +76,64 @@ defmodule ExDaytona.LogStreamTest do
     end
   end
 
+  describe "events!/2" do
+    test "enumerates demuxed events and halts on normal close" do
+      {:ok, stream} =
+        open!(frames: [{:binary, @out <> "a" <> @err <> "b" <> @out <> "c"}])
+
+      assert stream |> LogStream.events!() |> Enum.to_list() ==
+               [{:stdout, "a"}, {:stderr, "b"}, {:stdout, "c"}]
+    end
+
+    test "composes with Stream operators" do
+      {:ok, stream} =
+        open!(frames: [{:binary, @out <> "keep" <> @err <> "drop" <> @out <> "keep2"}])
+
+      stdout_only =
+        stream
+        |> LogStream.events!()
+        |> Stream.filter(&match?({:stdout, _}, &1))
+        |> Enum.map(fn {:stdout, bytes} -> bytes end)
+
+      assert stdout_only == ["keep", "keep2"]
+    end
+
+    test "halting enumeration early closes the stream" do
+      frames = for i <- 1..10, do: {:binary, @out <> "chunk-#{i}"}
+      {:ok, stream} = open!(frames: frames, hold_open: true)
+
+      assert [{:stdout, "chunk-1"}] = stream |> LogStream.events!() |> Enum.take(1)
+
+      # The Stream.resource cleanup closed the stream: with hold_open the
+      # socket never closes on its own, so draining to {:closed, :normal}
+      # proves close/1 ran (already-buffered events still deliver first).
+      drained =
+        Enum.reduce_while(1..20, nil, fn _, _ ->
+          case LogStream.next(stream, 500) do
+            {:ok, {:stdout, _bytes}} -> {:cont, nil}
+            {:closed, :normal} -> {:halt, :closed_normal}
+          end
+        end)
+
+      assert drained == :closed_normal
+    end
+
+    test "abnormal close raises the ExDaytona.Error" do
+      {:ok, stream} =
+        open!(frames: [{:binary, @out <> "partial"}], close_reason: {:error, :closed})
+
+      assert_raise Error, ~r/connection closed/, fn ->
+        stream |> LogStream.events!() |> Enum.to_list()
+      end
+    end
+
+    test "unlabeled frames enumerate as :output events" do
+      {:ok, stream} = open!(frames: [{:binary, "merged"}])
+
+      assert stream |> LogStream.events!() |> Enum.to_list() == [{:output, "merged"}]
+    end
+  end
+
   describe "bounds" do
     test "byte-buffer overflow closes with an explicit error" do
       {:ok, stream} =

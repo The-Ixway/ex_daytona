@@ -33,12 +33,22 @@ defmodule ExDaytona.Error do
     non-idempotent request MAY have been accepted before the failure.
     For idempotent requests an `:unknown` outcome is safe to retry; for
     POSTs the application must reconcile before retrying.
+
+  `ExDaytona.Error` is also an exception, so it can be raised directly —
+  the lazy stream APIs (`ExDaytona.FS.stream!/3`,
+  `ExDaytona.LogStream.events!/2`) do exactly that, and application code
+  can too:
+
+      case ExDaytona.Sandbox.create(client, opts) do
+        {:ok, sandbox} -> sandbox
+        {:error, error} -> raise error
+      end
   """
 
   alias ExDaytona.Model.ErrorResponse
   alias ExDaytona.Response
 
-  defstruct [
+  defexception [
     :status,
     :message,
     :code,
@@ -63,6 +73,23 @@ defmodule ExDaytona.Error do
           retry_count: non_neg_integer() | nil,
           outcome: :definite | :unknown
         }
+
+  # Exception.message/1 — errors raised from stream APIs (or by callers)
+  # render a stable, credential-scrubbed line even when fields are sparse.
+  @impl Exception
+  def message(%__MODULE__{} = error) do
+    base = ExDaytona.Redact.scrub_message(error.message) || "request failed"
+
+    suffix =
+      [
+        error.code && "code: #{error.code}",
+        error.status && "status: #{error.status}"
+      ]
+      |> Enum.filter(& &1)
+      |> Enum.join(", ")
+
+    if suffix == "", do: base, else: base <> " (" <> suffix <> ")"
+  end
 
   @doc """
   Collapse a generated-client result into `{:ok, value}` or

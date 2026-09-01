@@ -155,6 +155,49 @@ defmodule ExDaytona.LogStream do
   end
 
   @doc """
+  The stream's events as a lazy `Enumerable` — the idiomatic way to
+  consume a log stream with `for`/`Enum`/`Stream`:
+
+      {:ok, stream} = ExDaytona.Session.open_log_stream(session, cmd_id)
+
+      for event <- ExDaytona.LogStream.events!(stream) do
+        case event do
+          {:stdout, bytes} -> IO.write(bytes)
+          {:stderr, bytes} -> IO.write(:stderr, bytes)
+          {:output, bytes} -> IO.write(bytes)
+        end
+      end
+
+  Enumeration ends when the stream closes normally and **raises** the
+  `ExDaytona.Error` when it closes abnormally (overflow, timeout,
+  transport failure) — hence the `!`. Halting enumeration early
+  (`Enum.take/2`, `Stream.take_while/2`, a `for` with `:halt`, ...)
+  closes the underlying stream; so does finishing it.
+
+  Options:
+
+  - `:timeout` — max ms to wait for each event (default `:infinity`;
+    the stream's own `idle_timeout`/`overall_timeout` still apply)
+  """
+  @spec events!(pid(), keyword()) :: Enumerable.t()
+  def events!(stream, opts \\ []) do
+    timeout = Keyword.get(opts, :timeout, :infinity)
+
+    Stream.resource(
+      fn -> stream end,
+      fn stream ->
+        case next(stream, timeout) do
+          {:ok, event} -> {[event], stream}
+          {:closed, :normal} -> {:halt, stream}
+          {:closed, {:error, error}} -> raise error
+          {:error, error} -> raise error
+        end
+      end,
+      fn stream -> close(stream) end
+    )
+  end
+
+  @doc """
   Collect events until the stream closes, returning
   `{:ok, %{stdout: binary, stderr: binary, closed: reason}}`. Convenience
   for short commands; long-lived follows should loop `next/2`.

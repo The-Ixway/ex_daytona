@@ -129,6 +129,7 @@ defmodule ExDaytona.Redact do
     entries =
       struct
       |> Map.from_struct()
+      |> Map.delete(:__exception__)
       |> Enum.map(fn {key, value} ->
         if sensitive?(module, key, value, extra_sensitive) do
           {key, @marker}

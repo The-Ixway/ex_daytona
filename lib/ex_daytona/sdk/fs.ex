@@ -191,6 +191,36 @@ defmodule ExDaytona.FS do
   end
 
   @doc """
+  A **lazy `Enumerable`** of the file's chunks — the idiomatic way to
+  pipe a sandbox file through `Stream`/`Enum` with constant memory:
+
+      sandbox
+      |> ExDaytona.FS.stream!("/workspace/big.log")
+      |> Stream.into(File.stream!("local.log"))
+      |> Stream.run()
+
+      first_kb =
+        sandbox
+        |> ExDaytona.FS.stream!("/workspace/big.log", max_bytes: 10_000_000)
+        |> Enum.reduce_while(<<>>, fn chunk, acc ->
+          if byte_size(acc) >= 1024, do: {:halt, acc}, else: {:cont, acc <> chunk}
+        end)
+
+  Nothing is requested until enumeration starts; one chunk is in flight
+  at a time, so enumeration speed applies backpressure to the transfer.
+  Halting early (`Enum.take/2`, `Stream.take_while/2`, ...) cancels the
+  HTTP request. A failed transfer **raises** the `ExDaytona.Error` —
+  hence the `!` (for the tuple-returning API use `download_stream/4`).
+
+  Options as in `download_stream/4` (`:max_bytes`, `:idle_timeout`,
+  `:deadline`, `:expected_sha256`).
+  """
+  @spec stream!(Sandbox.t(), String.t(), keyword()) :: Enumerable.t()
+  def stream!(%Sandbox{} = sandbox, remote_path, opts \\ []) when is_binary(remote_path) do
+    ExDaytona.FS.Stream.lazy_download(sandbox, remote_path, opts)
+  end
+
+  @doc """
   Stream a download to a local path safely: chunks are written
   incrementally to a sibling temporary file, which is synced, verified
   (`:expected_sha256`, when given), and atomically renamed over
