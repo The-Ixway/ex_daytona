@@ -55,6 +55,30 @@ defmodule ModelSurfaceTest do
     assert failures == []
   end
 
+  test "every struct model inspects via the redacting implementation" do
+    # The model template gives every struct a credential-redacting Inspect
+    # impl; rendering an all-nil struct must not raise and must use the
+    # #Module<...> form the impl produces.
+    failures =
+      Enum.reduce(SdkSurface.model_modules(), [], fn module, acc ->
+        {:module, ^module} = Code.ensure_loaded(module)
+
+        if function_exported?(module, :__struct__, 1) do
+          rendered = inspect(struct(module))
+
+          if String.starts_with?(rendered, "#" <> inspect(module) <> "<") do
+            acc
+          else
+            [{module, rendered} | acc]
+          end
+        else
+          acc
+        end
+      end)
+
+    assert failures == []
+  end
+
   test "the generated model surface is present" do
     assert SdkSurface.model_modules() != []
   end

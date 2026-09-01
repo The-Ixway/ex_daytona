@@ -28,15 +28,12 @@ defmodule FakeTransports do
   `ExDaytona.LogStream` started from the test finds the test's script).
   """
   def script_ws(opts) do
-    ensure_table()
     :ets.insert(@table, {self(), Map.new(opts)})
     :ok
   end
 
   @doc false
   def lookup_ws_script do
-    ensure_table()
-
     candidates = [self() | Process.get(:"$ancestors", [])]
 
     Enum.find_value(candidates, %{}, fn
@@ -49,12 +46,6 @@ defmodule FakeTransports do
       _named ->
         nil
     end)
-  end
-
-  defp ensure_table do
-    :ets.new(@table, [:named_table, :public, :set])
-  rescue
-    ArgumentError -> @table
   end
 
   defmodule HTTPStream do

@@ -13,3 +13,7 @@ Mox.defmock(HTTPClientMock, for: Tesla.Adapter)
 # Application will be started automatically by Mix
 # but we ensure it's running for integration tests
 {:ok, _} = Application.ensure_all_started(:bandit)
+
+# Script table for FakeTransports — owned here so it survives the whole run
+# (an ETS table owned by an individual test process dies with that test).
+_ = :ets.new(:fake_transport_scripts, [:named_table, :public, :set])

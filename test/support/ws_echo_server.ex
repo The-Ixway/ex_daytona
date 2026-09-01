@@ -98,6 +98,19 @@ defmodule WsEchoServer do
   """
   def start_interpreter, do: start_with(InterpreterSock)
 
+  @doc """
+  Stop every listener this process started (for disconnect tests).
+  """
+  def stop_all do
+    Process.get(:ws_echo_listeners, [])
+    |> Enum.each(fn server ->
+      if Process.alive?(server), do: stop_server(server)
+    end)
+
+    Process.put(:ws_echo_listeners, [])
+    :ok
+  end
+
   defp start_with(handler) do
     {:ok, server} =
       Bandit.start_link(plug: {UpgradePlug, handler}, port: 0, startup_log: false)
@@ -105,6 +118,7 @@ defmodule WsEchoServer do
     {:ok, {_address, port}} = ThousandIsland.listener_info(server)
 
     ExUnit.Callbacks.on_exit(fn -> stop_server(server) end)
+    Process.put(:ws_echo_listeners, [server | Process.get(:ws_echo_listeners, [])])
 
     port
   end

@@ -163,14 +163,32 @@ defmodule LiveSmokeTest do
         {:ok, client} =
           ExDaytona.Client.new(api_key: ctx.token, base_url: ctx.base_url, retry: false)
 
+        # Create-time secret binding: the secret must exist before the
+        # sandbox binds it.
+        secret_name = "ex-daytona-live-#{System.unique_integer([:positive])}"
+        secret_value = "live-secret-value-#{System.unique_integer([:positive])}"
+        {:ok, secret} = ExDaytona.Secrets.create(client, secret_name, secret_value)
+
         {:ok, sandbox} =
           ExDaytona.Sandbox.create(client,
             labels: %{"purpose" => "ex_daytona-live-lifecycle"},
-            ttl_minutes: 15
+            ttl_minutes: 15,
+            secrets: [%{"LIVE_BOUND_SECRET" => secret_name}]
           )
 
         try do
           assert ExDaytona.Sandbox.state(sandbox) == "started"
+
+          # The bound secret is visible inside the sandbox as an env var…
+          assert {:ok, %{exit_code: 0, output: secret_out}} =
+                   ExDaytona.Sandbox.exec(sandbox, "printenv LIVE_BOUND_SECRET")
+
+          assert String.trim(secret_out) == secret_value
+
+          # …and resolvable through the facade with redacted inspection
+          assert {:ok, resolved} = ExDaytona.Secrets.resolve(sandbox)
+          assert Enum.any?(resolved, &(&1.env == "LIVE_BOUND_SECRET" and &1.value == secret_value))
+          refute inspect(resolved) =~ secret_value
 
           assert {:ok, %{exit_code: 0, output: output}} =
                    ExDaytona.Sandbox.exec(sandbox, "echo live-lifecycle")
@@ -179,6 +197,61 @@ defmodule LiveSmokeTest do
 
           assert :ok = ExDaytona.Sandbox.write_file(sandbox, "/tmp/live.txt", "roundtrip")
           assert {:ok, "roundtrip"} = ExDaytona.Sandbox.read_file(sandbox, "/tmp/live.txt")
+
+          # Constant-memory streaming transfer: 4MB round-trip with checksums
+          four_mb = :crypto.strong_rand_bytes(4 * 1024 * 1024)
+          upload_sha = :sha256 |> :crypto.hash(four_mb) |> Base.encode16(case: :lower)
+          chunks = for <<chunk::binary-size(64 * 1024) <- four_mb>>, do: chunk
+
+          assert {:ok, %{bytes: up_bytes, sha256: ^upload_sha}} =
+                   ExDaytona.FS.upload_stream(sandbox, "/tmp/stream.bin", chunks, expected_sha256: upload_sha)
+
+          assert up_bytes == byte_size(four_mb)
+
+          stream_dl = Path.join(System.tmp_dir!(), "ex_daytona_live_dl.bin")
+          File.rm(stream_dl)
+
+          assert {:ok, %{sha256: ^upload_sha}} =
+                   ExDaytona.FS.download_file(sandbox, "/tmp/stream.bin", stream_dl, expected_sha256: upload_sha)
+
+          assert File.stat!(stream_dl).size == byte_size(four_mb)
+          File.rm!(stream_dl)
+
+          # Stream cancellation mid-download closes cleanly
+          {:ok, cancel_seen} = Agent.start_link(fn -> 0 end)
+
+          cancel_consumer = fn _chunk ->
+            if Agent.get_and_update(cancel_seen, &{&1 + 1, &1 + 1}) >= 1, do: :halt, else: :ok
+          end
+
+          assert {:error, %ExDaytona.Error{message: cancel_msg}} =
+                   ExDaytona.FS.download_stream(sandbox, "/tmp/stream.bin", cancel_consumer)
+
+          assert cancel_msg =~ "canceled"
+
+          # Response and rate-limit metadata on success and error paths
+          assert {:ok, %ExDaytona.Response{} = full} =
+                   ExDaytona.Api.Sandbox.get_sandbox(
+                     ExDaytona.Client.conn(client),
+                     ExDaytona.Sandbox.id(sandbox),
+                     response: :full
+                   )
+
+          assert is_binary(full.request_id)
+          assert full.status == 200
+
+          assert {:error, %ExDaytona.Error{status: 404, request_id: err_req_id}} =
+                   ExDaytona.Sandbox.get(client, "missing-#{System.unique_integer([:positive])}")
+
+          assert is_binary(err_req_id)
+
+          # Runtime network policy update
+          assert {:ok, sandbox} =
+                   ExDaytona.Sandbox.update_network_settings(sandbox,
+                     domain_allow_list: "example.com,*.daytona.io"
+                   )
+
+          assert sandbox.info.domainAllowList =~ "example.com"
 
           # Sessions: shared state, async command, real-time log streaming
           {:ok, session} = ExDaytona.Session.create(sandbox)
@@ -207,6 +280,47 @@ defmodule LiveSmokeTest do
 
           assert {:ok, logs} = ExDaytona.Session.logs(session, cmd_id)
           assert logs =~ "s1"
+
+          # Structured log stream: separated stdout/stderr over the ws
+          # multiplex protocol
+          {:ok, mux_cmd} =
+            ExDaytona.Session.run_async(
+              session,
+              "echo to-stdout; echo to-stderr 1>&2; sleep 1; echo late-stdout"
+            )
+
+          {:ok, log_stream} =
+            ExDaytona.Session.open_log_stream(session, mux_cmd, idle_timeout: 30_000)
+
+          assert {:ok, collected} = ExDaytona.LogStream.collect(log_stream, 30_000)
+          assert collected.stdout =~ "to-stdout"
+          assert collected.stdout =~ "late-stdout"
+          assert collected.stderr =~ "to-stderr"
+          refute collected.stdout =~ "to-stderr"
+          assert collected.closed == :normal
+
+          # exit status stays a separate lookup
+          assert {:ok, %{exit_code: 0}} = ExDaytona.Session.await(session, mux_cmd)
+
+          # Owner-death cleanup: a stream owned by a dying process shuts down
+          {:ok, owner_cmd} = ExDaytona.Session.run_async(session, "sleep 30")
+          parent = self()
+
+          owner =
+            spawn(fn ->
+              {:ok, stream} = ExDaytona.Session.open_log_stream(session, owner_cmd)
+              send(parent, {:stream_opened, stream})
+
+              receive do
+                :die -> :ok
+              end
+            end)
+
+          assert_receive {:stream_opened, orphan_stream}, 15_000
+          orphan_ref = Process.monitor(orphan_stream)
+          send(owner, :die)
+          assert_receive {:DOWN, ^orphan_ref, :process, ^orphan_stream, _}, 5_000
+
           assert :ok = ExDaytona.Session.delete(session)
 
           # File system: full surface
@@ -295,6 +409,7 @@ defmodule LiveSmokeTest do
           assert ExDaytona.Sandbox.state(restarted) == "started"
         after
           :ok = ExDaytona.Sandbox.delete(sandbox)
+          _ = ExDaytona.Secrets.delete(client, secret.id)
         end
       end
     end

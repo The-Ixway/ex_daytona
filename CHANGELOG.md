@@ -10,6 +10,74 @@ inserts new sections below this marker:
 
 <!-- changelog -->
 
+## [v0.2.0](https://github.com/The-Ixway/ex_daytona/releases/tag/v0.2.0) - 2026-09-01
+
+Production-hardening release: constant-memory transfer, structured
+bounded log streaming, response/rate-limit metadata, retry correctness,
+credential redaction, a completed security facade, and injectable
+streaming transports. No breaking changes to 0.1.0 call sites.
+
+### Added
+- **Constant-memory file transfer**: `ExDaytona.FS.upload_stream/4`,
+  `upload_file/4`, `download_stream/4`, and `download_file/4` — lazy
+  multipart uploads from Enumerables/IO devices/files, consumer-driven
+  downloads, `max_bytes`/idle/overall limits, caller cancellation,
+  incremental SHA-256 with optional verification, and atomic
+  temp-file-then-rename downloads that never clobber an existing
+  destination. Existing small-file helpers unchanged (buffering now
+  documented).
+- **Structured log streaming**: `ExDaytona.LogStream` +
+  `ExDaytona.Session.open_log_stream/3` — separate `:stdout`/`:stderr`
+  events in arrival order over the provider websocket protocol,
+  pull-based (`next/2`, `collect/2`), owner-monitored, bounded
+  (buffer/frame caps with explicit overflow errors), with idle and
+  overall timeouts and no silent reconnect. `Session.stream_logs/4`
+  remains as the documented merged-output HTTP path and gains `:halt`
+  cancellation and a `:deadline`.
+- **Response metadata**: `response: :full` on every generated operation
+  returns `%ExDaytona.Response{}` (status, normalized headers, request
+  id, rate-limit state, parsed Retry-After, transport retry count).
+  `ExDaytona.Error` carries the same fields on every facade error, plus
+  an `outcome` (`:definite` | `:unknown`) that refuses to claim a
+  definite result for non-idempotent requests lost in transport.
+- **Security facade**: `Sandbox.create/2` now exposes every
+  CreateSandbox field (`domain_allow_list`, vault `secrets` bindings,
+  `auto_pause_interval`, `gpu_type`, `spot`, `linked_sandbox`,
+  `outbound_proxy_url`, `otel_endpoint_override`);
+  `Sandbox.update_network_settings/2` for runtime policy;
+  `ExDaytona.Secrets` (manage, bind, resolve — resolved values redacted
+  under inspect); `ExDaytona.Platform` (regions, sandbox classes,
+  snapshots, usage/quota).
+- **Injectable streaming transports**: `ExDaytona.Transport` behaviours
+  for streaming HTTP and websockets, selected via
+  `Client.new(transports: [...])` and carried into every derived stream —
+  built for deterministic failure simulation in tests.
+- Dedicated Finch pool (`ExDaytona.Finch.Stream`, tunable via
+  `:stream_pool_size`/`:stream_pool_count`) isolates long-lived streams
+  and bulk transfers from lifecycle/control requests.
+
+### Changed
+- **Credential redaction everywhere**: every generated model, the
+  client, errors, and the new SSH/preview/storage result structs render
+  credential-shaped fields as `"[REDACTED]"` under `inspect/1`; error
+  details/headers are deep-sanitized; URLs in messages have signed query
+  parameters scrubbed; telemetry no longer carries the Tesla client (and
+  its embedded bearer token). Note: field-name matching intentionally
+  over-redacts (e.g. pagination `nextToken` cursors render redacted).
+- Retries now forward `jitter_factor` and honor `Retry-After` on safe
+  (idempotent) retries **by default** (`use_retry_after_header: true`,
+  capped by `max_delay`); POSTs remain never auto-retried.
+- `Sandbox.ssh_access/2`, `preview_url/2`, `signed_preview_url/3`, and
+  `ObjectStorage.push_access/1` return dedicated structs with redacted
+  inspection — pattern-matching on the previous map shapes continues to
+  work.
+
+### Migration notes
+- No call-site changes required. If you pattern-matched telemetry
+  metadata's `env.__client__`, it is now `nil` (credential hygiene).
+- If your handlers relied on retries NOT honoring `Retry-After`, pass
+  `retry: [use_retry_after_header: false]`.
+
 ## [v0.1.0](https://github.com/The-Ixway/ex_daytona/releases/tag/v0.1.0) - 2026-08-31
 
 ### Added

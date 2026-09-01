@@ -19,7 +19,7 @@ Add `ex_daytona` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:ex_daytona, "~> 0.1.0"}
+    {:ex_daytona, "~> 0.2.0"}
   ]
 end
 ```
@@ -81,6 +81,26 @@ read/write/list helpers delegate to it):
 :ok = ExDaytona.FS.delete(sandbox, "/workspace/data", recursive: true)
 ```
 
+Large transfers stream with **constant memory** — lazy sources, bounded
+limits, incremental SHA-256, cancellation, and atomic downloads:
+
+```elixir
+{:ok, %{bytes: _, sha256: sha}} =
+  ExDaytona.FS.upload_file(sandbox, "dataset.tar.gz", "/workspace/dataset.tar.gz",
+    max_bytes: 5_000_000_000, idle_timeout: 60_000)
+
+# Any Enumerable of chunks works: FS.upload_stream(sandbox, path, chunks, opts)
+
+# Downloads write to a sibling temp file and atomically rename on success —
+# a failed/canceled/mismatched transfer never touches an existing destination
+{:ok, _} =
+  ExDaytona.FS.download_file(sandbox, "/workspace/dataset.tar.gz", "copy.tar.gz",
+    expected_sha256: sha)
+
+# Or consume chunks yourself; return :halt to cancel mid-stream
+{:ok, _} = ExDaytona.FS.download_stream(sandbox, "/big.log", &IO.write/1, max_bytes: 100_000_000)
+```
+
 ### Code execution
 
 Stateless snippets (fresh interpreter per run; Python/JavaScript/TypeScript):
@@ -130,6 +150,25 @@ and can run asynchronously with real-time log streaming.
 
 :ok = ExDaytona.Session.delete(session)
 ```
+
+For **separated stdout/stderr** with bounded, pull-based delivery, open a
+structured log stream (websocket-backed):
+
+```elixir
+{:ok, stream} = ExDaytona.Session.open_log_stream(session, cmd_id, idle_timeout: 60_000)
+
+case ExDaytona.LogStream.next(stream, 5_000) do
+  {:ok, {:stdout, bytes}} -> IO.write(bytes)
+  {:ok, {:stderr, bytes}} -> IO.write(:stderr, bytes)
+  {:closed, :normal} -> :done
+  {:closed, {:error, %ExDaytona.Error{}}} -> :failed
+end
+```
+
+The stream monitors its owner (auto-cleanup on owner death), enforces
+buffer/frame bounds with explicit overflow errors, and applies idle and
+overall timeouts — see `ExDaytona.LogStream` for the full contract.
+`Session.stream_logs/4` remains the simple merged-output follow.
 
 `ExDaytona.Session.entrypoint/1` and `entrypoint_logs/1` expose the
 session a configured entrypoint runs in.
@@ -247,6 +286,53 @@ image =
 Context uploads speak S3 (SigV4) through the SDK's own HTTP stack — no
 AWS dependency; identical content is deduplicated by hash and skipped on
 re-upload.
+
+### Secrets, network policy, and platform lookups
+
+```elixir
+# Vault-backed secrets: values live server-side, sandboxes mount bindings
+{:ok, _} = ExDaytona.Secrets.create(client, "db-prod", "s3cr3t")
+{:ok, sandbox} = ExDaytona.Sandbox.create(client, secrets: [%{"DB_PASSWORD" => "db-prod"}])
+{:ok, resolved} = ExDaytona.Secrets.resolve(sandbox)   # values redacted under inspect
+
+# Runtime network policy
+{:ok, sandbox} =
+  ExDaytona.Sandbox.update_network_settings(sandbox,
+    domain_allow_list: "example.com,*.daytona.io")
+
+# Pre-create lookups
+{:ok, regions} = ExDaytona.Platform.regions(client)
+{:ok, classes} = ExDaytona.Platform.sandbox_classes(client, org_id)
+{:ok, %{items: snapshots}} = ExDaytona.Platform.snapshots(client, limit: 10)
+```
+
+> **`env` values are not secrets** — they are plaintext, visible to
+> sandbox processes and the provider API. Use `ExDaytona.Secrets`.
+
+### Response metadata, retries, and errors
+
+Every generated operation accepts `response: :full` to keep the response
+envelope; facade errors always carry the same metadata:
+
+```elixir
+{:ok, %ExDaytona.Response{data: sandbox, request_id: id, rate_limit: rl, retry_after: ra}} =
+  ExDaytona.Api.Sandbox.get_sandbox(conn, "sb-1", response: :full)
+
+{:error, %ExDaytona.Error{status: 429, retry_after: seconds, request_id: id, outcome: outcome}} =
+  ExDaytona.Sandbox.get(client, "sb-1")
+```
+
+- Safe (idempotent) retries honor the server's `Retry-After` by default;
+  POSTs are never auto-retried. All Tesla retry options
+  (`jitter_factor`, `use_retry_after_header`, ...) are forwarded.
+- `outcome: :unknown` marks transport losses where a non-idempotent
+  request *may* have been accepted — reconcile before retrying those.
+- **Credentials are redacted** from `inspect/1` on every model and
+  facade struct, from error details/headers, and from telemetry.
+- Long-lived streams and bulk transfers run on a dedicated Finch pool
+  (`:stream_pool_size`), so they cannot starve control requests.
+- Streaming transports are injectable for tests:
+  `ExDaytona.Client.new(transports: [http_stream: MyFake, websocket: MyFakeWS])`.
 
 ### Low-level generated API (full surface)
 
