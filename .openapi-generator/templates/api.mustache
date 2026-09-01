@@ -39,7 +39,7 @@ defmodule {{moduleName}}.Api.{{classname}} do
   - `{:error, Tesla.Env.t}` on failure
   """
   {{{typespec}}}
-  def {{{operationId}}}(connection, {{#requiredParams}}{{#underscored}}{{{paramName}}}{{/underscored}}, {{/requiredParams}}{{^hasOptionalParams}}_{{/hasOptionalParams}}opts \\ []) do
+  def {{{operationId}}}(connection, {{#requiredParams}}{{#underscored}}{{{paramName}}}{{/underscored}}, {{/requiredParams}}opts \\ []) do
 {{#optionalParams}}
 {{#-first}}
     optional_params = %{
@@ -79,7 +79,7 @@ defmodule {{moduleName}}.Api.{{classname}} do
     |> evaluate_response({{#responses}}{{#-first}}[
 {{/-first}}
       {{=<% %>=}}{<%& codeMappingKey%>, <%decodedStruct%>}<%={{ }}=%>{{^-last}},{{/-last}}
-{{#-last}}    ]{{/-last}}{{/responses}})
+{{#-last}}    ]{{/-last}}{{/responses}}, opts)
   end
   {{/operation}}
 {{/operations}}

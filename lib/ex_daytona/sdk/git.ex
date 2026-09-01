@@ -48,7 +48,7 @@ defmodule ExDaytona.Git do
       password: opts[:password]
     }
 
-    run(sandbox, &Api.Git.clone_repository(&1, request))
+    run(sandbox, &Api.Git.clone_repository(&1, request, response: :full))
   end
 
   @doc """
@@ -58,7 +58,7 @@ defmodule ExDaytona.Git do
   @spec status(Sandbox.t(), String.t()) :: {:ok, Model.GitStatus.t()} | {:error, Error.t()}
   def status(%Sandbox{} = sandbox, path) when is_binary(path) do
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox) do
-      Error.normalize(Api.Git.get_status(conn, path))
+      Error.normalize(Api.Git.get_status(conn, path, response: :full))
     end
   end
 
@@ -70,7 +70,7 @@ defmodule ExDaytona.Git do
   def branches(%Sandbox{} = sandbox, path) when is_binary(path) do
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox),
          {:ok, %Model.ListBranchResponse{branches: branches, current: current}} <-
-           Error.normalize(Api.Git.list_branches(conn, path)) do
+           Error.normalize(Api.Git.list_branches(conn, path, response: :full)) do
       {:ok, %{branches: branches || [], current: current}}
     end
   end
@@ -81,7 +81,7 @@ defmodule ExDaytona.Git do
   @spec create_branch(Sandbox.t(), String.t(), String.t()) :: :ok | {:error, Error.t()}
   def create_branch(%Sandbox{} = sandbox, path, name)
       when is_binary(path) and is_binary(name) do
-    run(sandbox, &Api.Git.create_branch(&1, %Model.GitBranchRequest{path: path, name: name}))
+    run(sandbox, &Api.Git.create_branch(&1, %Model.GitBranchRequest{path: path, name: name}, response: :full))
   end
 
   @doc """
@@ -92,7 +92,7 @@ defmodule ExDaytona.Git do
       when is_binary(path) and is_binary(branch) do
     run(
       sandbox,
-      &Api.Git.checkout_branch(&1, %Model.GitCheckoutRequest{path: path, branch: branch})
+      &Api.Git.checkout_branch(&1, %Model.GitCheckoutRequest{path: path, branch: branch}, response: :full)
     )
   end
 
@@ -102,7 +102,7 @@ defmodule ExDaytona.Git do
   """
   @spec add(Sandbox.t(), String.t(), [String.t()]) :: :ok | {:error, Error.t()}
   def add(%Sandbox{} = sandbox, path, files) when is_binary(path) and is_list(files) do
-    run(sandbox, &Api.Git.add_files(&1, %Model.GitAddRequest{path: path, files: files}))
+    run(sandbox, &Api.Git.add_files(&1, %Model.GitAddRequest{path: path, files: files}, response: :full))
   end
 
   @doc """
@@ -119,13 +119,17 @@ defmodule ExDaytona.Git do
          {:ok, conn} <- Sandbox.toolbox_conn(sandbox),
          {:ok, %Model.GitCommitResponse{hash: hash}} <-
            Error.normalize(
-             Api.Git.commit_changes(conn, %Model.GitCommitRequest{
-               path: path,
-               message: message,
-               author: author,
-               email: email,
-               allow_empty: opts[:allow_empty]
-             })
+             Api.Git.commit_changes(
+               conn,
+               %Model.GitCommitRequest{
+                 path: path,
+                 message: message,
+                 author: author,
+                 email: email,
+                 allow_empty: opts[:allow_empty]
+               },
+               response: :full
+             )
            ) do
       {:ok, %{hash: hash}}
     end
@@ -148,7 +152,7 @@ defmodule ExDaytona.Git do
       password: opts[:password]
     }
 
-    run(sandbox, &Api.Git.push_changes(&1, request))
+    run(sandbox, &Api.Git.push_changes(&1, request, response: :full))
   end
 
   @doc """
@@ -166,7 +170,7 @@ defmodule ExDaytona.Git do
       password: opts[:password]
     }
 
-    run(sandbox, &Api.Git.pull_changes(&1, request))
+    run(sandbox, &Api.Git.pull_changes(&1, request, response: :full))
   end
 
   @doc """
@@ -177,7 +181,7 @@ defmodule ExDaytona.Git do
           {:ok, [Model.GitCommitInfo.t()]} | {:error, Error.t()}
   def history(%Sandbox{} = sandbox, path) when is_binary(path) do
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox),
-         {:ok, commits} <- Error.normalize(Api.Git.get_commit_history(conn, path)) do
+         {:ok, commits} <- Error.normalize(Api.Git.get_commit_history(conn, path, response: :full)) do
       {:ok, List.wrap(commits)}
     end
   end

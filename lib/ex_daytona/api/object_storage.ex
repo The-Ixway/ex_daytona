@@ -40,8 +40,11 @@ defmodule ExDaytona.Api.ObjectStorage do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.StorageAccessDto}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.StorageAccessDto}
+      ],
+      opts
+    )
   end
 end

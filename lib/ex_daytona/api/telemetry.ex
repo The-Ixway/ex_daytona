@@ -53,9 +53,12 @@ defmodule ExDaytona.Api.Telemetry do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ModelsLogEntry}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ModelsLogEntry}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -95,9 +98,12 @@ defmodule ExDaytona.Api.Telemetry do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ModelsMetricPoint}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ModelsMetricPoint}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -119,7 +125,7 @@ defmodule ExDaytona.Api.Telemetry do
   """
   @spec get_organization_sandbox_trace_spans(Tesla.Env.client(), String.t(), String.t(), String.t(), keyword()) ::
           {:ok, [ExDaytona.Model.ModelsSpan.t()]} | {:error, Tesla.Env.t()}
-  def get_organization_sandbox_trace_spans(connection, organization_id, sandbox_id, trace_id, _opts \\ []) do
+  def get_organization_sandbox_trace_spans(connection, organization_id, sandbox_id, trace_id, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -128,9 +134,12 @@ defmodule ExDaytona.Api.Telemetry do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ModelsSpan}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ModelsSpan}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -172,8 +181,11 @@ defmodule ExDaytona.Api.Telemetry do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ModelsTraceSummary}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ModelsTraceSummary}
+      ],
+      opts
+    )
   end
 end

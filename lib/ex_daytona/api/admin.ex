@@ -25,7 +25,7 @@ defmodule ExDaytona.Api.Admin do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec admin_can_cleanup_image(Tesla.Env.client(), String.t(), keyword()) :: {:ok, boolean()} | {:error, Tesla.Env.t()}
-  def admin_can_cleanup_image(connection, image_name, _opts \\ []) do
+  def admin_can_cleanup_image(connection, image_name, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -35,9 +35,12 @@ defmodule ExDaytona.Api.Admin do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -56,7 +59,7 @@ defmodule ExDaytona.Api.Admin do
   """
   @spec admin_create_organization(Tesla.Env.client(), ExDaytona.Model.AdminCreateOrganization.t(), keyword()) ::
           {:ok, ExDaytona.Model.Organization.t()} | {:error, Tesla.Env.t()}
-  def admin_create_organization(connection, admin_create_organization, _opts \\ []) do
+  def admin_create_organization(connection, admin_create_organization, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -66,9 +69,12 @@ defmodule ExDaytona.Api.Admin do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {201, ExDaytona.Model.Organization}
-    ])
+    |> evaluate_response(
+      [
+        {201, ExDaytona.Model.Organization}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -99,7 +105,7 @@ defmodule ExDaytona.Api.Admin do
         organization_id,
         region_id,
         create_organization_region_quota,
-        _opts \\ []
+        opts \\ []
       ) do
     request =
       %{}
@@ -110,9 +116,12 @@ defmodule ExDaytona.Api.Admin do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {201, ExDaytona.Model.RegionQuota}
-    ])
+    |> evaluate_response(
+      [
+        {201, ExDaytona.Model.RegionQuota}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -131,7 +140,7 @@ defmodule ExDaytona.Api.Admin do
   """
   @spec admin_create_runner(Tesla.Env.client(), ExDaytona.Model.AdminCreateRunner.t(), keyword()) ::
           {:ok, ExDaytona.Model.CreateRunnerResponse.t()} | {:error, Tesla.Env.t()}
-  def admin_create_runner(connection, admin_create_runner, _opts \\ []) do
+  def admin_create_runner(connection, admin_create_runner, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -141,9 +150,12 @@ defmodule ExDaytona.Api.Admin do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {201, ExDaytona.Model.CreateRunnerResponse}
-    ])
+    |> evaluate_response(
+      [
+        {201, ExDaytona.Model.CreateRunnerResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -162,7 +174,7 @@ defmodule ExDaytona.Api.Admin do
   """
   @spec admin_create_user(Tesla.Env.client(), ExDaytona.Model.CreateUser.t(), keyword()) ::
           {:ok, nil} | {:error, Tesla.Env.t()}
-  def admin_create_user(connection, create_user, _opts \\ []) do
+  def admin_create_user(connection, create_user, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -172,9 +184,12 @@ defmodule ExDaytona.Api.Admin do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {201, false}
-    ])
+    |> evaluate_response(
+      [
+        {201, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -200,7 +215,7 @@ defmodule ExDaytona.Api.Admin do
           ExDaytona.Model.SandboxClass.t(),
           keyword()
         ) :: {:ok, nil} | {:error, Tesla.Env.t()}
-  def admin_delete_organization_region_quota(connection, organization_id, region_id, sandbox_class, _opts \\ []) do
+  def admin_delete_organization_region_quota(connection, organization_id, region_id, sandbox_class, opts \\ []) do
     request =
       %{}
       |> method(:delete)
@@ -209,9 +224,12 @@ defmodule ExDaytona.Api.Admin do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -244,9 +262,12 @@ defmodule ExDaytona.Api.Admin do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -307,9 +328,12 @@ defmodule ExDaytona.Api.Admin do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.PaginatedAuditLogs}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.PaginatedAuditLogs}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -329,7 +353,7 @@ defmodule ExDaytona.Api.Admin do
   """
   @spec admin_get_message_attempts(Tesla.Env.client(), String.t(), String.t(), keyword()) ::
           {:ok, [map()]} | {:error, Tesla.Env.t()}
-  def admin_get_message_attempts(connection, organization_id, message_id, _opts \\ []) do
+  def admin_get_message_attempts(connection, organization_id, message_id, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -338,9 +362,12 @@ defmodule ExDaytona.Api.Admin do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, []}
-    ])
+    |> evaluate_response(
+      [
+        {200, []}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -366,7 +393,7 @@ defmodule ExDaytona.Api.Admin do
           ExDaytona.Model.SandboxClass.t(),
           keyword()
         ) :: {:ok, ExDaytona.Model.RegionQuota.t()} | {:error, Tesla.Env.t()}
-  def admin_get_organization_region_quota(connection, organization_id, region_id, sandbox_class, _opts \\ []) do
+  def admin_get_organization_region_quota(connection, organization_id, region_id, sandbox_class, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -375,9 +402,12 @@ defmodule ExDaytona.Api.Admin do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.RegionQuota}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.RegionQuota}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -396,7 +426,7 @@ defmodule ExDaytona.Api.Admin do
   """
   @spec admin_get_runner_by_id(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.RunnerFull.t()} | {:error, Tesla.Env.t()}
-  def admin_get_runner_by_id(connection, id, _opts \\ []) do
+  def admin_get_runner_by_id(connection, id, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -405,9 +435,12 @@ defmodule ExDaytona.Api.Admin do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.RunnerFull}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.RunnerFull}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -426,7 +459,7 @@ defmodule ExDaytona.Api.Admin do
   """
   @spec admin_get_user(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.User.t()} | {:error, Tesla.Env.t()}
-  def admin_get_user(connection, id, _opts \\ []) do
+  def admin_get_user(connection, id, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -435,9 +468,12 @@ defmodule ExDaytona.Api.Admin do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.User}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.User}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -455,7 +491,7 @@ defmodule ExDaytona.Api.Admin do
   """
   @spec admin_get_webhook_status(Tesla.Env.client(), keyword()) ::
           {:ok, ExDaytona.Model.AdminGetWebhookStatus200Response.t()} | {:error, Tesla.Env.t()}
-  def admin_get_webhook_status(connection, _opts \\ []) do
+  def admin_get_webhook_status(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -464,9 +500,12 @@ defmodule ExDaytona.Api.Admin do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.AdminGetWebhookStatus200Response}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.AdminGetWebhookStatus200Response}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -484,7 +523,7 @@ defmodule ExDaytona.Api.Admin do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec admin_initialize_webhooks(Tesla.Env.client(), String.t(), keyword()) :: {:ok, nil} | {:error, Tesla.Env.t()}
-  def admin_initialize_webhooks(connection, organization_id, _opts \\ []) do
+  def admin_initialize_webhooks(connection, organization_id, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -494,10 +533,13 @@ defmodule ExDaytona.Api.Admin do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {201, false},
-      {404, false}
-    ])
+    |> evaluate_response(
+      [
+        {201, false},
+        {404, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -530,9 +572,12 @@ defmodule ExDaytona.Api.Admin do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.RunnerFull}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.RunnerFull}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -549,7 +594,7 @@ defmodule ExDaytona.Api.Admin do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec admin_list_users(Tesla.Env.client(), keyword()) :: {:ok, nil} | {:error, Tesla.Env.t()}
-  def admin_list_users(connection, _opts \\ []) do
+  def admin_list_users(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -558,9 +603,12 @@ defmodule ExDaytona.Api.Admin do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -579,7 +627,7 @@ defmodule ExDaytona.Api.Admin do
   """
   @spec admin_recover_sandbox(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.Sandbox.t()} | {:error, Tesla.Env.t()}
-  def admin_recover_sandbox(connection, sandbox_id, _opts \\ []) do
+  def admin_recover_sandbox(connection, sandbox_id, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -589,9 +637,12 @@ defmodule ExDaytona.Api.Admin do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Sandbox}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Sandbox}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -609,7 +660,7 @@ defmodule ExDaytona.Api.Admin do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec admin_regenerate_key_pair(Tesla.Env.client(), String.t(), keyword()) :: {:ok, nil} | {:error, Tesla.Env.t()}
-  def admin_regenerate_key_pair(connection, id, _opts \\ []) do
+  def admin_regenerate_key_pair(connection, id, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -619,9 +670,12 @@ defmodule ExDaytona.Api.Admin do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {201, false}
-    ])
+    |> evaluate_response(
+      [
+        {201, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -641,7 +695,7 @@ defmodule ExDaytona.Api.Admin do
   """
   @spec admin_send_webhook(Tesla.Env.client(), String.t(), ExDaytona.Model.SendWebhookDto.t(), keyword()) ::
           {:ok, nil} | {:error, Tesla.Env.t()}
-  def admin_send_webhook(connection, organization_id, send_webhook_dto, _opts \\ []) do
+  def admin_send_webhook(connection, organization_id, send_webhook_dto, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -651,9 +705,12 @@ defmodule ExDaytona.Api.Admin do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -672,7 +729,7 @@ defmodule ExDaytona.Api.Admin do
   """
   @spec admin_set_default_registry(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.DockerRegistry.t()} | {:error, Tesla.Env.t()}
-  def admin_set_default_registry(connection, id, _opts \\ []) do
+  def admin_set_default_registry(connection, id, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -682,9 +739,12 @@ defmodule ExDaytona.Api.Admin do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.DockerRegistry}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.DockerRegistry}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -708,7 +768,7 @@ defmodule ExDaytona.Api.Admin do
           ExDaytona.Model.SetSnapshotGeneralStatusDto.t(),
           keyword()
         ) :: {:ok, ExDaytona.Model.SnapshotDto.t()} | {:error, Tesla.Env.t()}
-  def admin_set_snapshot_general_status(connection, id, set_snapshot_general_status_dto, _opts \\ []) do
+  def admin_set_snapshot_general_status(connection, id, set_snapshot_general_status_dto, opts \\ []) do
     request =
       %{}
       |> method(:patch)
@@ -718,9 +778,12 @@ defmodule ExDaytona.Api.Admin do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.SnapshotDto}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.SnapshotDto}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -744,7 +807,7 @@ defmodule ExDaytona.Api.Admin do
           ExDaytona.Model.OrganizationPreviewWarning.t(),
           keyword()
         ) :: {:ok, nil} | {:error, Tesla.Env.t()}
-  def admin_update_organization_preview_warning(connection, organization_id, organization_preview_warning, _opts \\ []) do
+  def admin_update_organization_preview_warning(connection, organization_id, organization_preview_warning, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -754,9 +817,12 @@ defmodule ExDaytona.Api.Admin do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -787,7 +853,7 @@ defmodule ExDaytona.Api.Admin do
         organization_id,
         region_id,
         update_organization_region_quota,
-        _opts \\ []
+        opts \\ []
       ) do
     request =
       %{}
@@ -798,9 +864,12 @@ defmodule ExDaytona.Api.Admin do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -819,7 +888,7 @@ defmodule ExDaytona.Api.Admin do
   """
   @spec admin_update_runner_scheduling(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, nil} | {:error, Tesla.Env.t()}
-  def admin_update_runner_scheduling(connection, id, _opts \\ []) do
+  def admin_update_runner_scheduling(connection, id, opts \\ []) do
     request =
       %{}
       |> method(:patch)
@@ -829,8 +898,11 @@ defmodule ExDaytona.Api.Admin do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 end

@@ -92,7 +92,7 @@ defmodule ExDaytona.Sandbox do
     with {:ok, model} <- build_create_model(opts),
          {:ok, model} <- apply_image(model, image, client),
          {:ok, %Model.Sandbox{} = info} <-
-           Error.normalize(Api.Sandbox.create_sandbox(client.conn, model)) do
+           Error.normalize(Api.Sandbox.create_sandbox(client.conn, model, response: :full)) do
       sandbox = %__MODULE__{client: client, info: info}
 
       if Keyword.get(wait_opts, :wait, true) do
@@ -109,7 +109,7 @@ defmodule ExDaytona.Sandbox do
   @spec get(Client.t(), String.t()) :: {:ok, t()} | {:error, Error.t()}
   def get(%Client{} = client, id_or_name) when is_binary(id_or_name) do
     with {:ok, %Model.Sandbox{} = info} <-
-           Error.normalize(Api.Sandbox.get_sandbox(client.conn, id_or_name)) do
+           Error.normalize(Api.Sandbox.get_sandbox(client.conn, id_or_name, response: :full)) do
       {:ok, %__MODULE__{client: client, info: info}}
     end
   end
@@ -125,7 +125,7 @@ defmodule ExDaytona.Sandbox do
           | {:error, Error.t()}
   def list(%Client{} = client, opts \\ []) do
     with {:ok, %Model.ListSandboxesResponse{items: items, nextCursor: cursor}} <-
-           Error.normalize(Api.Sandbox.list_sandboxes(client.conn, opts)) do
+           Error.normalize(Api.Sandbox.list_sandboxes(client.conn, opts ++ [response: :full])) do
       {:ok, %{items: items || [], next_cursor: cursor}}
     end
   end
@@ -159,11 +159,11 @@ defmodule ExDaytona.Sandbox do
   def delete(sandbox_or_id, client \\ nil)
 
   def delete(%__MODULE__{client: client, info: %{id: id}}, _client) do
-    with {:ok, _} <- Error.normalize(Api.Sandbox.delete_sandbox(client.conn, id)), do: :ok
+    with {:ok, _} <- Error.normalize(Api.Sandbox.delete_sandbox(client.conn, id, response: :full)), do: :ok
   end
 
   def delete(id, %Client{} = client) when is_binary(id) do
-    with {:ok, _} <- Error.normalize(Api.Sandbox.delete_sandbox(client.conn, id)), do: :ok
+    with {:ok, _} <- Error.normalize(Api.Sandbox.delete_sandbox(client.conn, id, response: :full)), do: :ok
   end
 
   @doc """
@@ -219,7 +219,7 @@ defmodule ExDaytona.Sandbox do
       end
 
     with {:ok, %Model.SshAccessDto{} = dto} <-
-           Error.normalize(Api.Sandbox.create_ssh_access(client.conn, id, api_opts)) do
+           Error.normalize(Api.Sandbox.create_ssh_access(client.conn, id, api_opts ++ [response: :full])) do
       {:ok, %{token: dto.token, ssh_command: dto.sshCommand, expires_at: dto.expiresAt}}
     end
   end
@@ -229,7 +229,7 @@ defmodule ExDaytona.Sandbox do
   """
   @spec revoke_ssh_access(t()) :: :ok | {:error, Error.t()}
   def revoke_ssh_access(%__MODULE__{client: client, info: %{id: id}}) do
-    with {:ok, _} <- Error.normalize(Api.Sandbox.revoke_ssh_access(client.conn, id)), do: :ok
+    with {:ok, _} <- Error.normalize(Api.Sandbox.revoke_ssh_access(client.conn, id, response: :full)), do: :ok
   end
 
   @doc """
@@ -245,7 +245,7 @@ defmodule ExDaytona.Sandbox do
           {:ok, %{valid: boolean() | nil, sandbox_id: String.t() | nil}} | {:error, Error.t()}
   def validate_ssh_access(%Client{} = client, token) when is_binary(token) do
     with {:ok, %Model.SshAccessValidationDto{valid: valid, sandboxId: sandbox_id}} <-
-           Error.normalize(Api.Sandbox.validate_ssh_access(client.conn, token)) do
+           Error.normalize(Api.Sandbox.validate_ssh_access(client.conn, token, response: :full)) do
       {:ok, %{valid: valid, sandbox_id: sandbox_id}}
     end
   end
@@ -262,7 +262,7 @@ defmodule ExDaytona.Sandbox do
           {:ok, %{url: String.t(), token: String.t() | nil}} | {:error, Error.t()}
   def preview_url(%__MODULE__{client: client, info: %{id: id}}, port) when is_integer(port) do
     with {:ok, %Model.PortPreviewUrl{url: url, token: token}} <-
-           Error.normalize(Api.Sandbox.get_port_preview_url(client.conn, id, port)) do
+           Error.normalize(Api.Sandbox.get_port_preview_url(client.conn, id, port, response: :full)) do
       {:ok, %{url: url, token: token}}
     end
   end
@@ -287,7 +287,9 @@ defmodule ExDaytona.Sandbox do
       end
 
     with {:ok, %Model.SignedPortPreviewUrl{url: url, token: token}} <-
-           Error.normalize(Api.Sandbox.get_signed_port_preview_url(client.conn, id, port, api_opts)) do
+           Error.normalize(
+             Api.Sandbox.get_signed_port_preview_url(client.conn, id, port, api_opts ++ [response: :full])
+           ) do
       {:ok, %{url: url, token: token}}
     end
   end
@@ -299,7 +301,7 @@ defmodule ExDaytona.Sandbox do
   def expire_signed_preview_url(%__MODULE__{client: client, info: %{id: id}}, port, token)
       when is_integer(port) and is_binary(token) do
     with {:ok, _} <-
-           Error.normalize(Api.Sandbox.expire_signed_port_preview_url(client.conn, id, port, token)) do
+           Error.normalize(Api.Sandbox.expire_signed_port_preview_url(client.conn, id, port, token, response: :full)) do
       :ok
     end
   end
@@ -311,7 +313,7 @@ defmodule ExDaytona.Sandbox do
   @spec build_logs(t()) :: {:ok, binary()} | {:error, Error.t()}
   def build_logs(%__MODULE__{client: client, info: %{id: id}}) do
     with {:ok, %Tesla.Env{body: body}} <-
-           Error.normalize(Api.Sandbox.get_build_logs(client.conn, id)) do
+           Error.normalize(Api.Sandbox.get_build_logs(client.conn, id, response: :full)) do
       {:ok, body}
     end
   end
@@ -358,7 +360,7 @@ defmodule ExDaytona.Sandbox do
 
     with {:ok, conn} <- toolbox_conn(sandbox),
          {:ok, %Model.ExecuteResponse{exitCode: code, result: output}} <-
-           Error.normalize(Api.Process.execute_command(conn, request)) do
+           Error.normalize(Api.Process.execute_command(conn, request, response: :full)) do
       {:ok, %{exit_code: code, output: output}}
     end
   end
@@ -398,7 +400,7 @@ defmodule ExDaytona.Sandbox do
 
     with {:ok, conn} <- toolbox_conn(sandbox),
          {:ok, %Model.CodeRunResponse{} = response} <-
-           Error.normalize(Api.Process.code_run(conn, request)) do
+           Error.normalize(Api.Process.code_run(conn, request, response: :full)) do
       {:ok, %{exit_code: response.exitCode, result: response.result, artifacts: response.artifacts}}
     end
   end

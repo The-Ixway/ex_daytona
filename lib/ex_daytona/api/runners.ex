@@ -42,9 +42,12 @@ defmodule ExDaytona.Api.Runners do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {201, ExDaytona.Model.CreateRunnerResponse}
-    ])
+    |> evaluate_response(
+      [
+        {201, ExDaytona.Model.CreateRunnerResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -79,9 +82,12 @@ defmodule ExDaytona.Api.Runners do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -99,7 +105,7 @@ defmodule ExDaytona.Api.Runners do
   """
   @spec get_info_for_authenticated_runner(Tesla.Env.client(), keyword()) ::
           {:ok, ExDaytona.Model.RunnerFull.t()} | {:error, Tesla.Env.t()}
-  def get_info_for_authenticated_runner(connection, _opts \\ []) do
+  def get_info_for_authenticated_runner(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -108,9 +114,12 @@ defmodule ExDaytona.Api.Runners do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.RunnerFull}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.RunnerFull}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -144,9 +153,12 @@ defmodule ExDaytona.Api.Runners do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Runner}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Runner}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -165,7 +177,7 @@ defmodule ExDaytona.Api.Runners do
   """
   @spec get_runner_by_sandbox_id(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.RunnerFull.t()} | {:error, Tesla.Env.t()}
-  def get_runner_by_sandbox_id(connection, sandbox_id, _opts \\ []) do
+  def get_runner_by_sandbox_id(connection, sandbox_id, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -174,9 +186,12 @@ defmodule ExDaytona.Api.Runners do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.RunnerFull}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.RunnerFull}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -195,7 +210,7 @@ defmodule ExDaytona.Api.Runners do
   """
   @spec get_runner_full_by_id(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.RunnerFull.t()} | {:error, Tesla.Env.t()}
-  def get_runner_full_by_id(connection, id, _opts \\ []) do
+  def get_runner_full_by_id(connection, id, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -204,9 +219,12 @@ defmodule ExDaytona.Api.Runners do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.RunnerFull}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.RunnerFull}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -225,7 +243,7 @@ defmodule ExDaytona.Api.Runners do
   """
   @spec get_runners_by_snapshot_ref(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, [ExDaytona.Model.RunnerSnapshotDto.t()]} | {:error, Tesla.Env.t()}
-  def get_runners_by_snapshot_ref(connection, ref, _opts \\ []) do
+  def get_runners_by_snapshot_ref(connection, ref, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -235,9 +253,12 @@ defmodule ExDaytona.Api.Runners do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.RunnerSnapshotDto}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.RunnerSnapshotDto}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -255,7 +276,7 @@ defmodule ExDaytona.Api.Runners do
   """
   @spec get_snapshot_refs_for_authenticated_runner(Tesla.Env.client(), keyword()) ::
           {:ok, [String.t()]} | {:error, Tesla.Env.t()}
-  def get_snapshot_refs_for_authenticated_runner(connection, _opts \\ []) do
+  def get_snapshot_refs_for_authenticated_runner(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -264,9 +285,12 @@ defmodule ExDaytona.Api.Runners do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, []}
-    ])
+    |> evaluate_response(
+      [
+        {200, []}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -300,9 +324,12 @@ defmodule ExDaytona.Api.Runners do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Runner}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Runner}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -322,7 +349,7 @@ defmodule ExDaytona.Api.Runners do
   """
   @spec runner_healthcheck(Tesla.Env.client(), ExDaytona.Model.RunnerHealthcheck.t(), keyword()) ::
           {:ok, nil} | {:error, Tesla.Env.t()}
-  def runner_healthcheck(connection, runner_healthcheck, _opts \\ []) do
+  def runner_healthcheck(connection, runner_healthcheck, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -332,9 +359,12 @@ defmodule ExDaytona.Api.Runners do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -369,9 +399,12 @@ defmodule ExDaytona.Api.Runners do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Runner}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Runner}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -406,8 +439,11 @@ defmodule ExDaytona.Api.Runners do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Runner}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Runner}
+      ],
+      opts
+    )
   end
 end

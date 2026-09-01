@@ -25,7 +25,7 @@ defmodule ExDaytona.Api.Config do
   """
   @spec get_config(Tesla.Env.client(), keyword()) ::
           {:ok, ExDaytona.Model.DaytonaConfiguration.t()} | {:error, Tesla.Env.t()}
-  def get_config(connection, _opts \\ []) do
+  def get_config(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -34,8 +34,11 @@ defmodule ExDaytona.Api.Config do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.DaytonaConfiguration}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.DaytonaConfiguration}
+      ],
+      opts
+    )
   end
 end

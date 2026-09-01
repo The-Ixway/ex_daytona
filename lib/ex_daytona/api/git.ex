@@ -27,7 +27,7 @@ defmodule ExDaytona.Api.Git do
   """
   @spec add_files(Tesla.Env.client(), ExDaytona.Model.GitAddRequest.t(), keyword()) ::
           {:ok, nil} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def add_files(connection, git_add_request, _opts \\ []) do
+  def add_files(connection, git_add_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -37,12 +37,15 @@ defmodule ExDaytona.Api.Git do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false},
-      {400, ExDaytona.Model.ErrorResponse},
-      {409, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, false},
+        {400, ExDaytona.Model.ErrorResponse},
+        {409, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -62,7 +65,7 @@ defmodule ExDaytona.Api.Git do
   """
   @spec add_remote(Tesla.Env.client(), ExDaytona.Model.GitAddRemoteRequest.t(), keyword()) ::
           {:ok, nil} | {:error, Tesla.Env.t()}
-  def add_remote(connection, git_add_remote_request, _opts \\ []) do
+  def add_remote(connection, git_add_remote_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -72,9 +75,12 @@ defmodule ExDaytona.Api.Git do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {201, false}
-    ])
+    |> evaluate_response(
+      [
+        {201, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -94,7 +100,7 @@ defmodule ExDaytona.Api.Git do
   """
   @spec authenticate(Tesla.Env.client(), ExDaytona.Model.GitAuthenticateRequest.t(), keyword()) ::
           {:ok, nil} | {:error, Tesla.Env.t()}
-  def authenticate(connection, git_authenticate_request, _opts \\ []) do
+  def authenticate(connection, git_authenticate_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -104,9 +110,12 @@ defmodule ExDaytona.Api.Git do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -126,7 +135,7 @@ defmodule ExDaytona.Api.Git do
   """
   @spec checkout_branch(Tesla.Env.client(), ExDaytona.Model.GitCheckoutRequest.t(), keyword()) ::
           {:ok, nil} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def checkout_branch(connection, git_checkout_request, _opts \\ []) do
+  def checkout_branch(connection, git_checkout_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -136,13 +145,16 @@ defmodule ExDaytona.Api.Git do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false},
-      {400, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse},
-      {409, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, false},
+        {400, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse},
+        {409, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -162,7 +174,7 @@ defmodule ExDaytona.Api.Git do
   """
   @spec clone_repository(Tesla.Env.client(), ExDaytona.Model.GitCloneRequest.t(), keyword()) ::
           {:ok, nil} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def clone_repository(connection, git_clone_request, _opts \\ []) do
+  def clone_repository(connection, git_clone_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -172,14 +184,17 @@ defmodule ExDaytona.Api.Git do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false},
-      {400, ExDaytona.Model.ErrorResponse},
-      {401, ExDaytona.Model.ErrorResponse},
-      {403, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, false},
+        {400, ExDaytona.Model.ErrorResponse},
+        {401, ExDaytona.Model.ErrorResponse},
+        {403, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -201,7 +216,7 @@ defmodule ExDaytona.Api.Git do
           {:ok, ExDaytona.Model.ErrorResponse.t()}
           | {:ok, ExDaytona.Model.GitCommitResponse.t()}
           | {:error, Tesla.Env.t()}
-  def commit_changes(connection, git_commit_request, _opts \\ []) do
+  def commit_changes(connection, git_commit_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -211,12 +226,15 @@ defmodule ExDaytona.Api.Git do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.GitCommitResponse},
-      {400, ExDaytona.Model.ErrorResponse},
-      {409, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.GitCommitResponse},
+        {400, ExDaytona.Model.ErrorResponse},
+        {409, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -236,7 +254,7 @@ defmodule ExDaytona.Api.Git do
   """
   @spec configure_user(Tesla.Env.client(), ExDaytona.Model.GitConfigureUserRequest.t(), keyword()) ::
           {:ok, nil} | {:error, Tesla.Env.t()}
-  def configure_user(connection, git_configure_user_request, _opts \\ []) do
+  def configure_user(connection, git_configure_user_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -246,9 +264,12 @@ defmodule ExDaytona.Api.Git do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -268,7 +289,7 @@ defmodule ExDaytona.Api.Git do
   """
   @spec create_branch(Tesla.Env.client(), ExDaytona.Model.GitBranchRequest.t(), keyword()) ::
           {:ok, nil} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def create_branch(connection, git_branch_request, _opts \\ []) do
+  def create_branch(connection, git_branch_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -278,12 +299,15 @@ defmodule ExDaytona.Api.Git do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {201, false},
-      {400, ExDaytona.Model.ErrorResponse},
-      {409, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {201, false},
+        {400, ExDaytona.Model.ErrorResponse},
+        {409, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -303,7 +327,7 @@ defmodule ExDaytona.Api.Git do
   """
   @spec delete_branch(Tesla.Env.client(), ExDaytona.Model.GitDeleteBranchRequest.t(), keyword()) ::
           {:ok, nil} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def delete_branch(connection, git_delete_branch_request, _opts \\ []) do
+  def delete_branch(connection, git_delete_branch_request, opts \\ []) do
     request =
       %{}
       |> method(:delete)
@@ -313,12 +337,15 @@ defmodule ExDaytona.Api.Git do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false},
-      {400, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {204, false},
+        {400, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -340,7 +367,7 @@ defmodule ExDaytona.Api.Git do
           {:ok, ExDaytona.Model.ErrorResponse.t()}
           | {:ok, [ExDaytona.Model.GitCommitInfo.t()]}
           | {:error, Tesla.Env.t()}
-  def get_commit_history(connection, path, _opts \\ []) do
+  def get_commit_history(connection, path, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -350,11 +377,14 @@ defmodule ExDaytona.Api.Git do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.GitCommitInfo},
-      {404, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.GitCommitInfo},
+        {404, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -392,9 +422,12 @@ defmodule ExDaytona.Api.Git do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.GitConfigResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.GitConfigResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -414,7 +447,7 @@ defmodule ExDaytona.Api.Git do
   """
   @spec get_status(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.ErrorResponse.t()} | {:ok, ExDaytona.Model.GitStatus.t()} | {:error, Tesla.Env.t()}
-  def get_status(connection, path, _opts \\ []) do
+  def get_status(connection, path, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -424,12 +457,15 @@ defmodule ExDaytona.Api.Git do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.GitStatus},
-      {400, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.GitStatus},
+        {400, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -449,7 +485,7 @@ defmodule ExDaytona.Api.Git do
   """
   @spec init_repository(Tesla.Env.client(), ExDaytona.Model.GitInitRequest.t(), keyword()) ::
           {:ok, nil} | {:error, Tesla.Env.t()}
-  def init_repository(connection, git_init_request, _opts \\ []) do
+  def init_repository(connection, git_init_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -459,9 +495,12 @@ defmodule ExDaytona.Api.Git do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {201, false}
-    ])
+    |> evaluate_response(
+      [
+        {201, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -483,7 +522,7 @@ defmodule ExDaytona.Api.Git do
           {:ok, ExDaytona.Model.ErrorResponse.t()}
           | {:ok, ExDaytona.Model.ListBranchResponse.t()}
           | {:error, Tesla.Env.t()}
-  def list_branches(connection, path, _opts \\ []) do
+  def list_branches(connection, path, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -493,11 +532,14 @@ defmodule ExDaytona.Api.Git do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ListBranchResponse},
-      {404, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ListBranchResponse},
+        {404, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -517,7 +559,7 @@ defmodule ExDaytona.Api.Git do
   """
   @spec list_remotes(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.ListRemotesResponse.t()} | {:error, Tesla.Env.t()}
-  def list_remotes(connection, path, _opts \\ []) do
+  def list_remotes(connection, path, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -527,9 +569,12 @@ defmodule ExDaytona.Api.Git do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ListRemotesResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ListRemotesResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -549,7 +594,7 @@ defmodule ExDaytona.Api.Git do
   """
   @spec pull_changes(Tesla.Env.client(), ExDaytona.Model.GitPullRequest.t(), keyword()) ::
           {:ok, nil} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def pull_changes(connection, git_pull_request, _opts \\ []) do
+  def pull_changes(connection, git_pull_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -559,15 +604,18 @@ defmodule ExDaytona.Api.Git do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false},
-      {400, ExDaytona.Model.ErrorResponse},
-      {401, ExDaytona.Model.ErrorResponse},
-      {403, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse},
-      {409, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, false},
+        {400, ExDaytona.Model.ErrorResponse},
+        {401, ExDaytona.Model.ErrorResponse},
+        {403, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse},
+        {409, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -587,7 +635,7 @@ defmodule ExDaytona.Api.Git do
   """
   @spec push_changes(Tesla.Env.client(), ExDaytona.Model.GitPushRequest.t(), keyword()) ::
           {:ok, nil} | {:error, Tesla.Env.t()}
-  def push_changes(connection, git_push_request, _opts \\ []) do
+  def push_changes(connection, git_push_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -597,9 +645,12 @@ defmodule ExDaytona.Api.Git do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -619,7 +670,7 @@ defmodule ExDaytona.Api.Git do
   """
   @spec reset_changes(Tesla.Env.client(), ExDaytona.Model.GitResetRequest.t(), keyword()) ::
           {:ok, nil} | {:error, Tesla.Env.t()}
-  def reset_changes(connection, git_reset_request, _opts \\ []) do
+  def reset_changes(connection, git_reset_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -629,9 +680,12 @@ defmodule ExDaytona.Api.Git do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -651,7 +705,7 @@ defmodule ExDaytona.Api.Git do
   """
   @spec restore_files(Tesla.Env.client(), ExDaytona.Model.GitRestoreRequest.t(), keyword()) ::
           {:ok, nil} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def restore_files(connection, git_restore_request, _opts \\ []) do
+  def restore_files(connection, git_restore_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -661,14 +715,17 @@ defmodule ExDaytona.Api.Git do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false},
-      {400, ExDaytona.Model.ErrorResponse},
-      {401, ExDaytona.Model.ErrorResponse},
-      {403, ExDaytona.Model.ErrorResponse},
-      {409, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, false},
+        {400, ExDaytona.Model.ErrorResponse},
+        {401, ExDaytona.Model.ErrorResponse},
+        {403, ExDaytona.Model.ErrorResponse},
+        {409, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -688,7 +745,7 @@ defmodule ExDaytona.Api.Git do
   """
   @spec set_git_config(Tesla.Env.client(), ExDaytona.Model.GitSetConfigRequest.t(), keyword()) ::
           {:ok, nil} | {:error, Tesla.Env.t()}
-  def set_git_config(connection, git_set_config_request, _opts \\ []) do
+  def set_git_config(connection, git_set_config_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -698,8 +755,11 @@ defmodule ExDaytona.Api.Git do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false}
+      ],
+      opts
+    )
   end
 end

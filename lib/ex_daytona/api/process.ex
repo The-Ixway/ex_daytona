@@ -29,7 +29,7 @@ defmodule ExDaytona.Api.Process do
           {:ok, ExDaytona.Model.ErrorResponse.t()}
           | {:ok, ExDaytona.Model.CodeRunResponse.t()}
           | {:error, Tesla.Env.t()}
-  def code_run(connection, code_run_request, _opts \\ []) do
+  def code_run(connection, code_run_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -39,12 +39,15 @@ defmodule ExDaytona.Api.Process do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.CodeRunResponse},
-      {400, ExDaytona.Model.ErrorResponse},
-      {408, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.CodeRunResponse},
+        {400, ExDaytona.Model.ErrorResponse},
+        {408, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -64,7 +67,7 @@ defmodule ExDaytona.Api.Process do
   """
   @spec connect_pty_session(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, nil} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def connect_pty_session(connection, session_id, _opts \\ []) do
+  def connect_pty_session(connection, session_id, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -73,10 +76,13 @@ defmodule ExDaytona.Api.Process do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {101, false},
-      {400, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {101, false},
+        {400, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -98,7 +104,7 @@ defmodule ExDaytona.Api.Process do
           {:ok, ExDaytona.Model.ErrorResponse.t()}
           | {:ok, ExDaytona.Model.PtyCreateResponse.t()}
           | {:error, Tesla.Env.t()}
-  def create_pty_session(connection, pty_create_request, _opts \\ []) do
+  def create_pty_session(connection, pty_create_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -108,12 +114,15 @@ defmodule ExDaytona.Api.Process do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {201, ExDaytona.Model.PtyCreateResponse},
-      {400, ExDaytona.Model.ErrorResponse},
-      {409, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {201, ExDaytona.Model.PtyCreateResponse},
+        {400, ExDaytona.Model.ErrorResponse},
+        {409, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -133,7 +142,7 @@ defmodule ExDaytona.Api.Process do
   """
   @spec create_session(Tesla.Env.client(), ExDaytona.Model.CreateSessionRequest.t(), keyword()) ::
           {:ok, nil} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def create_session(connection, create_session_request, _opts \\ []) do
+  def create_session(connection, create_session_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -143,12 +152,15 @@ defmodule ExDaytona.Api.Process do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {201, false},
-      {400, ExDaytona.Model.ErrorResponse},
-      {409, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {201, false},
+        {400, ExDaytona.Model.ErrorResponse},
+        {409, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -168,7 +180,7 @@ defmodule ExDaytona.Api.Process do
   """
   @spec delete_pty_session(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.ErrorResponse.t()} | {:ok, %{optional(String.t()) => any()}} | {:error, Tesla.Env.t()}
-  def delete_pty_session(connection, session_id, _opts \\ []) do
+  def delete_pty_session(connection, session_id, opts \\ []) do
     request =
       %{}
       |> method(:delete)
@@ -177,11 +189,14 @@ defmodule ExDaytona.Api.Process do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, %{}},
-      {400, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, %{}},
+        {400, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -201,7 +216,7 @@ defmodule ExDaytona.Api.Process do
   """
   @spec delete_session(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, nil} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def delete_session(connection, session_id, _opts \\ []) do
+  def delete_session(connection, session_id, opts \\ []) do
     request =
       %{}
       |> method(:delete)
@@ -210,12 +225,15 @@ defmodule ExDaytona.Api.Process do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false},
-      {400, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {204, false},
+        {400, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -237,7 +255,7 @@ defmodule ExDaytona.Api.Process do
           {:ok, ExDaytona.Model.ErrorResponse.t()}
           | {:ok, ExDaytona.Model.ExecuteResponse.t()}
           | {:error, Tesla.Env.t()}
-  def execute_command(connection, execute_request, _opts \\ []) do
+  def execute_command(connection, execute_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -247,11 +265,14 @@ defmodule ExDaytona.Api.Process do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ExecuteResponse},
-      {400, ExDaytona.Model.ErrorResponse},
-      {408, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ExecuteResponse},
+        {400, ExDaytona.Model.ErrorResponse},
+        {408, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -287,11 +308,14 @@ defmodule ExDaytona.Api.Process do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.SessionCommandLogsResponse},
-      {404, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.SessionCommandLogsResponse},
+        {404, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -310,7 +334,7 @@ defmodule ExDaytona.Api.Process do
   """
   @spec get_entrypoint_session(Tesla.Env.client(), keyword()) ::
           {:ok, ExDaytona.Model.ErrorResponse.t()} | {:ok, ExDaytona.Model.Session.t()} | {:error, Tesla.Env.t()}
-  def get_entrypoint_session(connection, _opts \\ []) do
+  def get_entrypoint_session(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -319,11 +343,14 @@ defmodule ExDaytona.Api.Process do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Session},
-      {404, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Session},
+        {404, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -343,7 +370,7 @@ defmodule ExDaytona.Api.Process do
   """
   @spec get_pty_session(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.ErrorResponse.t()} | {:ok, ExDaytona.Model.PtySessionInfo.t()} | {:error, Tesla.Env.t()}
-  def get_pty_session(connection, session_id, _opts \\ []) do
+  def get_pty_session(connection, session_id, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -352,11 +379,14 @@ defmodule ExDaytona.Api.Process do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.PtySessionInfo},
-      {400, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.PtySessionInfo},
+        {400, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -376,7 +406,7 @@ defmodule ExDaytona.Api.Process do
   """
   @spec get_session(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.ErrorResponse.t()} | {:ok, ExDaytona.Model.Session.t()} | {:error, Tesla.Env.t()}
-  def get_session(connection, session_id, _opts \\ []) do
+  def get_session(connection, session_id, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -385,11 +415,14 @@ defmodule ExDaytona.Api.Process do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Session},
-      {404, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Session},
+        {404, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -410,7 +443,7 @@ defmodule ExDaytona.Api.Process do
   """
   @spec get_session_command(Tesla.Env.client(), String.t(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.Command.t()} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def get_session_command(connection, session_id, command_id, _opts \\ []) do
+  def get_session_command(connection, session_id, command_id, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -419,11 +452,14 @@ defmodule ExDaytona.Api.Process do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Command},
-      {404, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Command},
+        {404, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -461,13 +497,16 @@ defmodule ExDaytona.Api.Process do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.SessionCommandLogsResponse},
-      {400, ExDaytona.Model.ErrorResponse},
-      {403, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.SessionCommandLogsResponse},
+        {400, ExDaytona.Model.ErrorResponse},
+        {403, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -488,7 +527,7 @@ defmodule ExDaytona.Api.Process do
           {:ok, ExDaytona.Model.ErrorResponse.t()}
           | {:ok, ExDaytona.Model.PtyListResponse.t()}
           | {:error, Tesla.Env.t()}
-  def list_pty_sessions(connection, _opts \\ []) do
+  def list_pty_sessions(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -497,10 +536,13 @@ defmodule ExDaytona.Api.Process do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.PtyListResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.PtyListResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -519,7 +561,7 @@ defmodule ExDaytona.Api.Process do
   """
   @spec list_sessions(Tesla.Env.client(), keyword()) ::
           {:ok, ExDaytona.Model.ErrorResponse.t()} | {:ok, [ExDaytona.Model.Session.t()]} | {:error, Tesla.Env.t()}
-  def list_sessions(connection, _opts \\ []) do
+  def list_sessions(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -528,10 +570,13 @@ defmodule ExDaytona.Api.Process do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Session},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Session},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -552,7 +597,7 @@ defmodule ExDaytona.Api.Process do
   """
   @spec resize_pty_session(Tesla.Env.client(), String.t(), ExDaytona.Model.PtyResizeRequest.t(), keyword()) ::
           {:ok, ExDaytona.Model.ErrorResponse.t()} | {:ok, ExDaytona.Model.PtySessionInfo.t()} | {:error, Tesla.Env.t()}
-  def resize_pty_session(connection, session_id, pty_resize_request, _opts \\ []) do
+  def resize_pty_session(connection, session_id, pty_resize_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -562,12 +607,15 @@ defmodule ExDaytona.Api.Process do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.PtySessionInfo},
-      {400, ExDaytona.Model.ErrorResponse},
-      {410, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.PtySessionInfo},
+        {400, ExDaytona.Model.ErrorResponse},
+        {410, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -589,7 +637,7 @@ defmodule ExDaytona.Api.Process do
   """
   @spec send_input(Tesla.Env.client(), String.t(), String.t(), ExDaytona.Model.SessionSendInputRequest.t(), keyword()) ::
           {:ok, nil} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def send_input(connection, session_id, command_id, session_send_input_request, _opts \\ []) do
+  def send_input(connection, session_id, command_id, session_send_input_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -599,13 +647,16 @@ defmodule ExDaytona.Api.Process do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false},
-      {400, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse},
-      {410, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {204, false},
+        {400, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse},
+        {410, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -628,7 +679,7 @@ defmodule ExDaytona.Api.Process do
           {:ok, ExDaytona.Model.ErrorResponse.t()}
           | {:ok, ExDaytona.Model.SessionExecuteResponse.t()}
           | {:error, Tesla.Env.t()}
-  def session_execute_command(connection, session_id, session_execute_request, _opts \\ []) do
+  def session_execute_command(connection, session_id, session_execute_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -638,13 +689,16 @@ defmodule ExDaytona.Api.Process do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.SessionExecuteResponse},
-      {202, ExDaytona.Model.SessionExecuteResponse},
-      {400, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse},
-      {409, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.SessionExecuteResponse},
+        {202, ExDaytona.Model.SessionExecuteResponse},
+        {400, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse},
+        {409, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 end

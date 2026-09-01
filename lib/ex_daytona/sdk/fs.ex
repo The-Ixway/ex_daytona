@@ -61,7 +61,7 @@ defmodule ExDaytona.FS do
   def read_file(%Sandbox{} = sandbox, path) when is_binary(path) do
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox),
          {:ok, %Tesla.Env{body: body}} <-
-           Error.normalize(Api.FileSystem.download_file(conn, path)) do
+           Error.normalize(Api.FileSystem.download_file(conn, path, response: :full)) do
       {:ok, body}
     end
   end
@@ -122,7 +122,7 @@ defmodule ExDaytona.FS do
     opts = if path, do: [path: path], else: []
 
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox),
-         {:ok, files} <- Error.normalize(Api.FileSystem.list_files(conn, opts)) do
+         {:ok, files} <- Error.normalize(Api.FileSystem.list_files(conn, opts ++ [response: :full])) do
       {:ok, List.wrap(files)}
     end
   end
@@ -137,7 +137,7 @@ defmodule ExDaytona.FS do
     mode = Keyword.get(opts, :mode, "755")
 
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox),
-         {:ok, _} <- Error.normalize(Api.FileSystem.create_folder(conn, path, mode)) do
+         {:ok, _} <- Error.normalize(Api.FileSystem.create_folder(conn, path, mode, response: :full)) do
       :ok
     end
   end
@@ -148,7 +148,7 @@ defmodule ExDaytona.FS do
   @spec stat(Sandbox.t(), String.t()) :: {:ok, Model.FileInfo.t()} | {:error, Error.t()}
   def stat(%Sandbox{} = sandbox, path) when is_binary(path) do
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox) do
-      Error.normalize(Api.FileSystem.get_file_info(conn, path))
+      Error.normalize(Api.FileSystem.get_file_info(conn, path, response: :full))
     end
   end
 
@@ -162,7 +162,7 @@ defmodule ExDaytona.FS do
     api_opts = if Keyword.get(opts, :recursive), do: [recursive: true], else: []
 
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox),
-         {:ok, _} <- Error.normalize(Api.FileSystem.delete_file(conn, path, api_opts)) do
+         {:ok, _} <- Error.normalize(Api.FileSystem.delete_file(conn, path, api_opts ++ [response: :full])) do
       :ok
     end
   end
@@ -174,7 +174,7 @@ defmodule ExDaytona.FS do
   def move(%Sandbox{} = sandbox, source, destination)
       when is_binary(source) and is_binary(destination) do
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox),
-         {:ok, _} <- Error.normalize(Api.FileSystem.move_file(conn, source, destination)) do
+         {:ok, _} <- Error.normalize(Api.FileSystem.move_file(conn, source, destination, response: :full)) do
       :ok
     end
   end
@@ -190,7 +190,7 @@ defmodule ExDaytona.FS do
     api_opts = Keyword.take(opts, [:mode, :owner, :group])
 
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox),
-         {:ok, _} <- Error.normalize(Api.FileSystem.set_file_permissions(conn, path, api_opts)) do
+         {:ok, _} <- Error.normalize(Api.FileSystem.set_file_permissions(conn, path, api_opts ++ [response: :full])) do
       :ok
     end
   end
@@ -207,7 +207,7 @@ defmodule ExDaytona.FS do
       when is_binary(path) and is_binary(pattern) do
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox),
          {:ok, %Model.SearchFilesResponse{files: files}} <-
-           Error.normalize(Api.FileSystem.search_files(conn, path, pattern)) do
+           Error.normalize(Api.FileSystem.search_files(conn, path, pattern, response: :full)) do
       {:ok, files || []}
     end
   end
@@ -221,7 +221,7 @@ defmodule ExDaytona.FS do
   def grep(%Sandbox{} = sandbox, path, pattern)
       when is_binary(path) and is_binary(pattern) do
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox),
-         {:ok, matches} <- Error.normalize(Api.FileSystem.find_in_files(conn, path, pattern)) do
+         {:ok, matches} <- Error.normalize(Api.FileSystem.find_in_files(conn, path, pattern, response: :full)) do
       {:ok, List.wrap(matches)}
     end
   end
@@ -238,7 +238,7 @@ defmodule ExDaytona.FS do
     request = %Model.ReplaceRequest{files: files, pattern: pattern, newValue: replacement}
 
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox),
-         {:ok, results} <- Error.normalize(Api.FileSystem.replace_in_files(conn, request)) do
+         {:ok, results} <- Error.normalize(Api.FileSystem.replace_in_files(conn, request, response: :full)) do
       {:ok, List.wrap(results)}
     end
   end

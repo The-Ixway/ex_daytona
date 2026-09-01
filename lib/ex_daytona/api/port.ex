@@ -25,7 +25,7 @@ defmodule ExDaytona.Api.Port do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec get_ports(Tesla.Env.client(), keyword()) :: {:ok, ExDaytona.Model.PortList.t()} | {:error, Tesla.Env.t()}
-  def get_ports(connection, _opts \\ []) do
+  def get_ports(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -34,9 +34,12 @@ defmodule ExDaytona.Api.Port do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.PortList}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.PortList}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -58,7 +61,7 @@ defmodule ExDaytona.Api.Port do
           {:ok, ExDaytona.Model.ErrorResponse.t()}
           | {:ok, ExDaytona.Model.IsPortInUseResponse.t()}
           | {:error, Tesla.Env.t()}
-  def is_port_in_use(connection, port, _opts \\ []) do
+  def is_port_in_use(connection, port, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -67,9 +70,12 @@ defmodule ExDaytona.Api.Port do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.IsPortInUseResponse},
-      {400, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.IsPortInUseResponse},
+        {400, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 end

@@ -29,7 +29,7 @@ defmodule ExDaytona.Api.Interpreter do
           {:ok, ExDaytona.Model.ErrorResponse.t()}
           | {:ok, ExDaytona.Model.InterpreterContext.t()}
           | {:error, Tesla.Env.t()}
-  def create_interpreter_context(connection, create_context_request, _opts \\ []) do
+  def create_interpreter_context(connection, create_context_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -39,11 +39,14 @@ defmodule ExDaytona.Api.Interpreter do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.InterpreterContext},
-      {400, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.InterpreterContext},
+        {400, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -65,7 +68,7 @@ defmodule ExDaytona.Api.Interpreter do
           {:ok, ExDaytona.Model.ErrorResponse.t()}
           | {:ok, %{optional(String.t()) => String.t()}}
           | {:error, Tesla.Env.t()}
-  def delete_interpreter_context(connection, id, _opts \\ []) do
+  def delete_interpreter_context(connection, id, opts \\ []) do
     request =
       %{}
       |> method(:delete)
@@ -74,12 +77,15 @@ defmodule ExDaytona.Api.Interpreter do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, %{}},
-      {400, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, %{}},
+        {400, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -97,7 +103,7 @@ defmodule ExDaytona.Api.Interpreter do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec execute_interpreter_code(Tesla.Env.client(), keyword()) :: {:ok, String.t()} | {:error, Tesla.Env.t()}
-  def execute_interpreter_code(connection, _opts \\ []) do
+  def execute_interpreter_code(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -106,9 +112,12 @@ defmodule ExDaytona.Api.Interpreter do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {101, false}
-    ])
+    |> evaluate_response(
+      [
+        {101, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -129,7 +138,7 @@ defmodule ExDaytona.Api.Interpreter do
           {:ok, ExDaytona.Model.ErrorResponse.t()}
           | {:ok, ExDaytona.Model.ListContextsResponse.t()}
           | {:error, Tesla.Env.t()}
-  def list_interpreter_contexts(connection, _opts \\ []) do
+  def list_interpreter_contexts(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -138,9 +147,12 @@ defmodule ExDaytona.Api.Interpreter do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ListContextsResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ListContextsResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 end

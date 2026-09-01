@@ -42,9 +42,12 @@ defmodule ExDaytona.Api.Secret do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {201, ExDaytona.Model.Secret}
-    ])
+    |> evaluate_response(
+      [
+        {201, ExDaytona.Model.Secret}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -77,9 +80,12 @@ defmodule ExDaytona.Api.Secret do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -113,9 +119,12 @@ defmodule ExDaytona.Api.Secret do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Secret}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Secret}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -148,9 +157,12 @@ defmodule ExDaytona.Api.Secret do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Secret}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Secret}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -193,9 +205,12 @@ defmodule ExDaytona.Api.Secret do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ListSecretsResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ListSecretsResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -231,8 +246,11 @@ defmodule ExDaytona.Api.Secret do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Secret}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Secret}
+      ],
+      opts
+    )
   end
 end

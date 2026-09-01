@@ -26,7 +26,7 @@ defmodule ExDaytona.Api.Info do
   """
   @spec get_user_home_dir(Tesla.Env.client(), keyword()) ::
           {:ok, ExDaytona.Model.UserHomeDirResponse.t()} | {:error, Tesla.Env.t()}
-  def get_user_home_dir(connection, _opts \\ []) do
+  def get_user_home_dir(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -35,9 +35,12 @@ defmodule ExDaytona.Api.Info do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.UserHomeDirResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.UserHomeDirResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -56,7 +59,7 @@ defmodule ExDaytona.Api.Info do
   """
   @spec get_version(Tesla.Env.client(), keyword()) ::
           {:ok, %{optional(String.t()) => String.t()}} | {:error, Tesla.Env.t()}
-  def get_version(connection, _opts \\ []) do
+  def get_version(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -65,9 +68,12 @@ defmodule ExDaytona.Api.Info do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, %{}}
-    ])
+    |> evaluate_response(
+      [
+        {200, %{}}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -86,7 +92,7 @@ defmodule ExDaytona.Api.Info do
   """
   @spec get_work_dir(Tesla.Env.client(), keyword()) ::
           {:ok, ExDaytona.Model.WorkDirResponse.t()} | {:error, Tesla.Env.t()}
-  def get_work_dir(connection, _opts \\ []) do
+  def get_work_dir(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -95,8 +101,11 @@ defmodule ExDaytona.Api.Info do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.WorkDirResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.WorkDirResponse}
+      ],
+      opts
+    )
   end
 end

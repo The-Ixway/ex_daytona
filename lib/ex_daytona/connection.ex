@@ -49,6 +49,9 @@ defmodule ExDaytona.Connection do
     - `max_retries`: Maximum number of retries (default: 3)
     - `delay`: Initial backoff delay in milliseconds (default: 100)
     - `max_delay`: Maximum backoff delay in milliseconds (default: 5_000)
+    - `jitter_factor`: Randomized backoff proportion, 0..1 (default: 0.2)
+    - `use_retry_after_header`: Honor the server's `Retry-After` header on
+      safe retries, capped by `max_delay` (default: true)
     - `should_retry`: Custom arity-3 retry predicate
   - `middleware`: Additional Tesla middleware (appended to the stack).
   - `bearer_token`: A bearer token for bearer authentication.
@@ -161,11 +164,21 @@ defmodule ExDaytona.Connection do
 
   defp retry_middleware(opts) when is_list(opts) do
     [
-      {Tesla.Middleware.Retry,
-       delay: Keyword.get(opts, :delay, 100),
-       max_retries: Keyword.get(opts, :max_retries, 3),
-       max_delay: Keyword.get(opts, :max_delay, 5_000),
-       should_retry: Keyword.get(opts, :should_retry, &default_should_retry/3)}
+      # AttemptTracker (outer) + AttemptCounter (inner) bracket the Retry
+      # middleware so the final env records how many transport retries the
+      # SDK performed (surfaced as retry_count in Response/Error metadata).
+      ExDaytona.Connection.AttemptTracker,
+      {
+        Tesla.Middleware.Retry,
+        # Honor provider Retry-After guidance on safe retries by default
+        delay: Keyword.get(opts, :delay, 100),
+        max_retries: Keyword.get(opts, :max_retries, 3),
+        max_delay: Keyword.get(opts, :max_delay, 5_000),
+        jitter_factor: Keyword.get(opts, :jitter_factor, 0.2),
+        use_retry_after_header: Keyword.get(opts, :use_retry_after_header, true),
+        should_retry: Keyword.get(opts, :should_retry, &default_should_retry/3)
+      },
+      ExDaytona.Connection.AttemptCounter
     ]
   end
 
@@ -179,4 +192,48 @@ defmodule ExDaytona.Connection do
 
   defp default_should_retry({:error, _reason}, %{method: method}, _context),
     do: method in @idempotent_methods
+
+  defmodule AttemptTracker do
+    @moduledoc false
+    # Sits ABOVE Retry: allocates a per-request attempt slot, and after the
+    # (possibly retried) call completes, stamps the retry count into the
+    # result env's opts as :ex_daytona_retry_count.
+    @behaviour Tesla.Middleware
+
+    @impl true
+    def call(env, next, _opts) do
+      key = {:ex_daytona_attempts, make_ref()}
+      Process.put(key, 0)
+      env = Tesla.put_opt(env, :ex_daytona_attempt_key, key)
+
+      try do
+        case Tesla.run(env, next) do
+          {:ok, result} ->
+            {:ok, Tesla.put_opt(result, :ex_daytona_retry_count, max(Process.get(key, 1) - 1, 0))}
+
+          other ->
+            other
+        end
+      after
+        Process.delete(key)
+      end
+    end
+  end
+
+  defmodule AttemptCounter do
+    @moduledoc false
+    # Sits BELOW Retry: executed once per attempt (Retry re-runs the inner
+    # stack), so incrementing here counts attempts.
+    @behaviour Tesla.Middleware
+
+    @impl true
+    def call(env, next, _opts) do
+      case env.opts[:ex_daytona_attempt_key] do
+        nil -> :ok
+        key -> Process.put(key, Process.get(key, 0) + 1)
+      end
+
+      Tesla.run(env, next)
+    end
+  end
 end

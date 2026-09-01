@@ -26,7 +26,7 @@ defmodule ExDaytona.Api.Health do
           {:ok, ExDaytona.Model.Check200Response.t()}
           | {:ok, ExDaytona.Model.Check503Response.t()}
           | {:error, Tesla.Env.t()}
-  def check(connection, _opts \\ []) do
+  def check(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -35,10 +35,13 @@ defmodule ExDaytona.Api.Health do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Check200Response},
-      {503, ExDaytona.Model.Check503Response}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Check200Response},
+        {503, ExDaytona.Model.Check503Response}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -54,7 +57,7 @@ defmodule ExDaytona.Api.Health do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec live(Tesla.Env.client(), keyword()) :: {:ok, nil} | {:error, Tesla.Env.t()}
-  def live(connection, _opts \\ []) do
+  def live(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -63,8 +66,11 @@ defmodule ExDaytona.Api.Health do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false}
+      ],
+      opts
+    )
   end
 end

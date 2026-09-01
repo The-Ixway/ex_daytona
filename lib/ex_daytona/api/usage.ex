@@ -30,7 +30,7 @@ defmodule ExDaytona.Api.Usage do
   """
   @spec get_organization_sandbox_usage(Tesla.Env.client(), String.t(), String.t(), String.t(), String.t(), keyword()) ::
           {:ok, [ExDaytona.Model.ModelsUsagePeriod.t()]} | {:error, Tesla.Env.t()}
-  def get_organization_sandbox_usage(connection, organization_id, sandbox_id, from, to, _opts \\ []) do
+  def get_organization_sandbox_usage(connection, organization_id, sandbox_id, from, to, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -41,9 +41,12 @@ defmodule ExDaytona.Api.Usage do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ModelsUsagePeriod}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ModelsUsagePeriod}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -65,7 +68,7 @@ defmodule ExDaytona.Api.Usage do
   """
   @spec get_organization_usage_aggregated(Tesla.Env.client(), String.t(), String.t(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.ModelsAggregatedUsage.t()} | {:error, Tesla.Env.t()}
-  def get_organization_usage_aggregated(connection, organization_id, from, to, _opts \\ []) do
+  def get_organization_usage_aggregated(connection, organization_id, from, to, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -76,9 +79,12 @@ defmodule ExDaytona.Api.Usage do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ModelsAggregatedUsage}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ModelsAggregatedUsage}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -117,9 +123,12 @@ defmodule ExDaytona.Api.Usage do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ModelsUsageChartPoint}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ModelsUsageChartPoint}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -141,7 +150,7 @@ defmodule ExDaytona.Api.Usage do
   """
   @spec get_organization_usage_per_sandbox(Tesla.Env.client(), String.t(), String.t(), String.t(), keyword()) ::
           {:ok, [ExDaytona.Model.ModelsSandboxUsage.t()]} | {:error, Tesla.Env.t()}
-  def get_organization_usage_per_sandbox(connection, organization_id, from, to, _opts \\ []) do
+  def get_organization_usage_per_sandbox(connection, organization_id, from, to, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -152,8 +161,11 @@ defmodule ExDaytona.Api.Usage do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ModelsSandboxUsage}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ModelsSandboxUsage}
+      ],
+      opts
+    )
   end
 end

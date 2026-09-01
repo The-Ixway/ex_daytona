@@ -26,7 +26,7 @@ defmodule ExDaytona.Api.Organizations do
   """
   @spec accept_organization_invitation(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.OrganizationInvitation.t()} | {:error, Tesla.Env.t()}
-  def accept_organization_invitation(connection, invitation_id, _opts \\ []) do
+  def accept_organization_invitation(connection, invitation_id, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -36,9 +36,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.OrganizationInvitation}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.OrganizationInvitation}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -58,7 +61,7 @@ defmodule ExDaytona.Api.Organizations do
   """
   @spec cancel_organization_invitation(Tesla.Env.client(), String.t(), String.t(), keyword()) ::
           {:ok, nil} | {:error, Tesla.Env.t()}
-  def cancel_organization_invitation(connection, organization_id, invitation_id, _opts \\ []) do
+  def cancel_organization_invitation(connection, organization_id, invitation_id, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -68,9 +71,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -89,7 +95,7 @@ defmodule ExDaytona.Api.Organizations do
   """
   @spec create_organization(Tesla.Env.client(), ExDaytona.Model.CreateOrganization.t(), keyword()) ::
           {:ok, ExDaytona.Model.Organization.t()} | {:error, Tesla.Env.t()}
-  def create_organization(connection, create_organization, _opts \\ []) do
+  def create_organization(connection, create_organization, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -99,9 +105,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {201, ExDaytona.Model.Organization}
-    ])
+    |> evaluate_response(
+      [
+        {201, ExDaytona.Model.Organization}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -125,7 +134,7 @@ defmodule ExDaytona.Api.Organizations do
           ExDaytona.Model.CreateIdentityProvider.t(),
           keyword()
         ) :: {:ok, ExDaytona.Model.IdentityProvider.t()} | {:error, Tesla.Env.t()}
-  def create_organization_identity_provider(connection, organization_id, create_identity_provider, _opts \\ []) do
+  def create_organization_identity_provider(connection, organization_id, create_identity_provider, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -135,9 +144,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {201, ExDaytona.Model.IdentityProvider}
-    ])
+    |> evaluate_response(
+      [
+        {201, ExDaytona.Model.IdentityProvider}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -161,7 +173,7 @@ defmodule ExDaytona.Api.Organizations do
           ExDaytona.Model.CreateOrganizationInvitation.t(),
           keyword()
         ) :: {:ok, ExDaytona.Model.OrganizationInvitation.t()} | {:error, Tesla.Env.t()}
-  def create_organization_invitation(connection, organization_id, create_organization_invitation, _opts \\ []) do
+  def create_organization_invitation(connection, organization_id, create_organization_invitation, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -171,9 +183,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {201, ExDaytona.Model.OrganizationInvitation}
-    ])
+    |> evaluate_response(
+      [
+        {201, ExDaytona.Model.OrganizationInvitation}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -193,7 +208,7 @@ defmodule ExDaytona.Api.Organizations do
   """
   @spec create_organization_role(Tesla.Env.client(), String.t(), ExDaytona.Model.CreateOrganizationRole.t(), keyword()) ::
           {:ok, ExDaytona.Model.OrganizationRole.t()} | {:error, Tesla.Env.t()}
-  def create_organization_role(connection, organization_id, create_organization_role, _opts \\ []) do
+  def create_organization_role(connection, organization_id, create_organization_role, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -203,9 +218,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {201, ExDaytona.Model.OrganizationRole}
-    ])
+    |> evaluate_response(
+      [
+        {201, ExDaytona.Model.OrganizationRole}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -240,9 +258,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {201, ExDaytona.Model.CreateRegionResponse}
-    ])
+    |> evaluate_response(
+      [
+        {201, ExDaytona.Model.CreateRegionResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -261,7 +282,7 @@ defmodule ExDaytona.Api.Organizations do
   """
   @spec decline_organization_invitation(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, nil} | {:error, Tesla.Env.t()}
-  def decline_organization_invitation(connection, invitation_id, _opts \\ []) do
+  def decline_organization_invitation(connection, invitation_id, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -271,9 +292,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -291,7 +315,7 @@ defmodule ExDaytona.Api.Organizations do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec delete_organization(Tesla.Env.client(), String.t(), keyword()) :: {:ok, nil} | {:error, Tesla.Env.t()}
-  def delete_organization(connection, organization_id, _opts \\ []) do
+  def delete_organization(connection, organization_id, opts \\ []) do
     request =
       %{}
       |> method(:delete)
@@ -300,9 +324,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -322,7 +349,7 @@ defmodule ExDaytona.Api.Organizations do
   """
   @spec delete_organization_identity_provider(Tesla.Env.client(), String.t(), String.t(), keyword()) ::
           {:ok, nil} | {:error, Tesla.Env.t()}
-  def delete_organization_identity_provider(connection, organization_id, id, _opts \\ []) do
+  def delete_organization_identity_provider(connection, organization_id, id, opts \\ []) do
     request =
       %{}
       |> method(:delete)
@@ -331,9 +358,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -353,7 +383,7 @@ defmodule ExDaytona.Api.Organizations do
   """
   @spec delete_organization_member(Tesla.Env.client(), String.t(), String.t(), keyword()) ::
           {:ok, nil} | {:error, Tesla.Env.t()}
-  def delete_organization_member(connection, organization_id, user_id, _opts \\ []) do
+  def delete_organization_member(connection, organization_id, user_id, opts \\ []) do
     request =
       %{}
       |> method(:delete)
@@ -362,9 +392,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -383,7 +416,7 @@ defmodule ExDaytona.Api.Organizations do
   """
   @spec delete_organization_otel_config(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, nil} | {:error, Tesla.Env.t()}
-  def delete_organization_otel_config(connection, organization_id, _opts \\ []) do
+  def delete_organization_otel_config(connection, organization_id, opts \\ []) do
     request =
       %{}
       |> method(:delete)
@@ -392,9 +425,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -414,7 +450,7 @@ defmodule ExDaytona.Api.Organizations do
   """
   @spec delete_organization_role(Tesla.Env.client(), String.t(), String.t(), keyword()) ::
           {:ok, nil} | {:error, Tesla.Env.t()}
-  def delete_organization_role(connection, organization_id, role_id, _opts \\ []) do
+  def delete_organization_role(connection, organization_id, role_id, opts \\ []) do
     request =
       %{}
       |> method(:delete)
@@ -423,9 +459,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -458,9 +497,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -479,7 +521,7 @@ defmodule ExDaytona.Api.Organizations do
   """
   @spec get_organization(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.Organization.t()} | {:error, Tesla.Env.t()}
-  def get_organization(connection, organization_id, _opts \\ []) do
+  def get_organization(connection, organization_id, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -488,9 +530,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Organization}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Organization}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -510,7 +555,7 @@ defmodule ExDaytona.Api.Organizations do
   """
   @spec get_organization_identity_provider(Tesla.Env.client(), String.t(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.IdentityProvider.t()} | {:error, Tesla.Env.t()}
-  def get_organization_identity_provider(connection, organization_id, id, _opts \\ []) do
+  def get_organization_identity_provider(connection, organization_id, id, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -519,9 +564,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.IdentityProvider}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.IdentityProvider}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -539,7 +587,7 @@ defmodule ExDaytona.Api.Organizations do
   """
   @spec get_organization_invitations_count_for_authenticated_user(Tesla.Env.client(), keyword()) ::
           {:ok, number()} | {:error, Tesla.Env.t()}
-  def get_organization_invitations_count_for_authenticated_user(connection, _opts \\ []) do
+  def get_organization_invitations_count_for_authenticated_user(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -548,9 +596,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -569,7 +620,7 @@ defmodule ExDaytona.Api.Organizations do
   """
   @spec get_organization_otel_config(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.OtelConfig.t()} | {:error, Tesla.Env.t()}
-  def get_organization_otel_config(connection, organization_id, _opts \\ []) do
+  def get_organization_otel_config(connection, organization_id, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -578,9 +629,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.OtelConfig}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.OtelConfig}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -599,7 +653,7 @@ defmodule ExDaytona.Api.Organizations do
   """
   @spec get_organization_otel_config_by_sandbox_auth_token(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.OtelConfig.t()} | {:error, Tesla.Env.t()}
-  def get_organization_otel_config_by_sandbox_auth_token(connection, auth_token, _opts \\ []) do
+  def get_organization_otel_config_by_sandbox_auth_token(connection, auth_token, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -608,9 +662,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.OtelConfig}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.OtelConfig}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -629,7 +686,7 @@ defmodule ExDaytona.Api.Organizations do
   """
   @spec get_organization_usage_overview(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.OrganizationUsageOverview.t()} | {:error, Tesla.Env.t()}
-  def get_organization_usage_overview(connection, organization_id, _opts \\ []) do
+  def get_organization_usage_overview(connection, organization_id, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -638,9 +695,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.OrganizationUsageOverview}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.OrganizationUsageOverview}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -674,9 +734,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Region}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Region}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -694,7 +757,7 @@ defmodule ExDaytona.Api.Organizations do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec leave_organization(Tesla.Env.client(), String.t(), keyword()) :: {:ok, nil} | {:error, Tesla.Env.t()}
-  def leave_organization(connection, organization_id, _opts \\ []) do
+  def leave_organization(connection, organization_id, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -704,9 +767,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -739,9 +805,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Region}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Region}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -760,7 +829,7 @@ defmodule ExDaytona.Api.Organizations do
   """
   @spec list_available_sandbox_classes(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, [ExDaytona.Model.AvailableSandboxClass.t()]} | {:error, Tesla.Env.t()}
-  def list_available_sandbox_classes(connection, organization_id, _opts \\ []) do
+  def list_available_sandbox_classes(connection, organization_id, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -769,9 +838,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.AvailableSandboxClass}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.AvailableSandboxClass}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -790,7 +862,7 @@ defmodule ExDaytona.Api.Organizations do
   """
   @spec list_organization_identity_providers(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, [ExDaytona.Model.IdentityProvider.t()]} | {:error, Tesla.Env.t()}
-  def list_organization_identity_providers(connection, organization_id, _opts \\ []) do
+  def list_organization_identity_providers(connection, organization_id, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -799,9 +871,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.IdentityProvider}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.IdentityProvider}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -820,7 +895,7 @@ defmodule ExDaytona.Api.Organizations do
   """
   @spec list_organization_invitations(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, [ExDaytona.Model.OrganizationInvitation.t()]} | {:error, Tesla.Env.t()}
-  def list_organization_invitations(connection, organization_id, _opts \\ []) do
+  def list_organization_invitations(connection, organization_id, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -829,9 +904,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.OrganizationInvitation}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.OrganizationInvitation}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -849,7 +927,7 @@ defmodule ExDaytona.Api.Organizations do
   """
   @spec list_organization_invitations_for_authenticated_user(Tesla.Env.client(), keyword()) ::
           {:ok, [ExDaytona.Model.OrganizationInvitation.t()]} | {:error, Tesla.Env.t()}
-  def list_organization_invitations_for_authenticated_user(connection, _opts \\ []) do
+  def list_organization_invitations_for_authenticated_user(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -858,9 +936,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.OrganizationInvitation}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.OrganizationInvitation}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -879,7 +960,7 @@ defmodule ExDaytona.Api.Organizations do
   """
   @spec list_organization_members(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, [ExDaytona.Model.OrganizationUser.t()]} | {:error, Tesla.Env.t()}
-  def list_organization_members(connection, organization_id, _opts \\ []) do
+  def list_organization_members(connection, organization_id, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -888,9 +969,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.OrganizationUser}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.OrganizationUser}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -909,7 +993,7 @@ defmodule ExDaytona.Api.Organizations do
   """
   @spec list_organization_roles(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, [ExDaytona.Model.OrganizationRole.t()]} | {:error, Tesla.Env.t()}
-  def list_organization_roles(connection, organization_id, _opts \\ []) do
+  def list_organization_roles(connection, organization_id, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -918,9 +1002,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.OrganizationRole}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.OrganizationRole}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -938,7 +1025,7 @@ defmodule ExDaytona.Api.Organizations do
   """
   @spec list_organizations(Tesla.Env.client(), keyword()) ::
           {:ok, [ExDaytona.Model.Organization.t()]} | {:error, Tesla.Env.t()}
-  def list_organizations(connection, _opts \\ []) do
+  def list_organizations(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -947,9 +1034,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Organization}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Organization}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -984,9 +1074,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.RegenerateApiKeyResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.RegenerateApiKeyResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1021,9 +1114,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.SnapshotManagerCredentials}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.SnapshotManagerCredentials}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1058,9 +1154,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.RegenerateApiKeyResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.RegenerateApiKeyResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1084,7 +1183,7 @@ defmodule ExDaytona.Api.Organizations do
           ExDaytona.Model.UpdateOrganizationDefaultRegion.t(),
           keyword()
         ) :: {:ok, nil} | {:error, Tesla.Env.t()}
-  def set_organization_default_region(connection, organization_id, update_organization_default_region, _opts \\ []) do
+  def set_organization_default_region(connection, organization_id, update_organization_default_region, opts \\ []) do
     request =
       %{}
       |> method(:patch)
@@ -1094,9 +1193,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1130,9 +1232,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1160,7 +1265,7 @@ defmodule ExDaytona.Api.Organizations do
         connection,
         organization_id,
         test_identity_provider_connection,
-        _opts \\ []
+        opts \\ []
       ) do
     request =
       %{}
@@ -1171,9 +1276,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.TestIdentityProviderConnectionResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.TestIdentityProviderConnectionResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1191,7 +1299,7 @@ defmodule ExDaytona.Api.Organizations do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec unsuspend_organization(Tesla.Env.client(), String.t(), keyword()) :: {:ok, nil} | {:error, Tesla.Env.t()}
-  def unsuspend_organization(connection, organization_id, _opts \\ []) do
+  def unsuspend_organization(connection, organization_id, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -1201,9 +1309,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1234,7 +1345,7 @@ defmodule ExDaytona.Api.Organizations do
         organization_id,
         user_id,
         update_organization_member_access,
-        _opts \\ []
+        opts \\ []
       ) do
     request =
       %{}
@@ -1245,9 +1356,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.OrganizationUser}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.OrganizationUser}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1281,9 +1395,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1309,7 +1426,7 @@ defmodule ExDaytona.Api.Organizations do
           ExDaytona.Model.UpdateIdentityProvider.t(),
           keyword()
         ) :: {:ok, ExDaytona.Model.IdentityProvider.t()} | {:error, Tesla.Env.t()}
-  def update_organization_identity_provider(connection, organization_id, id, update_identity_provider, _opts \\ []) do
+  def update_organization_identity_provider(connection, organization_id, id, update_identity_provider, opts \\ []) do
     request =
       %{}
       |> method(:patch)
@@ -1319,9 +1436,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.IdentityProvider}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.IdentityProvider}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1352,7 +1472,7 @@ defmodule ExDaytona.Api.Organizations do
         organization_id,
         invitation_id,
         update_organization_invitation,
-        _opts \\ []
+        opts \\ []
       ) do
     request =
       %{}
@@ -1363,9 +1483,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.OrganizationInvitation}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.OrganizationInvitation}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1385,7 +1508,7 @@ defmodule ExDaytona.Api.Organizations do
   """
   @spec update_organization_otel_config(Tesla.Env.client(), String.t(), ExDaytona.Model.OtelConfig.t(), keyword()) ::
           {:ok, nil} | {:error, Tesla.Env.t()}
-  def update_organization_otel_config(connection, organization_id, otel_config, _opts \\ []) do
+  def update_organization_otel_config(connection, organization_id, otel_config, opts \\ []) do
     request =
       %{}
       |> method(:put)
@@ -1395,9 +1518,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1421,7 +1547,7 @@ defmodule ExDaytona.Api.Organizations do
           ExDaytona.Model.OrganizationPreviewWarning.t(),
           keyword()
         ) :: {:ok, nil} | {:error, Tesla.Env.t()}
-  def update_organization_preview_warning(connection, organization_id, organization_preview_warning, _opts \\ []) do
+  def update_organization_preview_warning(connection, organization_id, organization_preview_warning, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -1431,9 +1557,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1457,7 +1586,7 @@ defmodule ExDaytona.Api.Organizations do
           ExDaytona.Model.UpdateOrganizationQuota.t(),
           keyword()
         ) :: {:ok, nil} | {:error, Tesla.Env.t()}
-  def update_organization_quota(connection, organization_id, update_organization_quota, _opts \\ []) do
+  def update_organization_quota(connection, organization_id, update_organization_quota, opts \\ []) do
     request =
       %{}
       |> method(:patch)
@@ -1467,9 +1596,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1500,7 +1632,7 @@ defmodule ExDaytona.Api.Organizations do
         organization_id,
         region_id,
         update_organization_region_quota,
-        _opts \\ []
+        opts \\ []
       ) do
     request =
       %{}
@@ -1511,9 +1643,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1539,7 +1674,7 @@ defmodule ExDaytona.Api.Organizations do
           ExDaytona.Model.UpdateOrganizationRole.t(),
           keyword()
         ) :: {:ok, ExDaytona.Model.OrganizationRole.t()} | {:error, Tesla.Env.t()}
-  def update_organization_role(connection, organization_id, role_id, update_organization_role, _opts \\ []) do
+  def update_organization_role(connection, organization_id, role_id, update_organization_role, opts \\ []) do
     request =
       %{}
       |> method(:put)
@@ -1549,9 +1684,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.OrganizationRole}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.OrganizationRole}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1575,7 +1713,7 @@ defmodule ExDaytona.Api.Organizations do
           ExDaytona.Model.OrganizationSsoEnabled.t(),
           keyword()
         ) :: {:ok, nil} | {:error, Tesla.Env.t()}
-  def update_organization_sso_enabled(connection, organization_id, organization_sso_enabled, _opts \\ []) do
+  def update_organization_sso_enabled(connection, organization_id, organization_sso_enabled, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -1585,9 +1723,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1623,9 +1764,12 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1653,7 +1797,7 @@ defmodule ExDaytona.Api.Organizations do
         connection,
         organization_id,
         organization_sandbox_default_limited_network_egress,
-        _opts \\ []
+        opts \\ []
       ) do
     request =
       %{}
@@ -1664,8 +1808,11 @@ defmodule ExDaytona.Api.Organizations do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 end

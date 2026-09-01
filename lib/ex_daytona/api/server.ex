@@ -27,7 +27,7 @@ defmodule ExDaytona.Api.Server do
   """
   @spec initialize(Tesla.Env.client(), ExDaytona.Model.InitializeRequest.t(), keyword()) ::
           {:ok, %{optional(String.t()) => String.t()}} | {:error, Tesla.Env.t()}
-  def initialize(connection, initialize_request, _opts \\ []) do
+  def initialize(connection, initialize_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -37,9 +37,12 @@ defmodule ExDaytona.Api.Server do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, %{}}
-    ])
+    |> evaluate_response(
+      [
+        {200, %{}}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -59,7 +62,7 @@ defmodule ExDaytona.Api.Server do
   """
   @spec update_env(Tesla.Env.client(), ExDaytona.Model.UpdateEnvRequest.t(), keyword()) ::
           {:ok, %{optional(String.t()) => String.t()}} | {:error, Tesla.Env.t()}
-  def update_env(connection, update_env_request, _opts \\ []) do
+  def update_env(connection, update_env_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -69,8 +72,11 @@ defmodule ExDaytona.Api.Server do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, %{}}
-    ])
+    |> evaluate_response(
+      [
+        {200, %{}}
+      ],
+      opts
+    )
   end
 end

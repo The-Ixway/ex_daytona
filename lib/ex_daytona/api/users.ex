@@ -25,7 +25,7 @@ defmodule ExDaytona.Api.Users do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec confirm_pending_sso_link(Tesla.Env.client(), String.t(), keyword()) :: {:ok, nil} | {:error, Tesla.Env.t()}
-  def confirm_pending_sso_link(connection, id, _opts \\ []) do
+  def confirm_pending_sso_link(connection, id, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -35,9 +35,12 @@ defmodule ExDaytona.Api.Users do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -55,7 +58,7 @@ defmodule ExDaytona.Api.Users do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec dismiss_pending_sso_link(Tesla.Env.client(), String.t(), keyword()) :: {:ok, nil} | {:error, Tesla.Env.t()}
-  def dismiss_pending_sso_link(connection, id, _opts \\ []) do
+  def dismiss_pending_sso_link(connection, id, opts \\ []) do
     request =
       %{}
       |> method(:delete)
@@ -64,9 +67,12 @@ defmodule ExDaytona.Api.Users do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -83,7 +89,7 @@ defmodule ExDaytona.Api.Users do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec enroll_in_sms_mfa(Tesla.Env.client(), keyword()) :: {:ok, String.t()} | {:error, Tesla.Env.t()}
-  def enroll_in_sms_mfa(connection, _opts \\ []) do
+  def enroll_in_sms_mfa(connection, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -93,9 +99,12 @@ defmodule ExDaytona.Api.Users do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -113,7 +122,7 @@ defmodule ExDaytona.Api.Users do
   """
   @spec get_authenticated_user(Tesla.Env.client(), keyword()) ::
           {:ok, ExDaytona.Model.User.t()} | {:error, Tesla.Env.t()}
-  def get_authenticated_user(connection, _opts \\ []) do
+  def get_authenticated_user(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -122,9 +131,12 @@ defmodule ExDaytona.Api.Users do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.User}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.User}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -142,7 +154,7 @@ defmodule ExDaytona.Api.Users do
   """
   @spec get_available_account_providers(Tesla.Env.client(), keyword()) ::
           {:ok, [ExDaytona.Model.AccountProvider.t()]} | {:error, Tesla.Env.t()}
-  def get_available_account_providers(connection, _opts \\ []) do
+  def get_available_account_providers(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -151,9 +163,12 @@ defmodule ExDaytona.Api.Users do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.AccountProvider}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.AccountProvider}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -172,7 +187,7 @@ defmodule ExDaytona.Api.Users do
   """
   @spec link_account(Tesla.Env.client(), ExDaytona.Model.CreateLinkedAccount.t(), keyword()) ::
           {:ok, nil} | {:error, Tesla.Env.t()}
-  def link_account(connection, create_linked_account, _opts \\ []) do
+  def link_account(connection, create_linked_account, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -182,9 +197,12 @@ defmodule ExDaytona.Api.Users do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -202,7 +220,7 @@ defmodule ExDaytona.Api.Users do
   """
   @spec list_pending_sso_links(Tesla.Env.client(), keyword()) ::
           {:ok, [ExDaytona.Model.PendingSsoLink.t()]} | {:error, Tesla.Env.t()}
-  def list_pending_sso_links(connection, _opts \\ []) do
+  def list_pending_sso_links(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -211,9 +229,12 @@ defmodule ExDaytona.Api.Users do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.PendingSsoLink}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.PendingSsoLink}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -232,7 +253,7 @@ defmodule ExDaytona.Api.Users do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec unlink_account(Tesla.Env.client(), String.t(), String.t(), keyword()) :: {:ok, nil} | {:error, Tesla.Env.t()}
-  def unlink_account(connection, provider, provider_user_id, _opts \\ []) do
+  def unlink_account(connection, provider, provider_user_id, opts \\ []) do
     request =
       %{}
       |> method(:delete)
@@ -241,8 +262,11 @@ defmodule ExDaytona.Api.Users do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 end

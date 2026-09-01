@@ -42,9 +42,12 @@ defmodule ExDaytona.Api.WarmPools do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {201, ExDaytona.Model.WarmPool}
-    ])
+    |> evaluate_response(
+      [
+        {201, ExDaytona.Model.WarmPool}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -77,9 +80,12 @@ defmodule ExDaytona.Api.WarmPools do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -112,9 +118,12 @@ defmodule ExDaytona.Api.WarmPools do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.WarmPool}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.WarmPool}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -150,8 +159,11 @@ defmodule ExDaytona.Api.WarmPools do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.WarmPool}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.WarmPool}
+      ],
+      opts
+    )
   end
 end

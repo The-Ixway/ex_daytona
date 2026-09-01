@@ -28,7 +28,7 @@ defmodule ExDaytona.Api.FileSystem do
   """
   @spec create_folder(Tesla.Env.client(), String.t(), String.t(), keyword()) ::
           {:ok, nil} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def create_folder(connection, path, mode, _opts \\ []) do
+  def create_folder(connection, path, mode, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -40,10 +40,13 @@ defmodule ExDaytona.Api.FileSystem do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {201, false},
-      {400, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {201, false},
+        {400, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -79,12 +82,15 @@ defmodule ExDaytona.Api.FileSystem do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false},
-      {400, ExDaytona.Model.ErrorResponse},
-      {403, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {204, false},
+        {400, ExDaytona.Model.ErrorResponse},
+        {403, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -104,7 +110,7 @@ defmodule ExDaytona.Api.FileSystem do
   """
   @spec download_file(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.ErrorResponse.t()} | {:ok, String.t()} | {:error, Tesla.Env.t()}
-  def download_file(connection, path, _opts \\ []) do
+  def download_file(connection, path, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -114,12 +120,15 @@ defmodule ExDaytona.Api.FileSystem do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false},
-      {400, ExDaytona.Model.ErrorResponse},
-      {403, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, false},
+        {400, ExDaytona.Model.ErrorResponse},
+        {403, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -139,7 +148,7 @@ defmodule ExDaytona.Api.FileSystem do
   """
   @spec download_files(Tesla.Env.client(), ExDaytona.Model.FilesDownloadRequest.t(), keyword()) ::
           {:ok, ExDaytona.Model.ErrorResponse.t()} | {:ok, %{optional(String.t()) => any()}} | {:error, Tesla.Env.t()}
-  def download_files(connection, files_download_request, _opts \\ []) do
+  def download_files(connection, files_download_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -149,13 +158,16 @@ defmodule ExDaytona.Api.FileSystem do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, %{}},
-      {400, ExDaytona.Model.ErrorResponse},
-      {403, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, %{}},
+        {400, ExDaytona.Model.ErrorResponse},
+        {403, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -176,7 +188,7 @@ defmodule ExDaytona.Api.FileSystem do
   """
   @spec find_in_files(Tesla.Env.client(), String.t(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.ErrorResponse.t()} | {:ok, [ExDaytona.Model.Match.t()]} | {:error, Tesla.Env.t()}
-  def find_in_files(connection, path, pattern, _opts \\ []) do
+  def find_in_files(connection, path, pattern, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -187,10 +199,13 @@ defmodule ExDaytona.Api.FileSystem do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Match},
-      {400, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Match},
+        {400, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -210,7 +225,7 @@ defmodule ExDaytona.Api.FileSystem do
   """
   @spec get_file_info(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.ErrorResponse.t()} | {:ok, ExDaytona.Model.FileInfo.t()} | {:error, Tesla.Env.t()}
-  def get_file_info(connection, path, _opts \\ []) do
+  def get_file_info(connection, path, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -220,12 +235,15 @@ defmodule ExDaytona.Api.FileSystem do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.FileInfo},
-      {400, ExDaytona.Model.ErrorResponse},
-      {403, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.FileInfo},
+        {400, ExDaytona.Model.ErrorResponse},
+        {403, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -261,12 +279,15 @@ defmodule ExDaytona.Api.FileSystem do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.FileInfo},
-      {400, ExDaytona.Model.ErrorResponse},
-      {403, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.FileInfo},
+        {400, ExDaytona.Model.ErrorResponse},
+        {403, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -287,7 +308,7 @@ defmodule ExDaytona.Api.FileSystem do
   """
   @spec move_file(Tesla.Env.client(), String.t(), String.t(), keyword()) ::
           {:ok, nil} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def move_file(connection, source, destination, _opts \\ []) do
+  def move_file(connection, source, destination, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -299,13 +320,16 @@ defmodule ExDaytona.Api.FileSystem do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false},
-      {400, ExDaytona.Model.ErrorResponse},
-      {403, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse},
-      {409, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, false},
+        {400, ExDaytona.Model.ErrorResponse},
+        {403, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse},
+        {409, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -327,7 +351,7 @@ defmodule ExDaytona.Api.FileSystem do
           {:ok, ExDaytona.Model.ErrorResponse.t()}
           | {:ok, [ExDaytona.Model.ReplaceResult.t()]}
           | {:error, Tesla.Env.t()}
-  def replace_in_files(connection, replace_request, _opts \\ []) do
+  def replace_in_files(connection, replace_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -337,10 +361,13 @@ defmodule ExDaytona.Api.FileSystem do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ReplaceResult},
-      {400, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ReplaceResult},
+        {400, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -363,7 +390,7 @@ defmodule ExDaytona.Api.FileSystem do
           {:ok, ExDaytona.Model.ErrorResponse.t()}
           | {:ok, ExDaytona.Model.SearchFilesResponse.t()}
           | {:error, Tesla.Env.t()}
-  def search_files(connection, path, pattern, _opts \\ []) do
+  def search_files(connection, path, pattern, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -374,10 +401,13 @@ defmodule ExDaytona.Api.FileSystem do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.SearchFilesResponse},
-      {400, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.SearchFilesResponse},
+        {400, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -418,12 +448,15 @@ defmodule ExDaytona.Api.FileSystem do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false},
-      {400, ExDaytona.Model.ErrorResponse},
-      {403, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, false},
+        {400, ExDaytona.Model.ErrorResponse},
+        {403, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -460,10 +493,13 @@ defmodule ExDaytona.Api.FileSystem do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.UploadedFile},
-      {400, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.UploadedFile},
+        {400, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -482,7 +518,7 @@ defmodule ExDaytona.Api.FileSystem do
   """
   @spec upload_files(Tesla.Env.client(), keyword()) ::
           {:ok, nil} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def upload_files(connection, _opts \\ []) do
+  def upload_files(connection, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -492,9 +528,12 @@ defmodule ExDaytona.Api.FileSystem do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false},
-      {400, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, false},
+        {400, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 end

@@ -25,7 +25,7 @@ defmodule ExDaytona.Api.Regions do
   """
   @spec list_shared_regions(Tesla.Env.client(), keyword()) ::
           {:ok, [ExDaytona.Model.Region.t()]} | {:error, Tesla.Env.t()}
-  def list_shared_regions(connection, _opts \\ []) do
+  def list_shared_regions(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -34,8 +34,11 @@ defmodule ExDaytona.Api.Regions do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Region}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Region}
+      ],
+      opts
+    )
   end
 end

@@ -191,16 +191,30 @@ defmodule ExDaytona.RequestBuilder do
 
   - `{:ok, struct}`, `{:ok, [struct]}`, `{:ok, decoded_json}` (for `[]`/`%{}`
     mappings) or `{:ok, Tesla.Env.t()}` on success
+  - `{:ok, %ExDaytona.Response{}}` when called with `response: :full` —
+    the same decoded value in `data`, plus status, normalized headers,
+    request id, rate-limit state, parsed Retry-After, and retry count
   - `{:error, term}` on failure
   """
-  @spec evaluate_response(Tesla.Env.result(), response_mapping) ::
-          {:ok, struct() | [struct()] | list() | map() | Tesla.Env.t()}
+  @spec evaluate_response(Tesla.Env.result(), response_mapping, keyword()) ::
+          {:ok, struct() | [struct()] | list() | map() | Tesla.Env.t() | ExDaytona.Response.t()}
           | {:error, Tesla.Env.t() | any()}
-  def evaluate_response({:ok, %Tesla.Env{} = env}, mapping) do
-    resolve_mapping(env, mapping, nil)
+  def evaluate_response(result, mapping, opts \\ [])
+
+  def evaluate_response({:ok, %Tesla.Env{} = env}, mapping, opts) do
+    case {Keyword.get(opts, :response, :default), resolve_mapping(env, mapping, nil)} do
+      {:default, resolved} ->
+        resolved
+
+      {:full, {:ok, decoded}} ->
+        {:ok, ExDaytona.Response.from_env(env, decoded)}
+
+      {:full, {:error, _} = error} ->
+        error
+    end
   end
 
-  def evaluate_response({:error, _} = error, _), do: error
+  def evaluate_response({:error, _} = error, _, _opts), do: error
 
   defp resolve_mapping(%Tesla.Env{status: status} = env, [{mapping_status, struct} | _], _)
        when status == mapping_status do

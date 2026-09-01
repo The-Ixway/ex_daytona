@@ -42,9 +42,12 @@ defmodule ExDaytona.Api.Volumes do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.VolumeDto}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.VolumeDto}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -77,10 +80,13 @@ defmodule ExDaytona.Api.Volumes do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false},
-      {409, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false},
+        {409, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -114,9 +120,12 @@ defmodule ExDaytona.Api.Volumes do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.VolumeDto}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.VolumeDto}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -150,9 +159,12 @@ defmodule ExDaytona.Api.Volumes do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.VolumeDto}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.VolumeDto}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -186,8 +198,11 @@ defmodule ExDaytona.Api.Volumes do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.VolumeDto}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.VolumeDto}
+      ],
+      opts
+    )
   end
 end

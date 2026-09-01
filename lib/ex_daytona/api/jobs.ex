@@ -25,7 +25,7 @@ defmodule ExDaytona.Api.Jobs do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec get_job(Tesla.Env.client(), String.t(), keyword()) :: {:ok, ExDaytona.Model.Job.t()} | {:error, Tesla.Env.t()}
-  def get_job(connection, job_id, _opts \\ []) do
+  def get_job(connection, job_id, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -34,9 +34,12 @@ defmodule ExDaytona.Api.Jobs do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Job}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Job}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -75,9 +78,12 @@ defmodule ExDaytona.Api.Jobs do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.PaginatedJobs}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.PaginatedJobs}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -113,9 +119,12 @@ defmodule ExDaytona.Api.Jobs do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.PollJobsResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.PollJobsResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -135,7 +144,7 @@ defmodule ExDaytona.Api.Jobs do
   """
   @spec update_job_status(Tesla.Env.client(), String.t(), ExDaytona.Model.UpdateJobStatus.t(), keyword()) ::
           {:ok, ExDaytona.Model.Job.t()} | {:error, Tesla.Env.t()}
-  def update_job_status(connection, job_id, update_job_status, _opts \\ []) do
+  def update_job_status(connection, job_id, update_job_status, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -145,8 +154,11 @@ defmodule ExDaytona.Api.Jobs do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Job}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Job}
+      ],
+      opts
+    )
   end
 end

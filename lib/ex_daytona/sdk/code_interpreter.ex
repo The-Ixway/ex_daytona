@@ -80,7 +80,7 @@ defmodule ExDaytona.CodeInterpreter do
     request = %Model.CreateContextRequest{cwd: opts[:cwd], language: "python"}
 
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox) do
-      Error.normalize(Api.Interpreter.create_interpreter_context(conn, request))
+      Error.normalize(Api.Interpreter.create_interpreter_context(conn, request, response: :full))
     end
   end
 
@@ -92,7 +92,7 @@ defmodule ExDaytona.CodeInterpreter do
   def list_contexts(%Sandbox{} = sandbox) do
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox),
          {:ok, %Model.ListContextsResponse{contexts: contexts}} <-
-           Error.normalize(Api.Interpreter.list_interpreter_contexts(conn)) do
+           Error.normalize(Api.Interpreter.list_interpreter_contexts(conn, response: :full)) do
       {:ok, contexts || []}
     end
   end
@@ -106,7 +106,7 @@ defmodule ExDaytona.CodeInterpreter do
     id = context_id(context)
 
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox),
-         {:ok, _} <- Error.normalize(Api.Interpreter.delete_interpreter_context(conn, id)) do
+         {:ok, _} <- Error.normalize(Api.Interpreter.delete_interpreter_context(conn, id, response: :full)) do
       :ok
     end
   end

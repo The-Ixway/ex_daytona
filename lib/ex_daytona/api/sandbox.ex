@@ -42,9 +42,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Sandbox}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Sandbox}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -80,9 +83,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Sandbox}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Sandbox}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -117,9 +123,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Sandbox}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Sandbox}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -155,9 +164,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Sandbox}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Sandbox}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -194,9 +206,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.SshAccessDto}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.SshAccessDto}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -230,9 +245,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Sandbox}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Sandbox}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -269,9 +287,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -307,9 +328,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Sandbox}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Sandbox}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -345,9 +369,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -381,9 +408,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Url}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Url}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -417,9 +447,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Organization}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Organization}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -454,9 +487,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.PortPreviewUrl}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.PortPreviewUrl}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -490,9 +526,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.RegionQuota}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.RegionQuota}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -529,9 +568,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Sandbox}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Sandbox}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -565,9 +607,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Sandbox}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Sandbox}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -603,9 +648,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Sandbox}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Sandbox}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -652,9 +700,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.PaginatedLogs}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.PaginatedLogs}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -695,9 +746,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.MetricsResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.MetricsResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -731,9 +785,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Sandbox}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Sandbox}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -767,9 +824,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -805,9 +865,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.TraceSpan}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.TraceSpan}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -850,9 +913,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.PaginatedTraces}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.PaginatedTraces}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -889,9 +955,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Sandbox}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Sandbox}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -928,9 +997,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.SignedPortPreviewUrl}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.SignedPortPreviewUrl}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -964,9 +1036,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ToolboxProxyUrl}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ToolboxProxyUrl}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1054,9 +1129,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ListSandboxesResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ListSandboxesResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1127,9 +1205,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.PaginatedSandboxesDeprecated}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.PaginatedSandboxesDeprecated}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1164,9 +1245,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Sandbox}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Sandbox}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1203,9 +1287,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Sandbox}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Sandbox}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1241,9 +1328,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.SandboxLabels}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.SandboxLabels}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1279,9 +1369,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Sandbox}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Sandbox}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1315,9 +1408,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ResolveSandboxSecrets200ResponseInner}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ResolveSandboxSecrets200ResponseInner}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1353,9 +1449,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Sandbox}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Sandbox}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1389,9 +1488,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1427,9 +1529,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Sandbox}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Sandbox}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1465,9 +1570,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Sandbox}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Sandbox}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1503,9 +1611,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Sandbox}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Sandbox}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1541,9 +1652,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Sandbox}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Sandbox}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1579,9 +1693,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Sandbox}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Sandbox}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1617,9 +1734,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Sandbox}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Sandbox}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1656,9 +1776,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Sandbox}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Sandbox}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1694,9 +1817,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {201, false}
-    ])
+    |> evaluate_response(
+      [
+        {201, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1737,9 +1863,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Sandbox}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Sandbox}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1775,9 +1904,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Sandbox}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Sandbox}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1814,9 +1946,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Sandbox}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Sandbox}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1852,9 +1987,12 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1889,8 +2027,11 @@ defmodule ExDaytona.Api.Sandbox do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.SshAccessValidationDto}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.SshAccessValidationDto}
+      ],
+      opts
+    )
   end
 end

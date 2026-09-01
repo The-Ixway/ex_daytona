@@ -26,7 +26,7 @@ defmodule ExDaytona.Api.Audit do
   """
   @spec get_audit_scenarios(Tesla.Env.client(), keyword()) ::
           {:ok, ExDaytona.Model.AuditScenarios.t()} | {:error, Tesla.Env.t()}
-  def get_audit_scenarios(connection, _opts \\ []) do
+  def get_audit_scenarios(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -35,9 +35,12 @@ defmodule ExDaytona.Api.Audit do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.AuditScenarios}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.AuditScenarios}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -99,8 +102,11 @@ defmodule ExDaytona.Api.Audit do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.PaginatedAuditLogs}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.PaginatedAuditLogs}
+      ],
+      opts
+    )
   end
 end

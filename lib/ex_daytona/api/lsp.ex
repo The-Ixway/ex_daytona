@@ -27,7 +27,7 @@ defmodule ExDaytona.Api.Lsp do
   """
   @spec completions(Tesla.Env.client(), ExDaytona.Model.LspCompletionParams.t(), keyword()) ::
           {:ok, ExDaytona.Model.ErrorResponse.t()} | {:ok, ExDaytona.Model.CompletionList.t()} | {:error, Tesla.Env.t()}
-  def completions(connection, lsp_completion_params, _opts \\ []) do
+  def completions(connection, lsp_completion_params, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -37,10 +37,13 @@ defmodule ExDaytona.Api.Lsp do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.CompletionList},
-      {400, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.CompletionList},
+        {400, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -60,7 +63,7 @@ defmodule ExDaytona.Api.Lsp do
   """
   @spec did_close(Tesla.Env.client(), ExDaytona.Model.LspDocumentRequest.t(), keyword()) ::
           {:ok, nil} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def did_close(connection, lsp_document_request, _opts \\ []) do
+  def did_close(connection, lsp_document_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -70,10 +73,13 @@ defmodule ExDaytona.Api.Lsp do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false},
-      {400, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, false},
+        {400, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -93,7 +99,7 @@ defmodule ExDaytona.Api.Lsp do
   """
   @spec did_open(Tesla.Env.client(), ExDaytona.Model.LspDocumentRequest.t(), keyword()) ::
           {:ok, nil} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def did_open(connection, lsp_document_request, _opts \\ []) do
+  def did_open(connection, lsp_document_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -103,10 +109,13 @@ defmodule ExDaytona.Api.Lsp do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false},
-      {400, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, false},
+        {400, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -128,7 +137,7 @@ defmodule ExDaytona.Api.Lsp do
   """
   @spec document_symbols(Tesla.Env.client(), String.t(), String.t(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.ErrorResponse.t()} | {:ok, [ExDaytona.Model.LspSymbol.t()]} | {:error, Tesla.Env.t()}
-  def document_symbols(connection, language_id, path_to_project, uri, _opts \\ []) do
+  def document_symbols(connection, language_id, path_to_project, uri, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -140,10 +149,13 @@ defmodule ExDaytona.Api.Lsp do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.LspSymbol},
-      {400, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.LspSymbol},
+        {400, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -163,7 +175,7 @@ defmodule ExDaytona.Api.Lsp do
   """
   @spec start(Tesla.Env.client(), ExDaytona.Model.LspServerRequest.t(), keyword()) ::
           {:ok, nil} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def start(connection, lsp_server_request, _opts \\ []) do
+  def start(connection, lsp_server_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -173,11 +185,14 @@ defmodule ExDaytona.Api.Lsp do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false},
-      {400, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, false},
+        {400, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -197,7 +212,7 @@ defmodule ExDaytona.Api.Lsp do
   """
   @spec stop(Tesla.Env.client(), ExDaytona.Model.LspServerRequest.t(), keyword()) ::
           {:ok, nil} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def stop(connection, lsp_server_request, _opts \\ []) do
+  def stop(connection, lsp_server_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -207,11 +222,14 @@ defmodule ExDaytona.Api.Lsp do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false},
-      {400, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, false},
+        {400, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -233,7 +251,7 @@ defmodule ExDaytona.Api.Lsp do
   """
   @spec workspace_symbols(Tesla.Env.client(), String.t(), String.t(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.ErrorResponse.t()} | {:ok, [ExDaytona.Model.LspSymbol.t()]} | {:error, Tesla.Env.t()}
-  def workspace_symbols(connection, query, language_id, path_to_project, _opts \\ []) do
+  def workspace_symbols(connection, query, language_id, path_to_project, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -245,9 +263,12 @@ defmodule ExDaytona.Api.Lsp do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.LspSymbol},
-      {400, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.LspSymbol},
+        {400, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 end

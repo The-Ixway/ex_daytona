@@ -42,9 +42,12 @@ defmodule ExDaytona.Api.ApiKeys do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {201, ExDaytona.Model.ApiKeyResponse}
-    ])
+    |> evaluate_response(
+      [
+        {201, ExDaytona.Model.ApiKeyResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -77,9 +80,12 @@ defmodule ExDaytona.Api.ApiKeys do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -114,9 +120,12 @@ defmodule ExDaytona.Api.ApiKeys do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -150,9 +159,12 @@ defmodule ExDaytona.Api.ApiKeys do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ApiKeyList}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ApiKeyList}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -185,9 +197,12 @@ defmodule ExDaytona.Api.ApiKeys do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ApiKeyList}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ApiKeyList}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -220,9 +235,12 @@ defmodule ExDaytona.Api.ApiKeys do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ApiKeyList},
-      {500, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ApiKeyList},
+        {500, false}
+      ],
+      opts
+    )
   end
 end

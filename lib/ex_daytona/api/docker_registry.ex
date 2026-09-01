@@ -42,9 +42,12 @@ defmodule ExDaytona.Api.DockerRegistry do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {201, ExDaytona.Model.DockerRegistry}
-    ])
+    |> evaluate_response(
+      [
+        {201, ExDaytona.Model.DockerRegistry}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -77,9 +80,12 @@ defmodule ExDaytona.Api.DockerRegistry do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -113,9 +119,12 @@ defmodule ExDaytona.Api.DockerRegistry do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.DockerRegistry}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.DockerRegistry}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -150,9 +159,12 @@ defmodule ExDaytona.Api.DockerRegistry do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.RegistryPushAccessDto}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.RegistryPushAccessDto}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -185,9 +197,12 @@ defmodule ExDaytona.Api.DockerRegistry do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.DockerRegistry}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.DockerRegistry}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -223,8 +238,11 @@ defmodule ExDaytona.Api.DockerRegistry do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.DockerRegistry}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.DockerRegistry}
+      ],
+      opts
+    )
   end
 end

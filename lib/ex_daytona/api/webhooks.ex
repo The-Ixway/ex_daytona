@@ -42,9 +42,12 @@ defmodule ExDaytona.Api.Webhooks do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.WebhookAppPortalAccess}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.WebhookAppPortalAccess}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -78,10 +81,13 @@ defmodule ExDaytona.Api.Webhooks do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.WebhookInitializationStatus},
-      {404, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.WebhookInitializationStatus},
+        {404, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -116,9 +122,12 @@ defmodule ExDaytona.Api.Webhooks do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {201, ExDaytona.Model.WebhookInitializationStatus}
-    ])
+    |> evaluate_response(
+      [
+        {201, ExDaytona.Model.WebhookInitializationStatus}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -152,9 +161,12 @@ defmodule ExDaytona.Api.Webhooks do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false},
-      {404, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false},
+        {404, false}
+      ],
+      opts
+    )
   end
 end

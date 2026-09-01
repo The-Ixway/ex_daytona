@@ -46,7 +46,9 @@ defmodule ExDaytona.Session do
 
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox),
          {:ok, _} <-
-           Error.normalize(Api.Process.create_session(conn, %Model.CreateSessionRequest{sessionId: id})) do
+           Error.normalize(
+             Api.Process.create_session(conn, %Model.CreateSessionRequest{sessionId: id}, response: :full)
+           ) do
       {:ok, %__MODULE__{sandbox: sandbox, id: id}}
     end
   end
@@ -57,7 +59,7 @@ defmodule ExDaytona.Session do
   @spec list(Sandbox.t()) :: {:ok, [Model.Session.t()]} | {:error, Error.t()}
   def list(%Sandbox{} = sandbox) do
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox),
-         {:ok, sessions} <- Error.normalize(Api.Process.list_sessions(conn)) do
+         {:ok, sessions} <- Error.normalize(Api.Process.list_sessions(conn, response: :full)) do
       {:ok, List.wrap(sessions)}
     end
   end
@@ -69,7 +71,7 @@ defmodule ExDaytona.Session do
   @spec get(t()) :: {:ok, Model.Session.t()} | {:error, Error.t()}
   def get(%__MODULE__{sandbox: sandbox, id: id}) do
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox) do
-      Error.normalize(Api.Process.get_session(conn, id))
+      Error.normalize(Api.Process.get_session(conn, id, response: :full))
     end
   end
 
@@ -79,7 +81,7 @@ defmodule ExDaytona.Session do
   @spec delete(t()) :: :ok | {:error, Error.t()}
   def delete(%__MODULE__{sandbox: sandbox, id: id}) do
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox),
-         {:ok, _} <- Error.normalize(Api.Process.delete_session(conn, id)) do
+         {:ok, _} <- Error.normalize(Api.Process.delete_session(conn, id, response: :full)) do
       :ok
     end
   end
@@ -104,7 +106,7 @@ defmodule ExDaytona.Session do
 
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox),
          {:ok, %Model.SessionExecuteResponse{} = response} <-
-           Error.normalize(Api.Process.session_execute_command(conn, id, request)) do
+           Error.normalize(Api.Process.session_execute_command(conn, id, request, response: :full)) do
       {:ok,
        %{
          cmd_id: response.cmdId,
@@ -132,7 +134,7 @@ defmodule ExDaytona.Session do
 
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox),
          {:ok, %Model.SessionExecuteResponse{cmdId: cmd_id}} <-
-           Error.normalize(Api.Process.session_execute_command(conn, id, request)) do
+           Error.normalize(Api.Process.session_execute_command(conn, id, request, response: :full)) do
       {:ok, cmd_id}
     end
   end
@@ -144,7 +146,7 @@ defmodule ExDaytona.Session do
   @spec command(t(), String.t()) :: {:ok, Model.Command.t()} | {:error, Error.t()}
   def command(%__MODULE__{sandbox: sandbox, id: id}, cmd_id) when is_binary(cmd_id) do
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox) do
-      Error.normalize(Api.Process.get_session_command(conn, id, cmd_id))
+      Error.normalize(Api.Process.get_session_command(conn, id, cmd_id, response: :full))
     end
   end
 
@@ -230,7 +232,7 @@ defmodule ExDaytona.Session do
   # over a second on a fresh command. Retry that specific failure for a
   # couple of seconds instead of surfacing the race to callers.
   defp attempt_send_input(conn, id, cmd_id, request, attempts_left) do
-    case Error.normalize(Api.Process.send_input(conn, id, cmd_id, request)) do
+    case Error.normalize(Api.Process.send_input(conn, id, cmd_id, request, response: :full)) do
       {:ok, _} ->
         :ok
 
@@ -251,7 +253,7 @@ defmodule ExDaytona.Session do
   @spec entrypoint(Sandbox.t()) :: {:ok, Model.Session.t()} | {:error, Error.t()}
   def entrypoint(%Sandbox{} = sandbox) do
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox) do
-      Error.normalize(Api.Process.get_entrypoint_session(conn))
+      Error.normalize(Api.Process.get_entrypoint_session(conn, response: :full))
     end
   end
 

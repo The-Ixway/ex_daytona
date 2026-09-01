@@ -29,7 +29,7 @@ defmodule ExDaytona.Api.ComputerUse do
           {:ok, ExDaytona.Model.ErrorResponse.t()}
           | {:ok, ExDaytona.Model.MouseClickResponse.t()}
           | {:error, Tesla.Env.t()}
-  def click(connection, mouse_click_request, _opts \\ []) do
+  def click(connection, mouse_click_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -39,11 +39,14 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.MouseClickResponse},
-      {400, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.MouseClickResponse},
+        {400, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -63,7 +66,7 @@ defmodule ExDaytona.Api.ComputerUse do
   """
   @spec delete_recording(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, nil} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def delete_recording(connection, id, _opts \\ []) do
+  def delete_recording(connection, id, opts \\ []) do
     request =
       %{}
       |> method(:delete)
@@ -72,13 +75,16 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false},
-      {400, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse},
-      {409, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {204, false},
+        {400, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse},
+        {409, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -98,7 +104,7 @@ defmodule ExDaytona.Api.ComputerUse do
   """
   @spec download_recording(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.ErrorResponse.t()} | {:ok, String.t()} | {:error, Tesla.Env.t()}
-  def download_recording(connection, id, _opts \\ []) do
+  def download_recording(connection, id, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -107,12 +113,15 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false},
-      {400, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, false},
+        {400, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -134,7 +143,7 @@ defmodule ExDaytona.Api.ComputerUse do
           {:ok, ExDaytona.Model.ErrorResponse.t()}
           | {:ok, ExDaytona.Model.MouseDragResponse.t()}
           | {:error, Tesla.Env.t()}
-  def drag(connection, mouse_drag_request, _opts \\ []) do
+  def drag(connection, mouse_drag_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -144,11 +153,14 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.MouseDragResponse},
-      {400, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.MouseDragResponse},
+        {400, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -170,7 +182,7 @@ defmodule ExDaytona.Api.ComputerUse do
           {:ok, ExDaytona.Model.ErrorResponse.t()}
           | {:ok, ExDaytona.Model.AccessibilityNodesResponse.t()}
           | {:error, Tesla.Env.t()}
-  def find_accessibility_nodes(connection, find_accessibility_nodes_request, _opts \\ []) do
+  def find_accessibility_nodes(connection, find_accessibility_nodes_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -180,13 +192,16 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.AccessibilityNodesResponse},
-      {400, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse},
-      {503, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.AccessibilityNodesResponse},
+        {400, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse},
+        {503, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -206,7 +221,7 @@ defmodule ExDaytona.Api.ComputerUse do
   """
   @spec focus_accessibility_node(Tesla.Env.client(), ExDaytona.Model.AccessibilityNodeRequest.t(), keyword()) ::
           {:ok, map()} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def focus_accessibility_node(connection, accessibility_node_request, _opts \\ []) do
+  def focus_accessibility_node(connection, accessibility_node_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -216,13 +231,16 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, %{}},
-      {400, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse},
-      {503, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, %{}},
+        {400, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse},
+        {503, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -262,13 +280,16 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.AccessibilityTreeResponse},
-      {400, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse},
-      {503, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.AccessibilityTreeResponse},
+        {400, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse},
+        {503, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -287,7 +308,7 @@ defmodule ExDaytona.Api.ComputerUse do
   """
   @spec get_computer_use_status(Tesla.Env.client(), keyword()) ::
           {:ok, ExDaytona.Model.ComputerUseStatusResponse.t()} | {:error, Tesla.Env.t()}
-  def get_computer_use_status(connection, _opts \\ []) do
+  def get_computer_use_status(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -296,9 +317,12 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ComputerUseStatusResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ComputerUseStatusResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -319,7 +343,7 @@ defmodule ExDaytona.Api.ComputerUse do
           {:ok, ExDaytona.Model.ErrorResponse.t()}
           | {:ok, ExDaytona.Model.ComputerUseStatusResponse.t()}
           | {:error, Tesla.Env.t()}
-  def get_computer_use_system_status(connection, _opts \\ []) do
+  def get_computer_use_system_status(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -328,10 +352,13 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ComputerUseStatusResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ComputerUseStatusResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -352,7 +379,7 @@ defmodule ExDaytona.Api.ComputerUse do
           {:ok, ExDaytona.Model.ErrorResponse.t()}
           | {:ok, ExDaytona.Model.DisplayInfoResponse.t()}
           | {:error, Tesla.Env.t()}
-  def get_display_info(connection, _opts \\ []) do
+  def get_display_info(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -361,10 +388,13 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.DisplayInfoResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.DisplayInfoResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -385,7 +415,7 @@ defmodule ExDaytona.Api.ComputerUse do
           {:ok, ExDaytona.Model.ErrorResponse.t()}
           | {:ok, ExDaytona.Model.MousePositionResponse.t()}
           | {:error, Tesla.Env.t()}
-  def get_mouse_position(connection, _opts \\ []) do
+  def get_mouse_position(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -394,10 +424,13 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.MousePositionResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.MousePositionResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -417,7 +450,7 @@ defmodule ExDaytona.Api.ComputerUse do
   """
   @spec get_process_errors(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.ProcessErrorsResponse.t()} | {:error, Tesla.Env.t()}
-  def get_process_errors(connection, process_name, _opts \\ []) do
+  def get_process_errors(connection, process_name, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -426,9 +459,12 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ProcessErrorsResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ProcessErrorsResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -448,7 +484,7 @@ defmodule ExDaytona.Api.ComputerUse do
   """
   @spec get_process_logs(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.ProcessLogsResponse.t()} | {:error, Tesla.Env.t()}
-  def get_process_logs(connection, process_name, _opts \\ []) do
+  def get_process_logs(connection, process_name, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -457,9 +493,12 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ProcessLogsResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ProcessLogsResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -479,7 +518,7 @@ defmodule ExDaytona.Api.ComputerUse do
   """
   @spec get_process_status(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.ProcessStatusResponse.t()} | {:error, Tesla.Env.t()}
-  def get_process_status(connection, process_name, _opts \\ []) do
+  def get_process_status(connection, process_name, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -488,9 +527,12 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ProcessStatusResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ProcessStatusResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -510,7 +552,7 @@ defmodule ExDaytona.Api.ComputerUse do
   """
   @spec get_recording(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.Recording.t()} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def get_recording(connection, id, _opts \\ []) do
+  def get_recording(connection, id, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -519,12 +561,15 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Recording},
-      {400, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Recording},
+        {400, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -545,7 +590,7 @@ defmodule ExDaytona.Api.ComputerUse do
           {:ok, ExDaytona.Model.ErrorResponse.t()}
           | {:ok, ExDaytona.Model.WindowsResponse.t()}
           | {:error, Tesla.Env.t()}
-  def get_windows(connection, _opts \\ []) do
+  def get_windows(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -554,10 +599,13 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.WindowsResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.WindowsResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -577,7 +625,7 @@ defmodule ExDaytona.Api.ComputerUse do
   """
   @spec invoke_accessibility_node(Tesla.Env.client(), ExDaytona.Model.AccessibilityInvokeRequest.t(), keyword()) ::
           {:ok, map()} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def invoke_accessibility_node(connection, accessibility_invoke_request, _opts \\ []) do
+  def invoke_accessibility_node(connection, accessibility_invoke_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -587,13 +635,16 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, %{}},
-      {400, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse},
-      {503, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, %{}},
+        {400, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse},
+        {503, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -614,7 +665,7 @@ defmodule ExDaytona.Api.ComputerUse do
           {:ok, ExDaytona.Model.ErrorResponse.t()}
           | {:ok, ExDaytona.Model.ListRecordingsResponse.t()}
           | {:error, Tesla.Env.t()}
-  def list_recordings(connection, _opts \\ []) do
+  def list_recordings(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -623,10 +674,13 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ListRecordingsResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ListRecordingsResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -648,7 +702,7 @@ defmodule ExDaytona.Api.ComputerUse do
           {:ok, ExDaytona.Model.ErrorResponse.t()}
           | {:ok, ExDaytona.Model.MousePositionResponse.t()}
           | {:error, Tesla.Env.t()}
-  def move_mouse(connection, mouse_move_request, _opts \\ []) do
+  def move_mouse(connection, mouse_move_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -658,11 +712,14 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.MousePositionResponse},
-      {400, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.MousePositionResponse},
+        {400, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -682,7 +739,7 @@ defmodule ExDaytona.Api.ComputerUse do
   """
   @spec press_hotkey(Tesla.Env.client(), ExDaytona.Model.KeyboardHotkeyRequest.t(), keyword()) ::
           {:ok, map()} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def press_hotkey(connection, keyboard_hotkey_request, _opts \\ []) do
+  def press_hotkey(connection, keyboard_hotkey_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -692,11 +749,14 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, %{}},
-      {400, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, %{}},
+        {400, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -716,7 +776,7 @@ defmodule ExDaytona.Api.ComputerUse do
   """
   @spec press_key(Tesla.Env.client(), ExDaytona.Model.KeyboardPressRequest.t(), keyword()) ::
           {:ok, map()} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def press_key(connection, keyboard_press_request, _opts \\ []) do
+  def press_key(connection, keyboard_press_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -726,11 +786,14 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, %{}},
-      {400, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, %{}},
+        {400, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -750,7 +813,7 @@ defmodule ExDaytona.Api.ComputerUse do
   """
   @spec restart_process(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, ExDaytona.Model.ProcessRestartResponse.t()} | {:error, Tesla.Env.t()}
-  def restart_process(connection, process_name, _opts \\ []) do
+  def restart_process(connection, process_name, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -760,9 +823,12 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ProcessRestartResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ProcessRestartResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -782,7 +848,7 @@ defmodule ExDaytona.Api.ComputerUse do
   """
   @spec scroll(Tesla.Env.client(), ExDaytona.Model.MouseScrollRequest.t(), keyword()) ::
           {:ok, ExDaytona.Model.ErrorResponse.t()} | {:ok, ExDaytona.Model.ScrollResponse.t()} | {:error, Tesla.Env.t()}
-  def scroll(connection, mouse_scroll_request, _opts \\ []) do
+  def scroll(connection, mouse_scroll_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -792,11 +858,14 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ScrollResponse},
-      {400, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ScrollResponse},
+        {400, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -816,7 +885,7 @@ defmodule ExDaytona.Api.ComputerUse do
   """
   @spec set_accessibility_node_value(Tesla.Env.client(), ExDaytona.Model.AccessibilitySetValueRequest.t(), keyword()) ::
           {:ok, map()} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def set_accessibility_node_value(connection, accessibility_set_value_request, _opts \\ []) do
+  def set_accessibility_node_value(connection, accessibility_set_value_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -826,13 +895,16 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, %{}},
-      {400, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse},
-      {503, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, %{}},
+        {400, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse},
+        {503, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -851,7 +923,7 @@ defmodule ExDaytona.Api.ComputerUse do
   """
   @spec start_computer_use(Tesla.Env.client(), keyword()) ::
           {:ok, ExDaytona.Model.ComputerUseStartResponse.t()} | {:error, Tesla.Env.t()}
-  def start_computer_use(connection, _opts \\ []) do
+  def start_computer_use(connection, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -861,9 +933,12 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ComputerUseStartResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ComputerUseStartResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -898,12 +973,15 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {201, ExDaytona.Model.Recording},
-      {400, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse},
-      {503, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {201, ExDaytona.Model.Recording},
+        {400, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse},
+        {503, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -922,7 +1000,7 @@ defmodule ExDaytona.Api.ComputerUse do
   """
   @spec stop_computer_use(Tesla.Env.client(), keyword()) ::
           {:ok, ExDaytona.Model.ComputerUseStopResponse.t()} | {:error, Tesla.Env.t()}
-  def stop_computer_use(connection, _opts \\ []) do
+  def stop_computer_use(connection, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -932,9 +1010,12 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ComputerUseStopResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ComputerUseStopResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -954,7 +1035,7 @@ defmodule ExDaytona.Api.ComputerUse do
   """
   @spec stop_recording(Tesla.Env.client(), ExDaytona.Model.StopRecordingRequest.t(), keyword()) ::
           {:ok, ExDaytona.Model.Recording.t()} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def stop_recording(connection, stop_recording_request, _opts \\ []) do
+  def stop_recording(connection, stop_recording_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -964,12 +1045,15 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Recording},
-      {400, ExDaytona.Model.ErrorResponse},
-      {404, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Recording},
+        {400, ExDaytona.Model.ErrorResponse},
+        {404, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1019,11 +1103,14 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ScreenshotResponse},
-      {400, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ScreenshotResponse},
+        {400, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1065,11 +1152,14 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ScreenshotResponse},
-      {400, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ScreenshotResponse},
+        {400, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1113,11 +1203,14 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ScreenshotResponse},
-      {400, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ScreenshotResponse},
+        {400, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1153,11 +1246,14 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.ScreenshotResponse},
-      {400, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.ScreenshotResponse},
+        {400, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -1177,7 +1273,7 @@ defmodule ExDaytona.Api.ComputerUse do
   """
   @spec type_text(Tesla.Env.client(), ExDaytona.Model.KeyboardTypeRequest.t(), keyword()) ::
           {:ok, map()} | {:ok, ExDaytona.Model.ErrorResponse.t()} | {:error, Tesla.Env.t()}
-  def type_text(connection, keyboard_type_request, _opts \\ []) do
+  def type_text(connection, keyboard_type_request, opts \\ []) do
     request =
       %{}
       |> method(:post)
@@ -1187,10 +1283,13 @@ defmodule ExDaytona.Api.ComputerUse do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, %{}},
-      {400, ExDaytona.Model.ErrorResponse},
-      {500, ExDaytona.Model.ErrorResponse}
-    ])
+    |> evaluate_response(
+      [
+        {200, %{}},
+        {400, ExDaytona.Model.ErrorResponse},
+        {500, ExDaytona.Model.ErrorResponse}
+      ],
+      opts
+    )
   end
 end

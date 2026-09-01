@@ -42,11 +42,14 @@ defmodule ExDaytona.Api.Snapshots do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.SnapshotDto},
-      {400, false},
-      {404, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.SnapshotDto},
+        {400, false},
+        {404, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -81,10 +84,13 @@ defmodule ExDaytona.Api.Snapshots do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.SnapshotDto},
-      {400, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.SnapshotDto},
+        {400, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -118,9 +124,12 @@ defmodule ExDaytona.Api.Snapshots do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {204, false}
-    ])
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -165,9 +174,12 @@ defmodule ExDaytona.Api.Snapshots do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.PaginatedSnapshots}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.PaginatedSnapshots}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -201,10 +213,13 @@ defmodule ExDaytona.Api.Snapshots do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.SnapshotDto},
-      {404, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.SnapshotDto},
+        {404, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -240,9 +255,12 @@ defmodule ExDaytona.Api.Snapshots do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -276,9 +294,12 @@ defmodule ExDaytona.Api.Snapshots do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.Url}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.Url}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -311,8 +332,11 @@ defmodule ExDaytona.Api.Snapshots do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false}
+      ],
+      opts
+    )
   end
 end

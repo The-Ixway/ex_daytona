@@ -62,7 +62,7 @@ defmodule ExDaytona.Pty do
 
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox),
          {:ok, %Model.PtyCreateResponse{sessionId: session_id}} <-
-           Error.normalize(Api.Process.create_pty_session(conn, request)) do
+           Error.normalize(Api.Process.create_pty_session(conn, request, response: :full)) do
       {:ok, %__MODULE__{sandbox: sandbox, id: session_id || id}}
     end
   end
@@ -124,7 +124,7 @@ defmodule ExDaytona.Pty do
     request = %Model.PtyResizeRequest{cols: cols, rows: rows}
 
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox) do
-      Error.normalize(Api.Process.resize_pty_session(conn, id, request))
+      Error.normalize(Api.Process.resize_pty_session(conn, id, request, response: :full))
     end
   end
 
@@ -134,7 +134,7 @@ defmodule ExDaytona.Pty do
   @spec info(t()) :: {:ok, Model.PtySessionInfo.t()} | {:error, Error.t()}
   def info(%__MODULE__{sandbox: sandbox, id: id}) do
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox) do
-      Error.normalize(Api.Process.get_pty_session(conn, id))
+      Error.normalize(Api.Process.get_pty_session(conn, id, response: :full))
     end
   end
 
@@ -146,7 +146,7 @@ defmodule ExDaytona.Pty do
   def list(%Sandbox{} = sandbox) do
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox),
          {:ok, %Model.PtyListResponse{sessions: sessions}} <-
-           Error.normalize(Api.Process.list_pty_sessions(conn)) do
+           Error.normalize(Api.Process.list_pty_sessions(conn, response: :full)) do
       {:ok, sessions || []}
     end
   end
@@ -157,7 +157,7 @@ defmodule ExDaytona.Pty do
   @spec delete(t()) :: :ok | {:error, Error.t()}
   def delete(%__MODULE__{sandbox: sandbox, id: id}) do
     with {:ok, conn} <- Sandbox.toolbox_conn(sandbox),
-         {:ok, _} <- Error.normalize(Api.Process.delete_pty_session(conn, id)) do
+         {:ok, _} <- Error.normalize(Api.Process.delete_pty_session(conn, id, response: :full)) do
       :ok
     end
   end

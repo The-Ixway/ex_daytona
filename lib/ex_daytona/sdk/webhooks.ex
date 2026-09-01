@@ -45,7 +45,7 @@ defmodule ExDaytona.Webhooks do
   @spec initialize(Client.t(), String.t()) ::
           {:ok, Model.WebhookInitializationStatus.t()} | {:error, Error.t()}
   def initialize(%Client{} = client, org_id) when is_binary(org_id) do
-    Error.normalize(Api.Webhooks.initialize_webhooks(client.conn, org_id))
+    Error.normalize(Api.Webhooks.initialize_webhooks(client.conn, org_id, response: :full))
   end
 
   @doc """
@@ -54,7 +54,7 @@ defmodule ExDaytona.Webhooks do
   @spec status(Client.t(), String.t()) ::
           {:ok, Model.WebhookInitializationStatus.t()} | {:error, Error.t()}
   def status(%Client{} = client, org_id) when is_binary(org_id) do
-    Error.normalize(Api.Webhooks.get_initialization_status(client.conn, org_id))
+    Error.normalize(Api.Webhooks.get_initialization_status(client.conn, org_id, response: :full))
   end
 
   @doc """
@@ -66,7 +66,7 @@ defmodule ExDaytona.Webhooks do
           {:ok, %{url: String.t(), token: String.t() | nil}} | {:error, Error.t()}
   def portal(%Client{} = client, org_id) when is_binary(org_id) do
     with {:ok, %Model.WebhookAppPortalAccess{url: url, token: token}} <-
-           Error.normalize(Api.Webhooks.get_app_portal_access(client.conn, org_id)) do
+           Error.normalize(Api.Webhooks.get_app_portal_access(client.conn, org_id, response: :full)) do
       {:ok, %{url: url, token: token}}
     end
   end
@@ -77,7 +77,7 @@ defmodule ExDaytona.Webhooks do
   """
   @spec refresh_endpoints(Client.t(), String.t()) :: :ok | {:error, Error.t()}
   def refresh_endpoints(%Client{} = client, org_id) when is_binary(org_id) do
-    with {:ok, _} <- Error.normalize(Api.Webhooks.refresh_endpoints(client.conn, org_id)) do
+    with {:ok, _} <- Error.normalize(Api.Webhooks.refresh_endpoints(client.conn, org_id, response: :full)) do
       :ok
     end
   end

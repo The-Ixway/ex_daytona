@@ -26,7 +26,7 @@ defmodule ExDaytona.Api.System do
   """
   @spec get_system_metrics(Tesla.Env.client(), keyword()) ::
           {:ok, ExDaytona.Model.SystemMetrics.t()} | {:error, Tesla.Env.t()}
-  def get_system_metrics(connection, _opts \\ []) do
+  def get_system_metrics(connection, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -35,8 +35,11 @@ defmodule ExDaytona.Api.System do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.SystemMetrics}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.SystemMetrics}
+      ],
+      opts
+    )
   end
 end

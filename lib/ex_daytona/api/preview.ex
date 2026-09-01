@@ -27,7 +27,7 @@ defmodule ExDaytona.Api.Preview do
   """
   @spec get_sandbox_id_from_signed_preview_url_token(Tesla.Env.client(), String.t(), number(), keyword()) ::
           {:ok, String.t()} | {:error, Tesla.Env.t()}
-  def get_sandbox_id_from_signed_preview_url_token(connection, signed_preview_token, port, _opts \\ []) do
+  def get_sandbox_id_from_signed_preview_url_token(connection, signed_preview_token, port, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -36,9 +36,12 @@ defmodule ExDaytona.Api.Preview do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -56,7 +59,7 @@ defmodule ExDaytona.Api.Preview do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec get_signing_key(Tesla.Env.client(), String.t(), keyword()) :: {:ok, String.t()} | {:error, Tesla.Env.t()}
-  def get_signing_key(connection, sandbox_id, _opts \\ []) do
+  def get_signing_key(connection, sandbox_id, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -65,9 +68,12 @@ defmodule ExDaytona.Api.Preview do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -86,7 +92,7 @@ defmodule ExDaytona.Api.Preview do
   """
   @spec has_sandbox_access(Tesla.Env.client(), String.t(), keyword()) ::
           {:ok, nil} | {:ok, boolean()} | {:error, Tesla.Env.t()}
-  def has_sandbox_access(connection, sandbox_id, _opts \\ []) do
+  def has_sandbox_access(connection, sandbox_id, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -95,10 +101,13 @@ defmodule ExDaytona.Api.Preview do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false},
-      {404, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false},
+        {404, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -132,9 +141,12 @@ defmodule ExDaytona.Api.Preview do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, ExDaytona.Model.PreviewWarning}
-    ])
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.PreviewWarning}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -152,7 +164,7 @@ defmodule ExDaytona.Api.Preview do
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec is_sandbox_public(Tesla.Env.client(), String.t(), keyword()) :: {:ok, boolean()} | {:error, Tesla.Env.t()}
-  def is_sandbox_public(connection, sandbox_id, _opts \\ []) do
+  def is_sandbox_public(connection, sandbox_id, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -161,9 +173,12 @@ defmodule ExDaytona.Api.Preview do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false}
+      ],
+      opts
+    )
   end
 
   @doc """
@@ -183,7 +198,7 @@ defmodule ExDaytona.Api.Preview do
   """
   @spec is_valid_auth_token(Tesla.Env.client(), String.t(), String.t(), keyword()) ::
           {:ok, boolean()} | {:error, Tesla.Env.t()}
-  def is_valid_auth_token(connection, sandbox_id, auth_token, _opts \\ []) do
+  def is_valid_auth_token(connection, sandbox_id, auth_token, opts \\ []) do
     request =
       %{}
       |> method(:get)
@@ -192,8 +207,11 @@ defmodule ExDaytona.Api.Preview do
 
     connection
     |> Connection.request(request)
-    |> evaluate_response([
-      {200, false}
-    ])
+    |> evaluate_response(
+      [
+        {200, false}
+      ],
+      opts
+    )
   end
 end

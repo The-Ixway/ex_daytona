@@ -37,7 +37,7 @@ defmodule ExDaytona.ObjectStorage do
           | {:error, Error.t()}
   def push_access(%Client{} = client) do
     with {:ok, %Model.StorageAccessDto{} = dto} <-
-           Error.normalize(Api.ObjectStorage.get_push_access(client.conn)) do
+           Error.normalize(Api.ObjectStorage.get_push_access(client.conn, response: :full)) do
       {:ok,
        %{
          access_key: dto.accessKey,
