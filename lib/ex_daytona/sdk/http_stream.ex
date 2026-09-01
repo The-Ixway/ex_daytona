@@ -39,32 +39,16 @@ defmodule ExDaytona.HTTPStream do
       {"accept", "application/octet-stream, text/plain, */*"}
     ]
 
-    handle = fn
-      {:status, status}, {_status, error_body, deadline_hit?} ->
-        {:cont, {status, error_body, deadline_hit?}}
-
-      {:headers, _headers}, acc ->
-        {:cont, acc}
-
-      {:data, chunk}, {status, error_body, _} = acc ->
-        cond do
-          past?(deadline) ->
-            {:halt, {status, error_body, true}}
-
-          status >= 400 ->
-            {:cont, {status, bounded_append(error_body, chunk), false}}
-
-          true ->
-            fun.(chunk)
-            {:cont, acc}
-        end
-    end
+    handle = &handle_event(&1, &2, fun, deadline)
 
     transport_opts = [receive_timeout: timeout] ++ Keyword.take(opts, [:pool])
 
     case transport.stream("GET", url, headers, nil, {nil, [], false}, handle, transport_opts) do
       {:ok, {_status, _body, true}} ->
         {:error, %Error{message: "stream exceeded its overall deadline"}}
+
+      {:ok, {_status, _body, :halted}} ->
+        :ok
 
       {:ok, {status, _body, _}} when status < 400 ->
         :ok
@@ -75,6 +59,27 @@ defmodule ExDaytona.HTTPStream do
 
       {:error, reason, _acc} ->
         {:error, Error.from(reason)}
+    end
+  end
+
+  defp handle_event({:status, status}, {_status, error_body, flag}, _fun, _deadline),
+    do: {:cont, {status, error_body, flag}}
+
+  defp handle_event({:headers, _headers}, acc, _fun, _deadline), do: {:cont, acc}
+
+  defp handle_event({:data, chunk}, {status, error_body, _} = acc, fun, deadline) do
+    cond do
+      past?(deadline) ->
+        {:halt, {status, error_body, true}}
+
+      status >= 400 ->
+        {:cont, {status, bounded_append(error_body, chunk), false}}
+
+      true ->
+        case fun.(chunk) do
+          :halt -> {:halt, {status, error_body, :halted}}
+          _ -> {:cont, acc}
+        end
     end
   end
 

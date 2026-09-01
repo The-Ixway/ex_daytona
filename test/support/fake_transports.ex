@@ -17,11 +17,45 @@ defmodule FakeTransports do
   spawning a process that replays scripted frames set with `script_ws/1`.
   """
 
+  @table :fake_transport_scripts
+
   @doc "Configure the next HTTPStream call in this process."
   def script_http(opts), do: Process.put(:fake_http_script, Map.new(opts))
 
-  @doc "Configure the next WS connect in this process."
-  def script_ws(opts), do: Process.put(:fake_ws_script, Map.new(opts))
+  @doc """
+  Configure the next WS connect scripted by this process (or any process
+  it starts — resolution walks `$ancestors`, so a GenServer like
+  `ExDaytona.LogStream` started from the test finds the test's script).
+  """
+  def script_ws(opts) do
+    ensure_table()
+    :ets.insert(@table, {self(), Map.new(opts)})
+    :ok
+  end
+
+  @doc false
+  def lookup_ws_script do
+    ensure_table()
+
+    candidates = [self() | Process.get(:"$ancestors", [])]
+
+    Enum.find_value(candidates, %{}, fn
+      pid when is_pid(pid) ->
+        case :ets.lookup(@table, pid) do
+          [{_pid, script}] -> script
+          [] -> nil
+        end
+
+      _named ->
+        nil
+    end)
+  end
+
+  defp ensure_table do
+    :ets.new(@table, [:named_table, :public, :set])
+  rescue
+    ArgumentError -> @table
+  end
 
   defmodule HTTPStream do
     @moduledoc false
@@ -84,7 +118,7 @@ defmodule FakeTransports do
 
     @impl true
     def connect(_url, _api_key, opts) do
-      script = Process.get(:fake_ws_script) || %{}
+      script = FakeTransports.lookup_ws_script()
 
       case Map.get(script, :connect) do
         {:error, _} = error ->

@@ -190,12 +190,43 @@ defmodule ExDaytona.Session do
   end
 
   @doc """
+  Open a structured, bounded log stream for a command — separate
+  `:stdout`/`:stderr` events over the provider's websocket protocol,
+  pull-based via `ExDaytona.LogStream.next/2`. See `ExDaytona.LogStream`
+  for the full contract (ownership, bounds, timeouts, close semantics).
+
+  Options are passed to `ExDaytona.LogStream.open/3`
+  (`:owner`, `:max_buffer_bytes`, `:max_frames`, `:max_frame_bytes`,
+  `:idle_timeout`, `:overall_timeout`, `:connect_timeout`).
+  """
+  @spec open_log_stream(t(), String.t(), keyword()) :: {:ok, pid()} | {:error, Error.t()}
+  def open_log_stream(%__MODULE__{sandbox: sandbox, id: id}, cmd_id, opts \\ [])
+      when is_binary(cmd_id) do
+    with {:ok, base_url} <- toolbox_base_url(sandbox) do
+      url = base_url <> "/process/session/#{id}/command/#{cmd_id}/logs?follow=true"
+
+      opts =
+        Keyword.put_new(opts, :ws_mod, ExDaytona.Client.transport(sandbox.client, :websocket))
+
+      ExDaytona.LogStream.open(url, sandbox.client.api_key, opts)
+    end
+  end
+
+  @doc """
   Follow a command's logs in real time: `fun` is invoked with each chunk
   as the sandbox produces it, and the call returns `:ok` when the stream
-  closes (the command finished).
+  closes (the command finished). Returning `:halt` from `fun` cancels
+  the stream.
+
+  > #### Merged output {: .info}
+  >
+  > This HTTP follow delivers stdout and stderr merged, exactly as 0.1.0
+  > did. For separated, bounded, pull-based streaming use
+  > `open_log_stream/3` / `ExDaytona.LogStream`.
 
   Options: `:timeout` — max milliseconds to wait between chunks
-  (default `:infinity`).
+  (default `:infinity`); `:deadline` — overall milliseconds for the
+  stream.
   """
   @spec stream_logs(t(), String.t(), (binary() -> any()), keyword()) ::
           :ok | {:error, Error.t()}
