@@ -31,6 +31,35 @@ defmodule ExDaytona.Sandbox do
   @enforce_keys [:client, :info]
   defstruct [:client, :info]
 
+  defmodule SshAccess do
+    @moduledoc """
+    SSH access credentials for a sandbox. `token` doubles as the SSH
+    username and `ssh_command` embeds it, so inspection redacts both —
+    read the fields directly to use them.
+    """
+    defstruct [:token, :ssh_command, :expires_at]
+    @type t :: %__MODULE__{}
+
+    defimpl Inspect do
+      def inspect(access, opts),
+        do: ExDaytona.Redact.inspect_struct(access, opts, [:ssh_command])
+    end
+  end
+
+  defmodule PreviewUrl do
+    @moduledoc """
+    A sandbox preview URL. `token` (the `x-daytona-preview-token` value)
+    is redacted on inspection; the URL itself is the shareable artifact
+    and stays visible.
+    """
+    defstruct [:url, :token]
+    @type t :: %__MODULE__{}
+
+    defimpl Inspect do
+      def inspect(preview, opts), do: ExDaytona.Redact.inspect_struct(preview, opts)
+    end
+  end
+
   @typedoc """
   A sandbox bound to the client that created or fetched it.
 
@@ -208,9 +237,7 @@ defmodule ExDaytona.Sandbox do
   Options: `:expires_in_minutes` — token lifetime (server default when
   omitted).
   """
-  @spec ssh_access(t(), keyword()) ::
-          {:ok, %{token: String.t(), ssh_command: String.t() | nil, expires_at: String.t() | nil}}
-          | {:error, Error.t()}
+  @spec ssh_access(t(), keyword()) :: {:ok, SshAccess.t()} | {:error, Error.t()}
   def ssh_access(%__MODULE__{client: client, info: %{id: id}}, opts \\ []) do
     api_opts =
       case Keyword.fetch(opts, :expires_in_minutes) do
@@ -220,7 +247,7 @@ defmodule ExDaytona.Sandbox do
 
     with {:ok, %Model.SshAccessDto{} = dto} <-
            Error.normalize(Api.Sandbox.create_ssh_access(client.conn, id, api_opts ++ [response: :full])) do
-      {:ok, %{token: dto.token, ssh_command: dto.sshCommand, expires_at: dto.expiresAt}}
+      {:ok, %SshAccess{token: dto.token, ssh_command: dto.sshCommand, expires_at: dto.expiresAt}}
     end
   end
 
@@ -258,12 +285,11 @@ defmodule ExDaytona.Sandbox do
   `x-daytona-preview-token` header (browsers hitting the URL directly get
   Daytona's auth flow).
   """
-  @spec preview_url(t(), pos_integer()) ::
-          {:ok, %{url: String.t(), token: String.t() | nil}} | {:error, Error.t()}
+  @spec preview_url(t(), pos_integer()) :: {:ok, PreviewUrl.t()} | {:error, Error.t()}
   def preview_url(%__MODULE__{client: client, info: %{id: id}}, port) when is_integer(port) do
     with {:ok, %Model.PortPreviewUrl{url: url, token: token}} <-
            Error.normalize(Api.Sandbox.get_port_preview_url(client.conn, id, port, response: :full)) do
-      {:ok, %{url: url, token: token}}
+      {:ok, %PreviewUrl{url: url, token: token}}
     end
   end
 
@@ -277,7 +303,7 @@ defmodule ExDaytona.Sandbox do
   omitted).
   """
   @spec signed_preview_url(t(), pos_integer(), keyword()) ::
-          {:ok, %{url: String.t(), token: String.t() | nil}} | {:error, Error.t()}
+          {:ok, PreviewUrl.t()} | {:error, Error.t()}
   def signed_preview_url(%__MODULE__{client: client, info: %{id: id}}, port, opts \\ [])
       when is_integer(port) do
     api_opts =
@@ -290,7 +316,7 @@ defmodule ExDaytona.Sandbox do
            Error.normalize(
              Api.Sandbox.get_signed_port_preview_url(client.conn, id, port, api_opts ++ [response: :full])
            ) do
-      {:ok, %{url: url, token: token}}
+      {:ok, %PreviewUrl{url: url, token: token}}
     end
   end
 

@@ -7,6 +7,14 @@ defmodule ExDaytona.Model.UpdateLastActivity do
   UpdateLastActivity model.
   """
 
+  # Credential-safe inspection: fields whose names indicate credentials
+  # (tokens, keys, secrets, passwords) render as "[REDACTED]" — see
+  # ExDaytona.Redact. Regeneration cannot remove this protection
+  # because it lives in the model template.
+  defimpl Inspect do
+    def inspect(struct, opts), do: ExDaytona.Redact.inspect_struct(struct, opts)
+  end
+
   # Encode without nil fields: unset optional fields must be OMITTED from
   # request JSON, not sent as explicit nulls — real servers (Daytona
   # included) reject bodies full of nulls that a bare {} would satisfy.

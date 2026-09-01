@@ -116,4 +116,18 @@ defmodule ExDaytona.Client do
       Application.get_env(:ex_daytona, :base_url, "https://app.daytona.io/api")
     )
   end
+
+  defimpl Inspect do
+    import Inspect.Algebra
+
+    # api_key redacted; conn hidden entirely (its middleware embeds the
+    # bearer token).
+    def inspect(client, opts) do
+      concat([
+        "#ExDaytona.Client<",
+        to_doc([api_key: ExDaytona.Redact.marker(), options: client.options], opts),
+        ">"
+      ])
+    end
+  end
 end

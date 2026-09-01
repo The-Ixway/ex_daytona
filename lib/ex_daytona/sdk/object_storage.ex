@@ -19,27 +19,38 @@ defmodule ExDaytona.ObjectStorage do
   alias ExDaytona.Model
   alias ExDaytona.SigV4
 
+  defmodule Access do
+    @moduledoc """
+    Temporary object-storage push credentials. Inspection redacts the
+    credential fields — use the struct fields directly when signing.
+    """
+    defstruct [
+      :access_key,
+      :secret,
+      :session_token,
+      :bucket,
+      :storage_url,
+      :region,
+      :organization_id
+    ]
+
+    @type t :: %__MODULE__{}
+
+    defimpl Inspect do
+      def inspect(access, opts), do: ExDaytona.Redact.inspect_struct(access, opts)
+    end
+  end
+
   @doc """
   Temporary push credentials for the organization's build-context
   storage, as a snake_case map.
   """
-  @spec push_access(Client.t()) ::
-          {:ok,
-           %{
-             access_key: String.t(),
-             secret: String.t(),
-             session_token: String.t() | nil,
-             bucket: String.t(),
-             storage_url: String.t(),
-             region: String.t() | nil,
-             organization_id: String.t()
-           }}
-          | {:error, Error.t()}
+  @spec push_access(Client.t()) :: {:ok, Access.t()} | {:error, Error.t()}
   def push_access(%Client{} = client) do
     with {:ok, %Model.StorageAccessDto{} = dto} <-
            Error.normalize(Api.ObjectStorage.get_push_access(client.conn, response: :full)) do
       {:ok,
-       %{
+       %Access{
          access_key: dto.accessKey,
          secret: dto.secret,
          session_token: dto.sessionToken,

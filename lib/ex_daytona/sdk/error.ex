@@ -191,4 +191,19 @@ defmodule ExDaytona.Error do
 
   defp transport_message(%{__exception__: true} = exception), do: Exception.message(exception)
   defp transport_message(reason), do: "transport error: #{inspect(reason)}"
+
+  defimpl Inspect do
+    # Details and headers can carry provider payloads; deep-redact
+    # credential-shaped keys before rendering.
+    def inspect(error, opts) do
+      sanitized = %{
+        error
+        | details: ExDaytona.Redact.deep(error.details),
+          headers: ExDaytona.Redact.deep(error.headers),
+          message: ExDaytona.Redact.scrub_message(error.message)
+      }
+
+      ExDaytona.Redact.inspect_struct(sanitized, opts)
+    end
+  end
 end

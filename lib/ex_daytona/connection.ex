@@ -139,6 +139,10 @@ defmodule ExDaytona.Connection do
       {Tesla.Middleware.BaseUrl, base_url},
       {Tesla.Middleware.Headers, [{"user-agent", user_agent}]},
       {Tesla.Middleware.EncodeJson, engine: json_engine},
+      # TelemetryScrub must sit above Telemetry: env.__client__ embeds the
+      # full middleware stack — bearer token included — and would otherwise
+      # leak through every telemetry event's metadata.
+      ExDaytona.Connection.TelemetryScrub,
       {Tesla.Middleware.Telemetry, metadata: %{client: __MODULE__}}
     ] ++
       retry_middleware(retry_opts) ++
@@ -192,6 +196,19 @@ defmodule ExDaytona.Connection do
 
   defp default_should_retry({:error, _reason}, %{method: method}, _context),
     do: method in @idempotent_methods
+
+  defmodule TelemetryScrub do
+    @moduledoc false
+    # Drops env.__client__ before the request continues so telemetry events
+    # (and any env that escapes into diagnostics) cannot carry the client's
+    # middleware stack with its embedded bearer token.
+    @behaviour Tesla.Middleware
+
+    @impl true
+    def call(env, next, _opts) do
+      Tesla.run(%{env | __client__: nil}, next)
+    end
+  end
 
   defmodule AttemptTracker do
     @moduledoc false
