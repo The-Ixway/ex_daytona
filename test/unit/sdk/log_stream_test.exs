@@ -53,18 +53,19 @@ defmodule ExDaytona.LogStreamTest do
       assert collected.closed == :normal
     end
 
-    test "text frames and split payloads work; pre-marker bytes are dropped" do
+    test "text frames work; pre-marker bytes surface as unlabeled :output" do
       {:ok, stream} =
         open!(
           frames: [
-            # bytes before any channel marker have no destination
-            {:binary, "noise"},
+            # bytes before any channel marker: daemon didn't label them
+            {:binary, "merged"},
             {:text, @out <> "part1-"},
             {:text, "part2"}
           ]
         )
 
-      assert {:ok, %{stdout: "part1-part2", stderr: ""}} = LogStream.collect(stream)
+      assert {:ok, %{stdout: "part1-part2", stderr: "", output: "merged"}} =
+               LogStream.collect(stream)
     end
 
     test "malformed marker-only frames do not crash the stream" do

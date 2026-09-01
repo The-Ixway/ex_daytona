@@ -151,8 +151,10 @@ and can run asynchronously with real-time log streaming.
 :ok = ExDaytona.Session.delete(session)
 ```
 
-For **separated stdout/stderr** with bounded, pull-based delivery, open a
-structured log stream (websocket-backed):
+For bounded, pull-based delivery — with **separated stdout/stderr** when
+the daemon emits channel markers (unlabeled daemons yield merged
+`{:output, bytes}` events) — open a structured log stream
+(websocket-backed):
 
 ```elixir
 {:ok, stream} = ExDaytona.Session.open_log_stream(session, cmd_id, idle_timeout: 60_000)
@@ -160,6 +162,7 @@ structured log stream (websocket-backed):
 case ExDaytona.LogStream.next(stream, 5_000) do
   {:ok, {:stdout, bytes}} -> IO.write(bytes)
   {:ok, {:stderr, bytes}} -> IO.write(:stderr, bytes)
+  {:ok, {:output, bytes}} -> IO.write(bytes)   # unlabeled merged stream
   {:closed, :normal} -> :done
   {:closed, {:error, %ExDaytona.Error{}}} -> :failed
 end

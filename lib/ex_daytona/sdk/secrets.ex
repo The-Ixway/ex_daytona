@@ -14,6 +14,12 @@ defmodule ExDaytona.Secrets do
       # or later, replacing the mounted set:
       {:ok, _} = ExDaytona.Secrets.set_sandbox_bindings(sandbox, [%{"DB_PASSWORD" => "db-prod"}])
 
+  Inside the sandbox, a bound env var does **not** contain the plaintext:
+  it carries a placeholder handle (`dtn_secret_...`); the real value is
+  materialized by the platform according to the secret's `hosts`
+  allowlist (verified against the live API). `resolve/1` is the
+  operator-side view that returns actual values.
+
   Every value-bearing input and result renders redacted under
   `inspect/1` — resolved plaintext is reachable only by reading struct
   fields explicitly.
@@ -119,6 +125,13 @@ defmodule ExDaytona.Secrets do
   `ExDaytona.Model.ResolveSandboxSecrets200ResponseInner` structs whose
   `value` fields are **redacted under `inspect/1`** — plaintext is only
   reachable by reading `.value` explicitly.
+
+  > #### Authentication {: .warning}
+  >
+  > This endpoint authenticates platform infrastructure (the component
+  > that materializes secret values) — with a regular user API key it
+  > returns `403 "Invalid authentication context"` (verified live).
+  > User code sees only placeholder handles inside the sandbox.
   """
   @spec resolve(Sandbox.t()) ::
           {:ok, [Model.ResolveSandboxSecrets200ResponseInner.t()]} | {:error, Error.t()}

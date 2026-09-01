@@ -179,16 +179,31 @@ defmodule LiveSmokeTest do
         try do
           assert ExDaytona.Sandbox.state(sandbox) == "started"
 
-          # The bound secret is visible inside the sandbox as an env var…
+          # Live contract: the sandbox env var carries a PLACEHOLDER handle
+          # (dtn_secret_...), never the plaintext — values are materialized
+          # by the platform per the secret's hosts allowlist.
           assert {:ok, %{exit_code: 0, output: secret_out}} =
                    ExDaytona.Sandbox.exec(sandbox, "printenv LIVE_BOUND_SECRET")
 
-          assert String.trim(secret_out) == secret_value
+          placeholder = String.trim(secret_out)
+          assert placeholder =~ "dtn_secret_"
+          refute placeholder == secret_value
 
-          # …and resolvable through the facade with redacted inspection
-          assert {:ok, resolved} = ExDaytona.Secrets.resolve(sandbox)
-          assert Enum.any?(resolved, &(&1.env == "LIVE_BOUND_SECRET" and &1.value == secret_value))
-          refute inspect(resolved) =~ secret_value
+          # The resolve endpoint (plaintext values) authenticates platform
+          # infrastructure, not user API keys — expect the documented 403.
+          case ExDaytona.Secrets.resolve(sandbox) do
+            {:error, %ExDaytona.Error{status: 403}} ->
+              :infra_gated_as_documented
+
+            {:ok, resolved} ->
+              binding = Enum.find(resolved, &(&1.env == "LIVE_BOUND_SECRET"))
+              assert binding
+              assert binding.value == secret_value
+              refute inspect(resolved) =~ secret_value
+
+            other ->
+              flunk("unexpected resolve result: #{inspect(other)}")
+          end
 
           assert {:ok, %{exit_code: 0, output: output}} =
                    ExDaytona.Sandbox.exec(sandbox, "echo live-lifecycle")
@@ -237,21 +252,37 @@ defmodule LiveSmokeTest do
                      response: :full
                    )
 
-          assert is_binary(full.request_id)
           assert full.status == 200
+          assert ExDaytona.Response.get_header(full, "content-type") =~ "json"
 
-          assert {:error, %ExDaytona.Error{status: 404, request_id: err_req_id}} =
+          # request id / rate-limit headers are provider-optional (the
+          # platform's success responses omit x-request-id; the toolbox
+          # sends it) — assert the parsers ran without demanding presence
+          if full.request_id, do: assert(is_binary(full.request_id))
+          if full.rate_limit, do: assert(is_map(full.rate_limit))
+
+          assert {:error, %ExDaytona.Error{status: 404} = not_found} =
                    ExDaytona.Sandbox.get(client, "missing-#{System.unique_integer([:positive])}")
 
-          assert is_binary(err_req_id)
+          # error metadata pipeline attached the response headers
+          assert is_list(not_found.headers) and not_found.headers != []
+          if not_found.request_id, do: assert(is_binary(not_found.request_id))
 
-          # Runtime network policy update
-          assert {:ok, sandbox} =
-                   ExDaytona.Sandbox.update_network_settings(sandbox,
-                     domain_allow_list: "example.com,*.daytona.io"
-                   )
+          # Runtime network policy update — organizations on tiers with
+          # enforced network restrictions reject sandbox-level overrides
+          # (400 with a docs link); both outcomes exercise the facade.
+          sandbox =
+            case ExDaytona.Sandbox.update_network_settings(sandbox,
+                   domain_allow_list: "example.com,*.daytona.io"
+                 ) do
+              {:ok, updated} ->
+                assert updated.info.domainAllowList =~ "example.com"
+                updated
 
-          assert sandbox.info.domainAllowList =~ "example.com"
+              {:error, %ExDaytona.Error{status: 400, message: message}} ->
+                assert message =~ "restricted"
+                sandbox
+            end
 
           # Sessions: shared state, async command, real-time log streaming
           {:ok, session} = ExDaytona.Session.create(sandbox)
@@ -293,11 +324,21 @@ defmodule LiveSmokeTest do
             ExDaytona.Session.open_log_stream(session, mux_cmd, idle_timeout: 30_000)
 
           assert {:ok, collected} = ExDaytona.LogStream.collect(log_stream, 30_000)
-          assert collected.stdout =~ "to-stdout"
-          assert collected.stdout =~ "late-stdout"
-          assert collected.stderr =~ "to-stderr"
-          refute collected.stdout =~ "to-stderr"
           assert collected.closed == :normal
+
+          # Channel separation depends on the daemon: marker-emitting
+          # daemons separate stdout/stderr; the current production daemon
+          # streams unlabeled merged output ({:output, _} events).
+          if collected.stdout != "" or collected.stderr != "" do
+            assert collected.stdout =~ "to-stdout"
+            assert collected.stdout =~ "late-stdout"
+            assert collected.stderr =~ "to-stderr"
+            refute collected.stdout =~ "to-stderr"
+          else
+            assert collected.output =~ "to-stdout"
+            assert collected.output =~ "to-stderr"
+            assert collected.output =~ "late-stdout"
+          end
 
           # exit status stays a separate lookup
           assert {:ok, %{exit_code: 0}} = ExDaytona.Session.await(session, mux_cmd)

@@ -362,7 +362,10 @@ defmodule ExDaytona.Sandbox do
   - `:network_allow_list` — comma-separated allowed CIDRs
   - `:network_block_all` — block all network access
 
-  Returns the updated sandbox.
+  Returns the updated sandbox. Organizations on tiers with enforced
+  network restrictions reject sandbox-level overrides with a 400
+  ("Network access is restricted…", verified live) — see Daytona's
+  tier-based network restriction docs.
   """
   @spec update_network_settings(t(), keyword()) :: {:ok, t()} | {:error, Error.t()}
   def update_network_settings(%__MODULE__{client: client, info: %{id: id}} = sandbox, opts)

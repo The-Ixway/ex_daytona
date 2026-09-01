@@ -5,7 +5,15 @@ defmodule ExDaytona.LogStream do
   Where `ExDaytona.Session.stream_logs/4` delivers merged raw chunks over
   HTTP, a `LogStream` speaks the websocket protocol Daytona multiplexes
   command output on, and demultiplexes it back into separate `:stdout`
-  and `:stderr` events in provider arrival order:
+  and `:stderr` events in provider arrival order.
+
+  > #### Channel separation depends on the daemon {: .warning}
+  >
+  > Separation requires the daemon to emit the channel-marker protocol.
+  > Daemons that stream unlabeled output (the production daemon at the
+  > time of this release — verified live) yield `{:output, bytes}`
+  > events carrying the merged stream instead; consumers should handle
+  > all three event shapes.
 
       {:ok, stream} =
         ExDaytona.Session.open_log_stream(session, cmd_id,
@@ -52,7 +60,7 @@ defmodule ExDaytona.LogStream do
   @stderr_prefix <<0x02, 0x02, 0x02>>
   @max_prefix_len 3
 
-  @type event :: {:stdout, binary()} | {:stderr, binary()}
+  @type event :: {:stdout, binary()} | {:stderr, binary()} | {:output, binary()}
   @type close_reason :: :normal | {:error, Error.t()}
 
   defmodule State do
@@ -116,7 +124,9 @@ defmodule ExDaytona.LogStream do
   @doc """
   The next event, waiting up to `timeout` ms.
 
-  Returns `{:ok, {:stdout | :stderr, binary}}`, `{:closed, reason}` once
+  Returns `{:ok, {:stdout | :stderr | :output, binary}}` (`:output` =
+  unlabeled bytes from daemons without channel marking),
+  `{:closed, reason}` once
   the stream has ended and the buffer is drained (`reason` is `:normal`
   or `{:error, %ExDaytona.Error{}}` for overflow/timeout/transport
   failures), or `{:error, %ExDaytona.Error{}}` when `timeout` elapses
@@ -150,25 +160,23 @@ defmodule ExDaytona.LogStream do
   for short commands; long-lived follows should loop `next/2`.
   """
   @spec collect(pid(), timeout()) ::
-          {:ok, %{stdout: binary(), stderr: binary(), closed: close_reason()}}
+          {:ok, %{stdout: binary(), stderr: binary(), output: binary(), closed: close_reason()}}
           | {:error, Error.t()}
   def collect(stream, timeout \\ 60_000) do
-    do_collect(stream, timeout, %{stdout: [], stderr: []})
+    do_collect(stream, timeout, %{stdout: [], stderr: [], output: []})
   end
 
   defp do_collect(stream, timeout, acc) do
     case next(stream, timeout) do
-      {:ok, {:stdout, bytes}} ->
-        do_collect(stream, timeout, %{acc | stdout: [acc.stdout, bytes]})
-
-      {:ok, {:stderr, bytes}} ->
-        do_collect(stream, timeout, %{acc | stderr: [acc.stderr, bytes]})
+      {:ok, {channel, bytes}} ->
+        do_collect(stream, timeout, Map.update!(acc, channel, &[&1, bytes]))
 
       {:closed, reason} ->
         {:ok,
          %{
            stdout: IO.iodata_to_binary(acc.stdout),
            stderr: IO.iodata_to_binary(acc.stderr),
+           output: IO.iodata_to_binary(acc.output),
            closed: reason
          }}
 
@@ -392,7 +400,18 @@ defmodule ExDaytona.LogStream do
   defp nearest_marker(_si, ei), do: {ei, :stderr, @max_prefix_len}
 
   defp enqueue_payload(state, <<>>), do: state
-  defp enqueue_payload(%State{channel: nil} = state, _bytes), do: state
+
+  # Bytes arriving before any channel marker: the daemon did not label
+  # them (older daemons stream merged output without the mux protocol) —
+  # deliver as {:output, bytes} rather than dropping or mislabeling.
+  defp enqueue_payload(%State{channel: nil} = state, bytes) do
+    %{
+      state
+      | queue: :queue.in({:output, bytes}, state.queue),
+        queued_bytes: state.queued_bytes + byte_size(bytes),
+        queued_frames: state.queued_frames + 1
+    }
+  end
 
   defp enqueue_payload(%State{} = state, bytes) do
     %{

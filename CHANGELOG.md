@@ -27,11 +27,13 @@ streaming transports. No breaking changes to 0.1.0 call sites.
   destination. Existing small-file helpers unchanged (buffering now
   documented).
 - **Structured log streaming**: `ExDaytona.LogStream` +
-  `ExDaytona.Session.open_log_stream/3` — separate `:stdout`/`:stderr`
-  events in arrival order over the provider websocket protocol,
-  pull-based (`next/2`, `collect/2`), owner-monitored, bounded
-  (buffer/frame caps with explicit overflow errors), with idle and
-  overall timeouts and no silent reconnect. `Session.stream_logs/4`
+  `ExDaytona.Session.open_log_stream/3` — pull-based (`next/2`,
+  `collect/2`), owner-monitored, bounded (buffer/frame caps with
+  explicit overflow errors), with idle and overall timeouts and no
+  silent reconnect. Decodes the provider's stdout/stderr channel-marker
+  protocol into separate `:stdout`/`:stderr` events; daemons that stream
+  unlabeled output (the production daemon at release time — verified
+  live) yield merged `{:output, bytes}` events instead of dropping data. `Session.stream_logs/4`
   remains as the documented merged-output HTTP path and gains `:halt`
   cancellation and a `:deadline`.
 - **Response metadata**: `response: :full` on every generated operation
