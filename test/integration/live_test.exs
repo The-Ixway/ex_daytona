@@ -491,5 +491,90 @@ defmodule LiveSmokeTest do
         end
       end
     end
+
+    # Snapshot build -> instant create -> warm pools. Builds take minutes;
+    # same explicit opt-in as the lifecycle test above.
+    @tag timeout: 600_000
+    test "snapshot build -> sandbox from snapshot -> warm pool (creates real resources)", ctx do
+      if System.get_env("SDK_LIVE_LIFECYCLE") != "1" do
+        IO.puts("skipping snapshot lifecycle test (set SDK_LIVE_LIFECYCLE=1 to run)")
+      else
+        {:ok, client} =
+          ExDaytona.Client.new(api_key: ctx.token, base_url: ctx.base_url, retry: false)
+
+        name = "ex-daytona-live-snap-#{System.unique_integer([:positive])}"
+
+        image =
+          ExDaytona.Image.from("ubuntu:22.04")
+          |> ExDaytona.Image.run("echo built-by-ex-daytona > /marker.txt")
+
+        {:ok, log_acc} = Agent.start_link(fn -> [] end)
+
+        case ExDaytona.Snapshot.build(client, name, image,
+               log: fn chunk -> Agent.update(log_acc, &[chunk | &1]) end,
+               timeout: 480_000,
+               poll_interval: 3_000
+             ) do
+          {:ok, snapshot} ->
+            try do
+              assert snapshot.state == "active"
+              assert snapshot.name == name
+
+              streamed = log_acc |> Agent.get(& &1) |> Enum.reverse() |> Enum.join()
+              IO.puts("followed #{byte_size(streamed)} bytes of build logs live")
+
+              assert {:ok, %{items: items}} = ExDaytona.Snapshot.list(client, name: name)
+              assert Enum.any?(items, &(&1.id == snapshot.id))
+
+              # The payoff: creating from the snapshot skips the build
+              {:ok, sandbox} =
+                ExDaytona.Sandbox.create(client,
+                  snapshot: name,
+                  ttl_minutes: 10,
+                  labels: %{"purpose" => "ex_daytona-live-snapshot"}
+                )
+
+              try do
+                assert {:ok, %{exit_code: 0, output: marker}} =
+                         ExDaytona.Sandbox.exec(sandbox, "cat /marker.txt")
+
+                assert marker =~ "built-by-ex-daytona"
+
+                # Lazy Enumerable download against a real file
+                content = sandbox |> ExDaytona.FS.stream!("/marker.txt") |> Enum.join()
+                assert content =~ "built-by-ex-daytona"
+              after
+                :ok = ExDaytona.Sandbox.delete(sandbox)
+              end
+
+              # Warm pools may be tier-gated — exercise the facade either way
+              case ExDaytona.WarmPool.create(client, snapshot: name, size: 1) do
+                {:ok, pool} ->
+                  try do
+                    assert {:ok, pools} = ExDaytona.WarmPool.list(client)
+                    assert Enum.any?(pools, &(&1.id == pool.id))
+                  after
+                    :ok = ExDaytona.WarmPool.delete(client, pool.id)
+                  end
+
+                {:error, %ExDaytona.Error{status: status, message: message}}
+                when status in [400, 401, 402, 403] ->
+                  IO.puts("warm pools gated for this org (#{status}: #{message})")
+              end
+            after
+              _ = ExDaytona.Snapshot.delete(client, snapshot.id)
+            end
+
+          {:error, %ExDaytona.Error{status: status, message: message}}
+          when status in [400, 402, 403] ->
+            # Snapshot builds can be quota- or tier-gated; a documented gate
+            # is an acceptable outcome, anything else fails the test above.
+            IO.puts("snapshot build gated for this org (#{status}: #{message})")
+
+          {:error, error} ->
+            flunk("snapshot build failed: #{inspect(error)}")
+        end
+      end
+    end
   end
 end
