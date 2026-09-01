@@ -10,6 +10,69 @@ inserts new sections below this marker:
 
 <!-- changelog -->
 
+## [v0.4.0](https://github.com/The-Ixway/ex_daytona/compare/v0.3.0...v0.4.0) (2026-09-01)
+
+Developer-experience release: test without a Daytona account, snapshots
+and warm pools for instant sandbox creation, Elixir-native lazy streams,
+a drop-in webhook endpoint, and domain-level telemetry. No breaking
+changes; no new required runtime dependencies (`:telemetry` was already
+in the tree, `:plug` is optional).
+
+### Features:
+
+* add ExDaytona.Testing — in-package test doubles for SDK consumers by houllette
+
+  `Testing.client/1` returns a real `ExDaytona.Client` answered by
+  process-owned scripts instead of the network: FIFO `expect/3` with
+  `verify!/0`, reusable `stub/3` for polled endpoints, suffix path
+  matching for toolbox routes, `sandbox/2` for HTTP-free sandbox structs,
+  and `script_http_stream/1`/`script_ws/1` for the streaming transports.
+  Keyed by the test process (`async: true` safe), resolved across
+  SDK-internal process hops, cleaned up on owner exit.
+
+* Snapshot and WarmPool facades — build once, create instantly by houllette
+
+  `Snapshot.build/4` builds a snapshot from an `ExDaytona.Image`
+  (local build contexts included) with live build-log streaming and
+  waits for `active`; `Sandbox.create(snapshot: name)` then skips
+  building entirely. Full lifecycle: `create/3` (declarative or
+  registry image), `get`/`list`, `activate`/`deactivate` (quota
+  management), `delete`, `await_state/4` (fail-fast with the provider's
+  error reason), `build_logs/2`, `stream_build_logs/4`.
+  `ExDaytona.WarmPool` (`create`/`list`/`resize`/`delete`) keeps
+  sandboxes pre-provisioned for millisecond creates. Covered by the
+  opt-in live lifecycle suite.
+
+* lazy Enumerable streams — FS.stream!/3 and LogStream.events!/2 by houllette
+
+  Sandbox files and log streams compose with `for`/`Enum`/`Stream`
+  natively. `FS.stream!/3` pulls chunks through a monitored producer
+  with one chunk in flight (enumeration speed is the backpressure);
+  halting early cancels the request. `LogStream.events!/2` enumerates
+  demuxed events and closes the stream when enumeration stops.
+  Enabling change: `ExDaytona.Error` is now an exception — the bang
+  APIs raise it, and applications can `raise error` directly
+  (`Exception.message/1` renders credential-scrubbed).
+
+* drop-in webhook endpoint — ExDaytona.Webhooks.Plug by houllette
+
+  Mounted above `Plug.Parsers`, it reads the raw body (bounded),
+  verifies the Svix signature (secret as binary/MFA/fun, resolved per
+  request), dispatches to an `ExDaytona.Webhooks.Handler` module or
+  fun, and answers what Svix's retry logic expects (204 handled, 400
+  bad signature, 405/413 guards, 500 handler failure → retried). Other
+  paths pass through. Compiled only when the optional `:plug`
+  dependency is present.
+
+* emit domain-level telemetry spans across the facade by houllette
+
+  `[:ex_daytona, <area>, <op>, :start|:stop|:exception]` spans for
+  sandbox create/start/stop/delete/exec/run_code, session run, fs
+  upload/download, and snapshot create/build/delete. Stop metadata:
+  outcome, error_code/error_status, and result-derived ids/exit
+  codes/byte counts — redaction-safe by design (never commands, paths,
+  env values, or payloads). Event table in `ExDaytona.Telemetry`.
+
 ## [v0.3.0](https://github.com/The-Ixway/ex_daytona/releases/tag/v0.3.0) - 2026-09-01
 
 Quota, usage, and metering primitives for applications that build their
