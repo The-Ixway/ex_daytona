@@ -25,7 +25,6 @@ defmodule ExDaytona.CodeInterpreter do
   alias ExDaytona.Model
   alias ExDaytona.Sandbox
   alias ExDaytona.Toolbox
-  alias ExDaytona.WebSocket
 
   @type execution_error :: %{name: String.t(), value: String.t(), traceback: String.t()}
   @type result :: %{
@@ -58,14 +57,17 @@ defmodule ExDaytona.CodeInterpreter do
       |> put_if("envs", opts[:env])
       |> put_if("timeout", opts[:timeout])
 
+    ws_mod = ExDaytona.Client.transport(sandbox.client, :websocket)
+
     with {:ok, base_url} <- toolbox_base_url(sandbox),
          {:ok, ws} <-
-           WebSocket.connect(
+           ws_mod.connect(
              base_url <> "/process/interpreter/execute",
-             sandbox.client.api_key
+             sandbox.client.api_key,
+             []
            ),
-         :ok <- WebSocket.send_text(ws, JSON.encode!(request)) do
-      collect(ws, %{stdout: "", stderr: "", error: nil}, opts, receive_timeout)
+         :ok <- ws_mod.send_text(ws, JSON.encode!(request)) do
+      collect(ws_mod, ws, %{stdout: "", stderr: "", error: nil}, opts, receive_timeout)
     end
   end
 
@@ -111,19 +113,19 @@ defmodule ExDaytona.CodeInterpreter do
 
   ## Internals ---------------------------------------------------------------
 
-  defp collect(ws, result, opts, timeout) do
+  defp collect(ws_mod, ws, result, opts, timeout) do
     receive do
       {:ex_daytona_ws, ^ws, {frame_type, data}} when frame_type in [:text, :binary] ->
         case JSON.decode(data) do
-          {:ok, chunk} -> collect(ws, apply_chunk(chunk, result, opts), opts, timeout)
-          {:error, _} -> collect(ws, result, opts, timeout)
+          {:ok, chunk} -> collect(ws_mod, ws, apply_chunk(chunk, result, opts), opts, timeout)
+          {:error, _} -> collect(ws_mod, ws, result, opts, timeout)
         end
 
       {:ex_daytona_ws, ^ws, {:closed, _reason}} ->
         {:ok, result}
     after
       timeout ->
-        WebSocket.close(ws)
+        ws_mod.close(ws)
         {:error, %Error{message: "interpreter run timed out after #{timeout}ms", details: result}}
     end
   end

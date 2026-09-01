@@ -204,6 +204,9 @@ defmodule ExDaytona.Session do
         base_url <>
           "/process/session/#{id}/command/#{cmd_id}/logs?follow=true"
 
+      opts =
+        Keyword.put_new(opts, :transport, ExDaytona.Client.transport(sandbox.client, :http_stream))
+
       HTTPStream.get(url, sandbox.client.api_key, fun, opts)
     end
   end

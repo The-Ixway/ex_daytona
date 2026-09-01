@@ -329,6 +329,7 @@ defmodule ExDaytona.Sandbox do
       when is_function(fun, 1) do
     url = Client.base_url(client) <> "/sandbox/#{id}/build-logs?follow=true"
 
+    opts = Keyword.put_new(opts, :transport, Client.transport(client, :http_stream))
     ExDaytona.HTTPStream.get(url, client.api_key, fun, opts)
   end
 

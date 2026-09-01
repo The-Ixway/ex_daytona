@@ -20,7 +20,7 @@ defmodule ExDaytona.Client do
   alias ExDaytona.Error
 
   @enforce_keys [:conn, :api_key, :options]
-  defstruct [:conn, :api_key, :options]
+  defstruct [:conn, :api_key, :options, transports: nil]
 
   @typedoc """
   A configured SDK client.
@@ -33,7 +33,8 @@ defmodule ExDaytona.Client do
   @type t :: %__MODULE__{
           conn: Tesla.Env.client(),
           api_key: String.t(),
-          options: keyword()
+          options: keyword(),
+          transports: ExDaytona.Transport.t()
         }
 
   @doc """
@@ -52,10 +53,18 @@ defmodule ExDaytona.Client do
   @spec new(keyword()) :: {:ok, t()} | {:error, Error.t()}
   def new(options \\ []) do
     {api_key, options} = Keyword.pop(options, :api_key, System.get_env("DAYTONA_API_KEY"))
+    {transports, options} = Keyword.pop(options, :transports)
 
     if is_binary(api_key) and api_key != "" do
       conn = Connection.new([bearer_token: api_key] ++ options)
-      {:ok, %__MODULE__{conn: conn, api_key: api_key, options: options}}
+
+      {:ok,
+       %__MODULE__{
+         conn: conn,
+         api_key: api_key,
+         options: options,
+         transports: ExDaytona.Transport.resolve(transports)
+       }}
     else
       {:error,
        %Error{
@@ -84,6 +93,15 @@ defmodule ExDaytona.Client do
   """
   @spec conn(t()) :: Tesla.Env.client()
   def conn(%__MODULE__{conn: conn}), do: conn
+
+  @doc """
+  The configured transport implementation for `key` (`:http_stream` or
+  `:websocket`) — see `ExDaytona.Transport`.
+  """
+  @spec transport(t(), :http_stream | :websocket) :: module()
+  def transport(%__MODULE__{transports: transports}, key) do
+    Map.fetch!(ExDaytona.Transport.resolve(transports), key)
+  end
 
   @doc """
   The platform base URL this client targets, resolved the same way

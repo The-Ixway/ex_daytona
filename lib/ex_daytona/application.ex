@@ -22,19 +22,25 @@ defmodule ExDaytona.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      {Finch, name: ExDaytona.Finch, pools: pool_config()}
+      {Finch, name: ExDaytona.Finch, pools: pool_config(:pool_size, 25)},
+      # Dedicated pool for long-lived and bulk streams (log follows, file
+      # transfer) so they cannot starve lifecycle/control requests on the
+      # main pool. Tune with :stream_pool_size / :stream_pool_count.
+      {Finch, name: ExDaytona.Finch.Stream, pools: pool_config(:stream_pool_size, 16)}
     ]
 
     Supervisor.start_link(children, strategy: :one_for_one, name: ExDaytona.Supervisor)
   end
 
-  defp pool_config do
+  defp pool_config(size_key, default_size) do
     app = :ex_daytona
+
+    count_key = if size_key == :pool_size, do: :pool_count, else: :stream_pool_count
 
     %{
       default: [
-        size: Application.get_env(app, :pool_size, 25),
-        count: Application.get_env(app, :pool_count, 1),
+        size: Application.get_env(app, size_key, default_size),
+        count: Application.get_env(app, count_key, 1),
         conn_opts: [
           transport_opts: [
             timeout: Application.get_env(app, :connect_timeout, 5_000)

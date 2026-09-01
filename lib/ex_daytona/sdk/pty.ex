@@ -78,11 +78,19 @@ defmodule ExDaytona.Pty do
   @spec connect(t(), keyword()) :: {:ok, pid()} | {:error, Error.t()}
   def connect(%__MODULE__{sandbox: sandbox, id: id}, opts \\ []) do
     with {:ok, base_url} <- toolbox_base_url(sandbox) do
-      WebSocket.connect(
-        base_url <> "/process/pty/#{id}/connect",
-        sandbox.client.api_key,
-        opts
-      )
+      ws_mod = ExDaytona.Client.transport(sandbox.client, :websocket)
+      url = base_url <> "/process/pty/#{id}/connect"
+
+      case ws_mod.connect(url, sandbox.client.api_key, opts) do
+        {:ok, pid} when ws_mod == ExDaytona.WebSocket ->
+          {:ok, pid}
+
+        {:ok, pid} ->
+          {:ok, %ExDaytona.Transport.WSHandle{mod: ws_mod, pid: pid}}
+
+        {:error, _} = error ->
+          error
+      end
     end
   end
 
@@ -90,15 +98,21 @@ defmodule ExDaytona.Pty do
   Write input to the terminal (what a user would type). `ws` is the
   connection from `connect/2`.
   """
-  @spec send_input(pid(), iodata()) :: :ok | {:error, Error.t()}
+  @spec send_input(pid() | ExDaytona.Transport.WSHandle.t(), iodata()) ::
+          :ok | {:error, Error.t()}
   def send_input(ws, data) when is_pid(ws), do: WebSocket.send_binary(ws, data)
+
+  def send_input(%ExDaytona.Transport.WSHandle{mod: mod, pid: pid}, data),
+    do: mod.send_binary(pid, data)
 
   @doc """
   Close the websocket connection (the PTY session keeps running — use
   `delete/1` to kill it).
   """
-  @spec disconnect(pid()) :: :ok
+  @spec disconnect(pid() | ExDaytona.Transport.WSHandle.t()) :: :ok
   def disconnect(ws) when is_pid(ws), do: WebSocket.close(ws)
+
+  def disconnect(%ExDaytona.Transport.WSHandle{mod: mod, pid: pid}), do: mod.close(pid)
 
   @doc """
   Resize the terminal.

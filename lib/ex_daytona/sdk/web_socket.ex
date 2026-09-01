@@ -15,6 +15,8 @@ defmodule ExDaytona.WebSocket do
 
   use GenServer
 
+  @behaviour ExDaytona.Transport.WebSocketClient
+
   alias ExDaytona.Error
 
   @doc """
@@ -27,6 +29,7 @@ defmodule ExDaytona.WebSocket do
   - `:connect_timeout` — milliseconds to wait for the upgrade
     (default `15_000`)
   """
+  @impl true
   @spec connect(String.t(), String.t(), keyword()) :: {:ok, pid()} | {:error, Error.t()}
   def connect(url, api_key, opts \\ []) do
     owner = Keyword.get(opts, :owner, self())
@@ -49,12 +52,14 @@ defmodule ExDaytona.WebSocket do
   @doc """
   Send a text frame.
   """
+  @impl true
   @spec send_text(pid(), iodata()) :: :ok | {:error, Error.t()}
   def send_text(pid, data), do: GenServer.call(pid, {:send, {:text, IO.iodata_to_binary(data)}})
 
   @doc """
   Send a binary frame.
   """
+  @impl true
   @spec send_binary(pid(), iodata()) :: :ok | {:error, Error.t()}
   def send_binary(pid, data),
     do: GenServer.call(pid, {:send, {:binary, IO.iodata_to_binary(data)}})
@@ -62,6 +67,7 @@ defmodule ExDaytona.WebSocket do
   @doc """
   Close the connection (sends a close frame and stops the process).
   """
+  @impl true
   @spec close(pid()) :: :ok
   def close(pid) do
     if Process.alive?(pid), do: GenServer.cast(pid, :close)
