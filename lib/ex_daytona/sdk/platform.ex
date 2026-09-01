@@ -95,6 +95,118 @@ defmodule ExDaytona.Platform do
     Error.normalize(Api.Snapshots.get_snapshot(client.conn, id_or_name, response: :full))
   end
 
+  ## Metering (analytics API) -------------------------------------------------
+
+  @doc """
+  Aggregated metered usage for the organization over `[from, to]`
+  (ISO 8601 timestamps), normalized to snake_case:
+  `{:ok, %{sandbox_count, cpu_seconds, ram_gb_seconds, disk_gb_seconds,
+  gpu_seconds, price, first_start, last_end}}`.
+
+  Served by the analytics API (its own base URL — the connection is
+  derived automatically; override via
+  `config :ex_daytona, :analytics_base_url`).
+  """
+  @spec usage_aggregated(Client.t(), String.t(), String.t(), String.t()) ::
+          {:ok, map()} | {:error, Error.t()}
+  def usage_aggregated(%Client{} = client, organization_id, from, to)
+      when is_binary(organization_id) do
+    with {:ok, %Model.ModelsAggregatedUsage{} = usage} <-
+           Error.normalize(
+             Api.Usage.get_organization_usage_aggregated(
+               analytics_conn(client),
+               organization_id,
+               from,
+               to,
+               response: :full
+             )
+           ) do
+      {:ok, normalize_usage(usage)}
+    end
+  end
+
+  @doc """
+  Per-sandbox metered usage over `[from, to]` — the primitive for
+  rolling usage up into application-defined scopes (attribute sandboxes
+  with labels at create time, list them with
+  `ExDaytona.Sandbox.list(client, labels: %{...})`, then sum their rows
+  here). Returns `{:ok, [%{sandbox_id: id, cpu_seconds: n, ...}]}`.
+  """
+  @spec usage_per_sandbox(Client.t(), String.t(), String.t(), String.t()) ::
+          {:ok, [map()]} | {:error, Error.t()}
+  def usage_per_sandbox(%Client{} = client, organization_id, from, to)
+      when is_binary(organization_id) do
+    with {:ok, rows} <-
+           Error.normalize(
+             Api.Usage.get_organization_usage_per_sandbox(
+               analytics_conn(client),
+               organization_id,
+               from,
+               to,
+               response: :full
+             )
+           ) do
+      {:ok, rows |> List.wrap() |> Enum.map(&normalize_usage/1)}
+    end
+  end
+
+  @doc """
+  Usage over time as chart points (`:region` option narrows to one
+  region). Each point:
+  `%{time, cpu, cpu_price, ram_gb, ram_price, disk_gb, disk_price}`.
+  """
+  @spec usage_chart(Client.t(), String.t(), String.t(), String.t(), keyword()) ::
+          {:ok, [map()]} | {:error, Error.t()}
+  def usage_chart(%Client{} = client, organization_id, from, to, opts \\ [])
+      when is_binary(organization_id) do
+    api_opts = Keyword.take(opts, [:region]) ++ [response: :full]
+
+    with {:ok, points} <-
+           Error.normalize(
+             Api.Usage.get_organization_usage_chart(
+               analytics_conn(client),
+               organization_id,
+               from,
+               to,
+               api_opts
+             )
+           ) do
+      {:ok,
+       points
+       |> List.wrap()
+       |> Enum.map(fn %Model.ModelsUsageChartPoint{} = point ->
+         %{
+           time: point.time,
+           cpu: point.cpu,
+           cpu_price: point.cpuPrice,
+           ram_gb: point.ramGB,
+           ram_price: point.ramPrice,
+           disk_gb: point.diskGB,
+           disk_price: point.diskPrice
+         }
+       end)}
+    end
+  end
+
+  defp analytics_conn(%Client{} = client) do
+    ExDaytona.Analytics.connection([bearer_token: client.api_key] ++ client.options)
+  end
+
+  defp normalize_usage(usage) do
+    %{
+      sandbox_count: Map.get(usage, :sandboxCount),
+      sandbox_id: Map.get(usage, :sandboxId),
+      cpu_seconds: Map.get(usage, :totalCPUSeconds),
+      ram_gb_seconds: Map.get(usage, :totalRAMGBSeconds),
+      disk_gb_seconds: Map.get(usage, :totalDiskGBSeconds),
+      gpu_seconds: Map.get(usage, :totalGPUSeconds),
+      price: Map.get(usage, :totalPrice),
+      first_start: Map.get(usage, :firstStart),
+      last_end: Map.get(usage, :lastEnd)
+    }
+    |> Map.reject(fn {_k, v} -> is_nil(v) end)
+  end
+
   @doc """
   The organization's usage/quota overview (current usage vs. limits).
   """

@@ -53,7 +53,7 @@ additionalProperties:
   invokerPackage: "ExDaytona"
 
   # Package version
-  packageVersion: "0.2.0"
+  packageVersion: "0.3.0"
 
   # Description used in mix.exs.
   # Falls back to the spec's info.description when empty.

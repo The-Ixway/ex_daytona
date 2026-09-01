@@ -10,6 +10,28 @@ inserts new sections below this marker:
 
 <!-- changelog -->
 
+## [v0.3.0](https://github.com/The-Ixway/ex_daytona/releases/tag/v0.3.0) - 2026-09-01
+
+Quota, usage, and metering primitives for applications that build their
+own per-end-user limit or billing logic on top of Daytona's org-level
+enforcement. Read primitives only — the SDK ships no tenant policy.
+
+### Added
+- `ExDaytona.Quota` — normalized org quota truth: `overview/2`
+  (snapshot/volume gauges + per region × sandbox-class used-vs-total for
+  cpu/memory/disk/gpu with per-sandbox maxima), `headroom/3` (remaining
+  capacity per dimension, with known-combination hints on miss), and
+  `limits/2` (org per-sandbox maxima, secret quota, and
+  create/lifecycle/API rate limits).
+- Metering primitives on `ExDaytona.Platform` (analytics API, connection
+  derived automatically): `usage_aggregated/4`, `usage_per_sandbox/4`
+  (the per-sandbox CPU-seconds/RAM-GB-seconds/disk/price rows that
+  application-defined scopes roll up), and `usage_chart/5`.
+- `ExDaytona.Sandbox.list/2` accepts `labels:` as a map (JSON-encoded
+  into the server-side filter) — the attribution primitive for scoping
+  sandboxes to application-defined identities via labels set at create
+  time. Pre-encoded strings still pass through.
+
 ## [v0.2.0](https://github.com/The-Ixway/ex_daytona/releases/tag/v0.2.0) - 2026-09-01
 
 Production-hardening release: constant-memory transfer, structured

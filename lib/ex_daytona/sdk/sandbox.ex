@@ -170,11 +170,25 @@ defmodule ExDaytona.Sandbox do
   (`:limit`, `:name`, `:labels`, `:states`, ...) and returns
   `{:ok, %{items: [...], next_cursor: cursor}}` where items are
   `ExDaytona.Model.SandboxListItem` structs.
+
+  `:labels` may be a map — it is JSON-encoded into the server-side label
+  filter, the primitive for attributing sandboxes to your application's
+  own scopes (e.g. per end-user of a SaaS product):
+
+      Sandbox.list(client, labels: %{"my-app/tenant" => "user-123"})
+
+  A pre-encoded JSON string is also accepted.
   """
   @spec list(Client.t(), keyword()) ::
           {:ok, %{items: [Model.SandboxListItem.t()], next_cursor: String.t() | nil}}
           | {:error, Error.t()}
   def list(%Client{} = client, opts \\ []) do
+    opts =
+      case Keyword.get(opts, :labels) do
+        %{} = labels -> Keyword.put(opts, :labels, JSON.encode!(labels))
+        _ -> opts
+      end
+
     with {:ok, %Model.ListSandboxesResponse{items: items, nextCursor: cursor}} <-
            Error.normalize(Api.Sandbox.list_sandboxes(client.conn, opts ++ [response: :full])) do
       {:ok, %{items: items || [], next_cursor: cursor}}

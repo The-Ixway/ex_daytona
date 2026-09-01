@@ -19,7 +19,7 @@ Add `ex_daytona` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:ex_daytona, "~> 0.2.0"}
+    {:ex_daytona, "~> 0.3.0"}
   ]
 end
 ```
@@ -311,6 +311,33 @@ re-upload.
 
 > **`env` values are not secrets** — they are plaintext, visible to
 > sandbox processes and the provider API. Use `ExDaytona.Secrets`.
+
+### Quota, usage, and metering primitives
+
+Building a product on top of Daytona (per-end-user limits, billing,
+admission control)? The SDK ships the **read primitives** — your
+application owns the policy:
+
+```elixir
+# Org quota truth (the hard ceiling Daytona enforces)
+{:ok, overview} = ExDaytona.Quota.overview(client, org_id)      # region×class used vs total
+{:ok, headroom} = ExDaytona.Quota.headroom(client, org_id, region: "us", class: "small")
+{:ok, limits}   = ExDaytona.Quota.limits(client, org_id)        # per-sandbox maxima + rate limits
+
+# Attribution: tag sandboxes with your own scope at create time…
+{:ok, sandbox} = ExDaytona.Sandbox.create(client, labels: %{"my-app/tenant" => "user-123"})
+
+# …and filter server-side by it
+{:ok, %{items: theirs}} = ExDaytona.Sandbox.list(client, labels: %{"my-app/tenant" => "user-123"})
+
+# Metering for billing rollups (analytics API)
+{:ok, usage} = ExDaytona.Platform.usage_aggregated(client, org_id, from, to)
+{:ok, rows}  = ExDaytona.Platform.usage_per_sandbox(client, org_id, from, to)
+tenant_cost  = rows |> Enum.filter(&(&1.sandbox_id in tenant_sandbox_ids)) |> Enum.sum_by(& &1.price)
+```
+
+Application-side checks built on these are advisory (check-then-act) —
+Daytona enforces only the organization-level quota.
 
 ### Response metadata, retries, and errors
 

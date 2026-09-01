@@ -284,6 +284,35 @@ defmodule LiveSmokeTest do
                 sandbox
             end
 
+          # Quota primitives: org truth via the sandbox's own org id
+          org_id = sandbox.info.organizationId
+
+          assert {:ok, quota} = ExDaytona.Quota.overview(client, org_id)
+          assert is_list(quota.regions)
+
+          assert {:ok, limits} = ExDaytona.Quota.limits(client, org_id)
+          assert is_number(limits.max_cpu_per_sandbox) or is_nil(limits.max_cpu_per_sandbox)
+
+          # Metering (analytics API): auth model unconfirmed for API keys —
+          # accept data or a documented auth gate, never a crash
+          month_ago =
+            DateTime.utc_now() |> DateTime.add(-30, :day) |> DateTime.to_iso8601()
+
+          now_iso = DateTime.utc_now() |> DateTime.to_iso8601()
+
+          case ExDaytona.Platform.usage_aggregated(client, org_id, month_ago, now_iso) do
+            {:ok, usage} ->
+              assert is_map(usage)
+
+            {:error, %ExDaytona.Error{status: status}} when status in [401, 403] ->
+              IO.puts("analytics metering is auth-gated for API keys (#{status})")
+          end
+
+          case ExDaytona.Platform.usage_per_sandbox(client, org_id, month_ago, now_iso) do
+            {:ok, rows} -> assert is_list(rows)
+            {:error, %ExDaytona.Error{status: status}} when status in [401, 403] -> :gated
+          end
+
           # Sessions: shared state, async command, real-time log streaming
           {:ok, session} = ExDaytona.Session.create(sandbox)
           {:ok, %{exit_code: 0}} = ExDaytona.Session.run(session, "export LIVE_MARKER=ok")
