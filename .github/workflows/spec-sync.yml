@@ -31,7 +31,7 @@ jobs:
       # Node is needed up front: fetch-spec.sh uses npx swagger2openapi to
       # convert the Swagger 2.0 documents to OpenAPI 3.0.
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: "20"
 
