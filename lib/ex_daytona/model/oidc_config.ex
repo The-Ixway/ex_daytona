@@ -30,14 +30,18 @@ defmodule ExDaytona.Model.OidcConfig do
 
   defstruct [
     :audience,
+    :authApiHostname,
     :clientId,
-    :issuer
+    :issuer,
+    :provider
   ]
 
   @type t :: %__MODULE__{
           :audience => String.t(),
+          :authApiHostname => String.t() | nil,
           :clientId => String.t(),
-          :issuer => String.t()
+          :issuer => String.t(),
+          :provider => String.t()
         }
 
   def decode(value) do

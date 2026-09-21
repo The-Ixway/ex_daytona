@@ -506,6 +506,80 @@ defmodule ExDaytona.Api.Organizations do
   end
 
   @doc """
+  Generate a WorkOS Admin Portal link for configuring SSO or SCIM directory sync
+
+  ### Parameters
+
+  - `connection` (ExDaytona.Connection): Connection to server
+  - `organization_id` (String.t): Organization ID
+  - `generate_workos_admin_portal_link` (GenerateWorkosAdminPortalLink): 
+  - `opts` (keyword): Optional parameters
+
+  ### Returns
+
+  - `{:ok, ExDaytona.Model.WorkosAdminPortalLink.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec generate_workos_admin_portal_link(
+          Tesla.Env.client(),
+          String.t(),
+          ExDaytona.Model.GenerateWorkosAdminPortalLink.t(),
+          keyword()
+        ) :: {:ok, ExDaytona.Model.WorkosAdminPortalLink.t()} | {:error, Tesla.Env.t()}
+  def generate_workos_admin_portal_link(connection, organization_id, generate_workos_admin_portal_link, opts \\ []) do
+    request =
+      %{}
+      |> method(:post)
+      |> url("/organizations/#{organization_id}/identity-providers/workos-admin-portal-link")
+      |> add_param(:body, :body, generate_workos_admin_portal_link)
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response(
+      [
+        {201, ExDaytona.Model.WorkosAdminPortalLink}
+      ],
+      opts
+    )
+  end
+
+  @doc """
+  Get shared GPU capacity
+  Returns a short-lived observation of the shared GPU fleet. Organization quotas and entitlements are not applied. Capacity can change immediately and sandbox creation remains authoritative.
+
+  ### Parameters
+
+  - `connection` (ExDaytona.Connection): Connection to server
+  - `organization_id` (String.t): Organization ID
+  - `opts` (keyword): Optional parameters
+
+  ### Returns
+
+  - `{:ok, ExDaytona.Model.GpuCapacityResponse.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec get_gpu_capacity(Tesla.Env.client(), String.t(), keyword()) ::
+          {:ok, nil} | {:ok, ExDaytona.Model.GpuCapacityResponse.t()} | {:error, Tesla.Env.t()}
+  def get_gpu_capacity(connection, organization_id, opts \\ []) do
+    request =
+      %{}
+      |> method(:get)
+      |> url("/organizations/#{organization_id}/gpu-capacity")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.GpuCapacityResponse},
+        {403, false}
+      ],
+      opts
+    )
+  end
+
+  @doc """
   Get organization by ID
 
   ### Parameters
@@ -737,6 +811,39 @@ defmodule ExDaytona.Api.Organizations do
     |> evaluate_response(
       [
         {200, ExDaytona.Model.Region}
+      ],
+      opts
+    )
+  end
+
+  @doc """
+  Get sandbox identity by sandbox auth token
+
+  ### Parameters
+
+  - `connection` (ExDaytona.Connection): Connection to server
+  - `auth_token` (String.t): Sandbox Auth Token
+  - `opts` (keyword): Optional parameters
+
+  ### Returns
+
+  - `{:ok, ExDaytona.Model.SandboxIdentity.t}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec get_sandbox_identity_by_sandbox_auth_token(Tesla.Env.client(), String.t(), keyword()) ::
+          {:ok, ExDaytona.Model.SandboxIdentity.t()} | {:error, Tesla.Env.t()}
+  def get_sandbox_identity_by_sandbox_auth_token(connection, auth_token, opts \\ []) do
+    request =
+      %{}
+      |> method(:get)
+      |> url("/organizations/sandbox-identity/by-sandbox-auth-token/#{auth_token}")
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response(
+      [
+        {200, ExDaytona.Model.SandboxIdentity}
       ],
       opts
     )
@@ -1202,45 +1309,6 @@ defmodule ExDaytona.Api.Organizations do
   end
 
   @doc """
-  Suspend organization
-
-  ### Parameters
-
-  - `connection` (ExDaytona.Connection): Connection to server
-  - `organization_id` (String.t): Organization ID
-  - `opts` (keyword): Optional parameters
-    - `:body` (OrganizationSuspension): 
-
-  ### Returns
-
-  - `{:ok, nil}` on success
-  - `{:error, Tesla.Env.t}` on failure
-  """
-  @spec suspend_organization(Tesla.Env.client(), String.t(), keyword()) :: {:ok, nil} | {:error, Tesla.Env.t()}
-  def suspend_organization(connection, organization_id, opts \\ []) do
-    optional_params = %{
-      :body => :body
-    }
-
-    request =
-      %{}
-      |> method(:post)
-      |> url("/organizations/#{organization_id}/suspend")
-      |> add_optional_params(optional_params, opts)
-      |> ensure_body()
-      |> Enum.into([])
-
-    connection
-    |> Connection.request(request)
-    |> evaluate_response(
-      [
-        {204, false}
-      ],
-      opts
-    )
-  end
-
-  @doc """
   Test OIDC identity provider connection
 
   ### Parameters
@@ -1279,39 +1347,6 @@ defmodule ExDaytona.Api.Organizations do
     |> evaluate_response(
       [
         {200, ExDaytona.Model.TestIdentityProviderConnectionResponse}
-      ],
-      opts
-    )
-  end
-
-  @doc """
-  Unsuspend organization
-
-  ### Parameters
-
-  - `connection` (ExDaytona.Connection): Connection to server
-  - `organization_id` (String.t): Organization ID
-  - `opts` (keyword): Optional parameters
-
-  ### Returns
-
-  - `{:ok, nil}` on success
-  - `{:error, Tesla.Env.t}` on failure
-  """
-  @spec unsuspend_organization(Tesla.Env.client(), String.t(), keyword()) :: {:ok, nil} | {:error, Tesla.Env.t()}
-  def unsuspend_organization(connection, organization_id, opts \\ []) do
-    request =
-      %{}
-      |> method(:post)
-      |> url("/organizations/#{organization_id}/unsuspend")
-      |> ensure_body()
-      |> Enum.into([])
-
-    connection
-    |> Connection.request(request)
-    |> evaluate_response(
-      [
-        {204, false}
       ],
       opts
     )
@@ -1527,131 +1562,6 @@ defmodule ExDaytona.Api.Organizations do
   end
 
   @doc """
-  Update organization preview warning
-
-  ### Parameters
-
-  - `connection` (ExDaytona.Connection): Connection to server
-  - `organization_id` (String.t): Organization ID
-  - `organization_preview_warning` (OrganizationPreviewWarning): 
-  - `opts` (keyword): Optional parameters
-
-  ### Returns
-
-  - `{:ok, nil}` on success
-  - `{:error, Tesla.Env.t}` on failure
-  """
-  @spec update_organization_preview_warning(
-          Tesla.Env.client(),
-          String.t(),
-          ExDaytona.Model.OrganizationPreviewWarning.t(),
-          keyword()
-        ) :: {:ok, nil} | {:error, Tesla.Env.t()}
-  def update_organization_preview_warning(connection, organization_id, organization_preview_warning, opts \\ []) do
-    request =
-      %{}
-      |> method(:post)
-      |> url("/organizations/#{organization_id}/preview-warning")
-      |> add_param(:body, :body, organization_preview_warning)
-      |> Enum.into([])
-
-    connection
-    |> Connection.request(request)
-    |> evaluate_response(
-      [
-        {204, false}
-      ],
-      opts
-    )
-  end
-
-  @doc """
-  Update organization quota
-
-  ### Parameters
-
-  - `connection` (ExDaytona.Connection): Connection to server
-  - `organization_id` (String.t): Organization ID
-  - `update_organization_quota` (UpdateOrganizationQuota): 
-  - `opts` (keyword): Optional parameters
-
-  ### Returns
-
-  - `{:ok, nil}` on success
-  - `{:error, Tesla.Env.t}` on failure
-  """
-  @spec update_organization_quota(
-          Tesla.Env.client(),
-          String.t(),
-          ExDaytona.Model.UpdateOrganizationQuota.t(),
-          keyword()
-        ) :: {:ok, nil} | {:error, Tesla.Env.t()}
-  def update_organization_quota(connection, organization_id, update_organization_quota, opts \\ []) do
-    request =
-      %{}
-      |> method(:patch)
-      |> url("/organizations/#{organization_id}/quota")
-      |> add_param(:body, :body, update_organization_quota)
-      |> Enum.into([])
-
-    connection
-    |> Connection.request(request)
-    |> evaluate_response(
-      [
-        {204, false}
-      ],
-      opts
-    )
-  end
-
-  @doc """
-  Update organization region quota
-
-  ### Parameters
-
-  - `connection` (ExDaytona.Connection): Connection to server
-  - `organization_id` (String.t): Organization ID
-  - `region_id` (String.t): ID of the region where the updated quota will be applied
-  - `update_organization_region_quota` (UpdateOrganizationRegionQuota): 
-  - `opts` (keyword): Optional parameters
-
-  ### Returns
-
-  - `{:ok, nil}` on success
-  - `{:error, Tesla.Env.t}` on failure
-  """
-  @spec update_organization_region_quota(
-          Tesla.Env.client(),
-          String.t(),
-          String.t(),
-          ExDaytona.Model.UpdateOrganizationRegionQuota.t(),
-          keyword()
-        ) :: {:ok, nil} | {:error, Tesla.Env.t()}
-  def update_organization_region_quota(
-        connection,
-        organization_id,
-        region_id,
-        update_organization_region_quota,
-        opts \\ []
-      ) do
-    request =
-      %{}
-      |> method(:patch)
-      |> url("/organizations/#{organization_id}/quota/#{region_id}")
-      |> add_param(:body, :body, update_organization_region_quota)
-      |> Enum.into([])
-
-    connection
-    |> Connection.request(request)
-    |> evaluate_response(
-      [
-        {204, false}
-      ],
-      opts
-    )
-  end
-
-  @doc """
   Update organization role
 
   ### Parameters
@@ -1693,45 +1603,6 @@ defmodule ExDaytona.Api.Organizations do
   end
 
   @doc """
-  Update organization SSO entitlement
-
-  ### Parameters
-
-  - `connection` (ExDaytona.Connection): Connection to server
-  - `organization_id` (String.t): Organization ID
-  - `organization_sso_enabled` (OrganizationSsoEnabled): 
-  - `opts` (keyword): Optional parameters
-
-  ### Returns
-
-  - `{:ok, nil}` on success
-  - `{:error, Tesla.Env.t}` on failure
-  """
-  @spec update_organization_sso_enabled(
-          Tesla.Env.client(),
-          String.t(),
-          ExDaytona.Model.OrganizationSsoEnabled.t(),
-          keyword()
-        ) :: {:ok, nil} | {:error, Tesla.Env.t()}
-  def update_organization_sso_enabled(connection, organization_id, organization_sso_enabled, opts \\ []) do
-    request =
-      %{}
-      |> method(:post)
-      |> url("/organizations/#{organization_id}/sso-enabled")
-      |> add_param(:body, :body, organization_sso_enabled)
-      |> Enum.into([])
-
-    connection
-    |> Connection.request(request)
-    |> evaluate_response(
-      [
-        {204, false}
-      ],
-      opts
-    )
-  end
-
-  @doc """
   Update region configuration
 
   ### Parameters
@@ -1767,50 +1638,6 @@ defmodule ExDaytona.Api.Organizations do
     |> evaluate_response(
       [
         {200, false}
-      ],
-      opts
-    )
-  end
-
-  @doc """
-  Update sandbox default limited network egress
-
-  ### Parameters
-
-  - `connection` (ExDaytona.Connection): Connection to server
-  - `organization_id` (String.t): Organization ID
-  - `organization_sandbox_default_limited_network_egress` (OrganizationSandboxDefaultLimitedNetworkEgress): 
-  - `opts` (keyword): Optional parameters
-
-  ### Returns
-
-  - `{:ok, nil}` on success
-  - `{:error, Tesla.Env.t}` on failure
-  """
-  @spec update_sandbox_default_limited_network_egress(
-          Tesla.Env.client(),
-          String.t(),
-          ExDaytona.Model.OrganizationSandboxDefaultLimitedNetworkEgress.t(),
-          keyword()
-        ) :: {:ok, nil} | {:error, Tesla.Env.t()}
-  def update_sandbox_default_limited_network_egress(
-        connection,
-        organization_id,
-        organization_sandbox_default_limited_network_egress,
-        opts \\ []
-      ) do
-    request =
-      %{}
-      |> method(:post)
-      |> url("/organizations/#{organization_id}/sandbox-default-limited-network-egress")
-      |> add_param(:body, :body, organization_sandbox_default_limited_network_egress)
-      |> Enum.into([])
-
-    connection
-    |> Connection.request(request)
-    |> evaluate_response(
-      [
-        {204, false}
       ],
       opts
     )

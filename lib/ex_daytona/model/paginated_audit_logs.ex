@@ -39,9 +39,9 @@ defmodule ExDaytona.Model.PaginatedAuditLogs do
   @type t :: %__MODULE__{
           :items => [ExDaytona.Model.AuditLog.t()],
           :nextToken => String.t() | nil,
-          :page => number(),
-          :total => number(),
-          :totalPages => number()
+          :page => integer(),
+          :total => integer(),
+          :totalPages => integer()
         }
 
   alias ExDaytona.Deserializer

@@ -140,8 +140,8 @@ defmodule ExDaytona.Api.Snapshots do
   - `connection` (ExDaytona.Connection): Connection to server
   - `opts` (keyword): Optional parameters
     - `:"X-Daytona-Organization-ID"` (String.t): Use with JWT to specify the organization ID
-    - `:page` (number()): Page number of the results
-    - `:limit` (number()): Number of results per page
+    - `:page` (integer()): Page number of the results
+    - `:limit` (integer()): Number of results per page
     - `:name` (String.t): Filter by partial name match
     - `:sourceSandboxId` (String.t): Filter by the ID of the sandbox the snapshot was created from
     - `:sort` (String.t): Field to sort by

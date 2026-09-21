@@ -51,8 +51,8 @@ defmodule ExDaytona.Api.Audit do
   - `connection` (ExDaytona.Connection): Connection to server
   - `organization_id` (String.t): Organization ID
   - `opts` (keyword): Optional parameters
-    - `:page` (number()): Page number of the results
-    - `:limit` (number()): Number of results per page
+    - `:page` (integer()): Page number of the results
+    - `:limit` (integer()): Number of results per page
     - `:from` (DateTime.t): Deprecated alias for `createdAt[gte]`. From date (ISO 8601 format).
     - `:to` (DateTime.t): Deprecated alias for `createdAt[lte]`. To date (ISO 8601 format).
     - `:nextToken` (String.t): Token for cursor-based pagination. When provided, takes precedence over page parameter.

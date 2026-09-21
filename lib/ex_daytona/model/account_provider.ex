@@ -30,12 +30,14 @@ defmodule ExDaytona.Model.AccountProvider do
 
   defstruct [
     :displayName,
-    :name
+    :linked,
+    :provider
   ]
 
   @type t :: %__MODULE__{
           :displayName => String.t(),
-          :name => String.t()
+          :linked => boolean(),
+          :provider => String.t()
         }
 
   def decode(value) do

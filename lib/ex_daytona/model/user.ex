@@ -34,6 +34,7 @@ defmodule ExDaytona.Model.User do
     :emailVerified,
     :id,
     :name,
+    :privacyPoliciesAccepted,
     :publicKeys,
     :pylonEmailHash
   ]
@@ -44,6 +45,7 @@ defmodule ExDaytona.Model.User do
           :emailVerified => boolean(),
           :id => String.t(),
           :name => String.t(),
+          :privacyPoliciesAccepted => boolean() | nil,
           :publicKeys => [ExDaytona.Model.UserPublicKey.t()],
           :pylonEmailHash => String.t() | nil
         }

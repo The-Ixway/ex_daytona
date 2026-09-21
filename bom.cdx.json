@@ -99,8 +99,8 @@
       "version": "1.4.7"
     },
     {
-      "bom-ref": "otp:component:mix:otp:47854094",
-      "cpe": "cpe:2.3:a:elixir-lang:mix:1.20.4:*:*:*:*:*:*:*",
+      "bom-ref": "otp:component:mix:otp:55076520",
+      "cpe": "cpe:2.3:a:elixir-lang:mix:1.20.2:*:*:*:*:*:*:*",
       "description": "mix",
       "externalReferences": [
         {
@@ -109,7 +109,7 @@
         },
         {
           "type": "distribution",
-          "url": "https://github.com/elixir-lang/elixir/archive/refs/tags/v1.20.4.zip"
+          "url": "https://github.com/elixir-lang/elixir/archive/refs/tags/v1.20.2.zip"
         },
         {
           "comment": "github",
@@ -132,10 +132,10 @@
         }
       ],
       "name": "mix",
-      "purl": "pkg:otp/mix@1.20.4?download_url=https://github.com/elixir-lang/elixir/archive/refs/tags/v1.20.4.zip&repository_url=https://github.com/elixir-lang/elixir&vcs_url=git%2Bhttps://github.com/elixir-lang/elixir.git#lib/mix",
+      "purl": "pkg:otp/mix@1.20.2?download_url=https://github.com/elixir-lang/elixir/archive/refs/tags/v1.20.2.zip&repository_url=https://github.com/elixir-lang/elixir&vcs_url=git%2Bhttps://github.com/elixir-lang/elixir.git#lib/mix",
       "scope": "required",
       "type": "library",
-      "version": "1.20.4"
+      "version": "1.20.2"
     },
     {
       "bom-ref": "otp:component:nimble_ownership:hex:131509519",
@@ -250,8 +250,8 @@
       "version": "1.3.1"
     },
     {
-      "bom-ref": "otp:component:eex:otp:45483983",
-      "cpe": "cpe:2.3:a:elixir-lang:eex:1.20.4:*:*:*:*:*:*:*",
+      "bom-ref": "otp:component:eex:otp:98317081",
+      "cpe": "cpe:2.3:a:elixir-lang:eex:1.20.2:*:*:*:*:*:*:*",
       "description": "eex",
       "externalReferences": [
         {
@@ -260,7 +260,7 @@
         },
         {
           "type": "distribution",
-          "url": "https://github.com/elixir-lang/elixir/archive/refs/tags/v1.20.4.zip"
+          "url": "https://github.com/elixir-lang/elixir/archive/refs/tags/v1.20.2.zip"
         },
         {
           "comment": "github",
@@ -283,10 +283,10 @@
         }
       ],
       "name": "eex",
-      "purl": "pkg:otp/eex@1.20.4?download_url=https://github.com/elixir-lang/elixir/archive/refs/tags/v1.20.4.zip&repository_url=https://github.com/elixir-lang/elixir&vcs_url=git%2Bhttps://github.com/elixir-lang/elixir.git#lib/eex",
+      "purl": "pkg:otp/eex@1.20.2?download_url=https://github.com/elixir-lang/elixir/archive/refs/tags/v1.20.2.zip&repository_url=https://github.com/elixir-lang/elixir&vcs_url=git%2Bhttps://github.com/elixir-lang/elixir.git#lib/eex",
       "scope": "required",
       "type": "library",
-      "version": "1.20.4"
+      "version": "1.20.2"
     },
     {
       "bom-ref": "otp:component:websock:hex:95532479",
@@ -399,45 +399,6 @@
       "version": "0.10.0"
     },
     {
-      "bom-ref": "otp:component:hex:otp:256814",
-      "cpe": "cpe:2.3:a:hexpm:hex:2.5.0:*:*:*:*:*:*:*",
-      "description": "hex",
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "git+https://github.com/hexpm/hex"
-        },
-        {
-          "type": "distribution",
-          "url": "https://github.com/hexpm/hex/archive/refs/tags/v2.5.0.zip"
-        },
-        {
-          "comment": "github",
-          "type": "vcs",
-          "url": "https://github.com/hexpm/hex"
-        },
-        {
-          "comment": "website",
-          "type": "website",
-          "url": "https://hex.pm"
-        }
-      ],
-      "group": "hex",
-      "licenses": [
-        {
-          "license": {
-            "acknowledgement": "declared",
-            "id": "Apache-2.0"
-          }
-        }
-      ],
-      "name": "hex",
-      "purl": "pkg:otp/hex?download_url=https://github.com/hexpm/hex/archive/refs/tags/v2.5.0.zip&repository_url=https://github.com/hexpm/hex&vcs_url=git%2Bhttps://github.com/hexpm/hex.git",
-      "scope": "required",
-      "type": "library",
-      "version": "2.5.0"
-    },
-    {
       "bom-ref": "otp:component:mint:hex:82086386",
       "cpe": "cpe:2.3:a:elixir-mint:mint:1.9.3:*:*:*:*:*:*:*",
       "description": "Small and composable HTTP client.",
@@ -484,8 +445,8 @@
       "version": "1.9.3"
     },
     {
-      "bom-ref": "otp:component:ssl:otp:131716903",
-      "cpe": "cpe:2.3:a:erlang:ssl:11.7.4:*:*:*:*:*:*:*",
+      "bom-ref": "otp:component:ssl:otp:102842373",
+      "cpe": "cpe:2.3:a:erlang:ssl:11.7.2:*:*:*:*:*:*:*",
       "description": "Erlang/OTP SSL application",
       "externalReferences": [
         {
@@ -494,7 +455,7 @@
         },
         {
           "type": "distribution",
-          "url": "https://github.com/erlang/otp/archive/refs/tags/OTP-11.7.4.zip"
+          "url": "https://github.com/erlang/otp/archive/refs/tags/OTP-11.7.2.zip"
         },
         {
           "comment": "github",
@@ -517,10 +478,10 @@
         }
       ],
       "name": "ssl",
-      "purl": "pkg:otp/ssl?download_url=https://github.com/erlang/otp/archive/refs/tags/OTP-11.7.4.zip&repository_url=https://github.com/erlang/otp&vcs_url=git%2Bhttps://github.com/erlang/otp.git#lib/ssl",
+      "purl": "pkg:otp/ssl?download_url=https://github.com/erlang/otp/archive/refs/tags/OTP-11.7.2.zip&repository_url=https://github.com/erlang/otp&vcs_url=git%2Bhttps://github.com/erlang/otp.git#lib/ssl",
       "scope": "required",
       "type": "library",
-      "version": "11.7.4"
+      "version": "11.7.2"
     },
     {
       "bom-ref": "otp:component:plug:hex:15594346",
@@ -574,8 +535,8 @@
       "version": "1.20.3"
     },
     {
-      "bom-ref": "otp:component:logger:otp:72055478",
-      "cpe": "cpe:2.3:a:elixir-lang:logger:1.20.4:*:*:*:*:*:*:*",
+      "bom-ref": "otp:component:logger:otp:16931961",
+      "cpe": "cpe:2.3:a:elixir-lang:logger:1.20.2:*:*:*:*:*:*:*",
       "description": "logger",
       "externalReferences": [
         {
@@ -584,7 +545,7 @@
         },
         {
           "type": "distribution",
-          "url": "https://github.com/elixir-lang/elixir/archive/refs/tags/v1.20.4.zip"
+          "url": "https://github.com/elixir-lang/elixir/archive/refs/tags/v1.20.2.zip"
         },
         {
           "comment": "github",
@@ -607,10 +568,10 @@
         }
       ],
       "name": "logger",
-      "purl": "pkg:otp/logger@1.20.4?download_url=https://github.com/elixir-lang/elixir/archive/refs/tags/v1.20.4.zip&repository_url=https://github.com/elixir-lang/elixir&vcs_url=git%2Bhttps://github.com/elixir-lang/elixir.git#lib/logger",
+      "purl": "pkg:otp/logger@1.20.2?download_url=https://github.com/elixir-lang/elixir/archive/refs/tags/v1.20.2.zip&repository_url=https://github.com/elixir-lang/elixir&vcs_url=git%2Bhttps://github.com/elixir-lang/elixir.git#lib/logger",
       "scope": "required",
       "type": "library",
-      "version": "1.20.4"
+      "version": "1.20.2"
     },
     {
       "bom-ref": "otp:component:inets:otp:121672126",
@@ -652,8 +613,9 @@
       "version": "9.7.1"
     },
     {
-      "bom-ref": "otp:component:erts:otp:112605601",
-      "cpe": "cpe:2.3:a:erlang:erts:*:*:*:*:*:*:*:*",
+      "bom-ref": "otp:component:erts:otp:23928872",
+      "cpe": "cpe:2.3:a:erlang:erts:17.0.2:*:*:*:*:*:*:*",
+      "description": "ERTS  CXC 138 10",
       "externalReferences": [
         {
           "type": "vcs",
@@ -661,7 +623,7 @@
         },
         {
           "type": "distribution",
-          "url": "https://github.com/erlang/otp/archive/refs/heads/master.zip"
+          "url": "https://github.com/erlang/otp/archive/refs/tags/OTP-17.0.2.zip"
         },
         {
           "comment": "github",
@@ -684,13 +646,15 @@
         }
       ],
       "name": "erts",
-      "purl": "pkg:otp/erts?download_url=https://github.com/erlang/otp/archive/refs/heads/master.zip&repository_url=https://github.com/erlang/otp&vcs_url=git%2Bhttps://github.com/erlang/otp.git#lib/erts",
+      "purl": "pkg:otp/erts?download_url=https://github.com/erlang/otp/archive/refs/tags/OTP-17.0.2.zip&repository_url=https://github.com/erlang/otp&vcs_url=git%2Bhttps://github.com/erlang/otp.git#lib/erts",
       "scope": "required",
-      "type": "library"
+      "type": "library",
+      "version": "17.0.2"
     },
     {
-      "bom-ref": "otp:component:syntax_tools:otp:25983030",
-      "cpe": "cpe:2.3:a:erlang:syntax_tools:*:*:*:*:*:*:*:*",
+      "bom-ref": "otp:component:syntax_tools:otp:105159087",
+      "cpe": "cpe:2.3:a:erlang:syntax_tools:4.1:*:*:*:*:*:*:*",
+      "description": "Syntax tools",
       "externalReferences": [
         {
           "type": "vcs",
@@ -698,7 +662,7 @@
         },
         {
           "type": "distribution",
-          "url": "https://github.com/erlang/otp/archive/refs/heads/master.zip"
+          "url": "https://github.com/erlang/otp/archive/refs/tags/OTP-4.1.zip"
         },
         {
           "comment": "github",
@@ -721,13 +685,14 @@
         }
       ],
       "name": "syntax_tools",
-      "purl": "pkg:otp/syntax_tools?download_url=https://github.com/erlang/otp/archive/refs/heads/master.zip&repository_url=https://github.com/erlang/otp&vcs_url=git%2Bhttps://github.com/erlang/otp.git#lib/syntax_tools",
+      "purl": "pkg:otp/syntax_tools?download_url=https://github.com/erlang/otp/archive/refs/tags/OTP-4.1.zip&repository_url=https://github.com/erlang/otp&vcs_url=git%2Bhttps://github.com/erlang/otp.git#lib/syntax_tools",
       "scope": "required",
-      "type": "library"
+      "type": "library",
+      "version": "4.1"
     },
     {
-      "bom-ref": "otp:component:elixir:otp:91030763",
-      "cpe": "cpe:2.3:a:elixir-lang:elixir:1.20.4:*:*:*:*:*:*:*",
+      "bom-ref": "otp:component:elixir:otp:78816447",
+      "cpe": "cpe:2.3:a:elixir-lang:elixir:1.20.2:*:*:*:*:*:*:*",
       "description": "elixir",
       "externalReferences": [
         {
@@ -736,7 +701,7 @@
         },
         {
           "type": "distribution",
-          "url": "https://github.com/elixir-lang/elixir/archive/refs/tags/v1.20.4.zip"
+          "url": "https://github.com/elixir-lang/elixir/archive/refs/tags/v1.20.2.zip"
         },
         {
           "comment": "github",
@@ -757,14 +722,14 @@
         }
       ],
       "name": "elixir",
-      "purl": "pkg:otp/elixir@1.20.4?download_url=https://github.com/elixir-lang/elixir/archive/refs/tags/v1.20.4.zip&repository_url=https://github.com/elixir-lang/elixir&vcs_url=git%2Bhttps://github.com/elixir-lang/elixir.git#lib/elixir",
+      "purl": "pkg:otp/elixir@1.20.2?download_url=https://github.com/elixir-lang/elixir/archive/refs/tags/v1.20.2.zip&repository_url=https://github.com/elixir-lang/elixir&vcs_url=git%2Bhttps://github.com/elixir-lang/elixir.git#lib/elixir",
       "scope": "required",
       "type": "library",
-      "version": "1.20.4"
+      "version": "1.20.2"
     },
     {
-      "bom-ref": "otp:component:kernel:otp:41009003",
-      "cpe": "cpe:2.3:a:erlang:kernel:11.0.3:*:*:*:*:*:*:*",
+      "bom-ref": "otp:component:kernel:otp:3444471",
+      "cpe": "cpe:2.3:a:erlang:kernel:11.0.2:*:*:*:*:*:*:*",
       "description": "ERTS  CXC 138 10",
       "externalReferences": [
         {
@@ -773,7 +738,7 @@
         },
         {
           "type": "distribution",
-          "url": "https://github.com/erlang/otp/archive/refs/tags/OTP-11.0.3.zip"
+          "url": "https://github.com/erlang/otp/archive/refs/tags/OTP-11.0.2.zip"
         },
         {
           "comment": "github",
@@ -796,14 +761,15 @@
         }
       ],
       "name": "kernel",
-      "purl": "pkg:otp/kernel?download_url=https://github.com/erlang/otp/archive/refs/tags/OTP-11.0.3.zip&repository_url=https://github.com/erlang/otp&vcs_url=git%2Bhttps://github.com/erlang/otp.git#lib/kernel",
+      "purl": "pkg:otp/kernel?download_url=https://github.com/erlang/otp/archive/refs/tags/OTP-11.0.2.zip&repository_url=https://github.com/erlang/otp&vcs_url=git%2Bhttps://github.com/erlang/otp.git#lib/kernel",
       "scope": "required",
       "type": "library",
-      "version": "11.0.3"
+      "version": "11.0.2"
     },
     {
-      "bom-ref": "otp:component:ex_unit:otp:106830735",
-      "cpe": "cpe:2.3:a:elixir-lang:ex_unit:*:*:*:*:*:*:*:*",
+      "bom-ref": "otp:component:ex_unit:otp:80731915",
+      "cpe": "cpe:2.3:a:elixir-lang:ex_unit:1.20.2:*:*:*:*:*:*:*",
+      "description": "ex_unit",
       "externalReferences": [
         {
           "type": "vcs",
@@ -811,7 +777,7 @@
         },
         {
           "type": "distribution",
-          "url": "https://github.com/elixir-lang/elixir/archive/refs/heads/main.zip"
+          "url": "https://github.com/elixir-lang/elixir/archive/refs/tags/v1.20.2.zip"
         },
         {
           "comment": "github",
@@ -834,9 +800,10 @@
         }
       ],
       "name": "ex_unit",
-      "purl": "pkg:otp/ex_unit?download_url=https://github.com/elixir-lang/elixir/archive/refs/heads/main.zip&repository_url=https://github.com/elixir-lang/elixir&vcs_url=git%2Bhttps://github.com/elixir-lang/elixir.git#lib/ex_unit",
+      "purl": "pkg:otp/ex_unit@1.20.2?download_url=https://github.com/elixir-lang/elixir/archive/refs/tags/v1.20.2.zip&repository_url=https://github.com/elixir-lang/elixir&vcs_url=git%2Bhttps://github.com/elixir-lang/elixir.git#lib/ex_unit",
       "scope": "required",
-      "type": "library"
+      "type": "library",
+      "version": "1.20.2"
     },
     {
       "bom-ref": "otp:component:nimble_options:hex:39936919",
@@ -1232,8 +1199,8 @@
       "version": "2.12.2"
     },
     {
-      "bom-ref": "otp:component:crypto:otp:69550612",
-      "cpe": "cpe:2.3:a:erlang:crypto:5.9.2:*:*:*:*:*:*:*",
+      "bom-ref": "otp:component:crypto:otp:55543569",
+      "cpe": "cpe:2.3:a:erlang:crypto:5.9:*:*:*:*:*:*:*",
       "description": "CRYPTO",
       "externalReferences": [
         {
@@ -1242,7 +1209,7 @@
         },
         {
           "type": "distribution",
-          "url": "https://github.com/erlang/otp/archive/refs/tags/OTP-5.9.2.zip"
+          "url": "https://github.com/erlang/otp/archive/refs/tags/OTP-5.9.zip"
         },
         {
           "comment": "github",
@@ -1265,10 +1232,10 @@
         }
       ],
       "name": "crypto",
-      "purl": "pkg:otp/crypto?download_url=https://github.com/erlang/otp/archive/refs/tags/OTP-5.9.2.zip&repository_url=https://github.com/erlang/otp&vcs_url=git%2Bhttps://github.com/erlang/otp.git#lib/crypto",
+      "purl": "pkg:otp/crypto?download_url=https://github.com/erlang/otp/archive/refs/tags/OTP-5.9.zip&repository_url=https://github.com/erlang/otp&vcs_url=git%2Bhttps://github.com/erlang/otp.git#lib/crypto",
       "scope": "required",
       "type": "library",
-      "version": "5.9.2"
+      "version": "5.9"
     },
     {
       "bom-ref": "otp:component:nimble_pool:hex:34034329",
@@ -2036,8 +2003,8 @@
       "version": "0.40.3"
     },
     {
-      "bom-ref": "otp:component:stdlib:otp:33644561",
-      "cpe": "cpe:2.3:a:erlang:stdlib:8.0.3:*:*:*:*:*:*:*",
+      "bom-ref": "otp:component:stdlib:otp:20921218",
+      "cpe": "cpe:2.3:a:erlang:stdlib:8.0.1:*:*:*:*:*:*:*",
       "description": "ERTS  CXC 138 10",
       "externalReferences": [
         {
@@ -2046,7 +2013,7 @@
         },
         {
           "type": "distribution",
-          "url": "https://github.com/erlang/otp/archive/refs/tags/OTP-8.0.3.zip"
+          "url": "https://github.com/erlang/otp/archive/refs/tags/OTP-8.0.1.zip"
         },
         {
           "comment": "github",
@@ -2069,10 +2036,10 @@
         }
       ],
       "name": "stdlib",
-      "purl": "pkg:otp/stdlib?download_url=https://github.com/erlang/otp/archive/refs/tags/OTP-8.0.3.zip&repository_url=https://github.com/erlang/otp&vcs_url=git%2Bhttps://github.com/erlang/otp.git#lib/stdlib",
+      "purl": "pkg:otp/stdlib?download_url=https://github.com/erlang/otp/archive/refs/tags/OTP-8.0.1.zip&repository_url=https://github.com/erlang/otp&vcs_url=git%2Bhttps://github.com/erlang/otp.git#lib/stdlib",
       "scope": "required",
       "type": "library",
-      "version": "8.0.3"
+      "version": "8.0.1"
     },
     {
       "bom-ref": "otp:component:websock_adapter:hex:16123157",
@@ -2223,45 +2190,6 @@
       "version": "0.6.1"
     },
     {
-      "bom-ref": "otp:component:xmerl:otp:64702251",
-      "cpe": "cpe:2.3:a:erlang:xmerl:2.2:*:*:*:*:*:*:*",
-      "description": "XML parser",
-      "externalReferences": [
-        {
-          "type": "vcs",
-          "url": "git+https://github.com/erlang/otp.git#lib/xmerl"
-        },
-        {
-          "type": "distribution",
-          "url": "https://github.com/erlang/otp/archive/refs/tags/OTP-2.2.zip"
-        },
-        {
-          "comment": "github",
-          "type": "vcs",
-          "url": "https://github.com/erlang/otp"
-        },
-        {
-          "comment": "website",
-          "type": "website",
-          "url": "https://www.erlang.org"
-        }
-      ],
-      "group": "erlang.otp",
-      "licenses": [
-        {
-          "license": {
-            "acknowledgement": "declared",
-            "id": "Apache-2.0"
-          }
-        }
-      ],
-      "name": "xmerl",
-      "purl": "pkg:otp/xmerl?download_url=https://github.com/erlang/otp/archive/refs/tags/OTP-2.2.zip&repository_url=https://github.com/erlang/otp&vcs_url=git%2Bhttps://github.com/erlang/otp.git#lib/xmerl",
-      "scope": "required",
-      "type": "library",
-      "version": "2.2"
-    },
-    {
       "bom-ref": "otp:component:telemetry:hex:111137185",
       "cpe": "cpe:2.3:a:beam-telemetry:telemetry:1.4.2:*:*:*:*:*:*:*",
       "description": "Dynamic dispatching library for metrics and instrumentations",
@@ -2369,8 +2297,9 @@
       "version": "1.7.19"
     },
     {
-      "bom-ref": "otp:component:dialyzer:otp:116986873",
-      "cpe": "cpe:2.3:a:erlang:dialyzer:*:*:*:*:*:*:*:*",
+      "bom-ref": "otp:component:dialyzer:otp:73677362",
+      "cpe": "cpe:2.3:a:erlang:dialyzer:6.0.1:*:*:*:*:*:*:*",
+      "description": "DIscrepancy AnaLYZer of ERlang programs, version 6.0.1",
       "externalReferences": [
         {
           "type": "vcs",
@@ -2378,7 +2307,7 @@
         },
         {
           "type": "distribution",
-          "url": "https://github.com/erlang/otp/archive/refs/heads/master.zip"
+          "url": "https://github.com/erlang/otp/archive/refs/tags/OTP-6.0.1.zip"
         },
         {
           "comment": "github",
@@ -2401,9 +2330,10 @@
         }
       ],
       "name": "dialyzer",
-      "purl": "pkg:otp/dialyzer?download_url=https://github.com/erlang/otp/archive/refs/heads/master.zip&repository_url=https://github.com/erlang/otp&vcs_url=git%2Bhttps://github.com/erlang/otp.git#lib/dialyzer",
+      "purl": "pkg:otp/dialyzer?download_url=https://github.com/erlang/otp/archive/refs/tags/OTP-6.0.1.zip&repository_url=https://github.com/erlang/otp&vcs_url=git%2Bhttps://github.com/erlang/otp.git#lib/dialyzer",
       "scope": "required",
-      "type": "library"
+      "type": "library",
+      "version": "6.0.1"
     },
     {
       "bom-ref": "otp:component:excoveralls:hex:39185539",
@@ -2532,30 +2462,30 @@
     {
       "dependsOn": [
         "otp:component:jason:hex:87655102",
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763",
-        "otp:component:logger:otp:72055478",
-        "otp:component:eex:otp:45483983"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447",
+        "otp:component:logger:otp:16931961",
+        "otp:component:eex:otp:98317081"
       ],
       "ref": "otp:component:protobuf:hex:31621765"
     },
     {
       "dependsOn": [
         "otp:component:erlex:hex:97046561",
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763",
-        "otp:component:dialyzer:otp:116986873",
-        "otp:component:crypto:otp:69550612",
-        "otp:component:mix:otp:47854094",
-        "otp:component:erts:otp:112605601",
-        "otp:component:syntax_tools:otp:25983030",
-        "otp:component:logger:otp:72055478"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447",
+        "otp:component:dialyzer:otp:73677362",
+        "otp:component:crypto:otp:55543569",
+        "otp:component:mix:otp:55076520",
+        "otp:component:erts:otp:23928872",
+        "otp:component:syntax_tools:otp:105159087",
+        "otp:component:logger:otp:16931961"
       ],
       "ref": "otp:component:dialyxir:hex:88810649"
     },
-    { "ref": "otp:component:mix:otp:47854094" },
+    { "ref": "otp:component:mix:otp:55076520" },
     { "ref": "otp:component:nimble_ownership:hex:131509519" },
     {
       "dependsOn": [
@@ -2563,7 +2493,7 @@
       ],
       "ref": "otp:component:mox:hex:133772067"
     },
-    { "ref": "otp:component:eex:otp:45483983" },
+    { "ref": "otp:component:eex:otp:98317081" },
     { "ref": "otp:component:websock:hex:95532479" },
     {
       "dependsOn": [
@@ -2572,59 +2502,56 @@
         "otp:component:optimus:hex:124476107",
         "otp:component:protobuf:hex:31621765",
         "otp:component:purl:hex:34644079",
-        "otp:component:hex:otp:256814",
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763",
-        "otp:component:mix:otp:47854094",
-        "otp:component:xmerl:otp:64702251",
-        "otp:component:logger:otp:72055478"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447",
+        "otp:component:mix:otp:55076520",
+        "otp:component:logger:otp:16931961"
       ],
       "ref": "otp:component:sbom:hex:84832432"
     },
-    { "ref": "otp:component:hex:otp:256814" },
     {
       "dependsOn": [
         "otp:component:hpax:hex:13049320",
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763",
-        "otp:component:logger:otp:72055478",
-        "otp:component:ssl:otp:131716903"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447",
+        "otp:component:logger:otp:16931961",
+        "otp:component:ssl:otp:102842373"
       ],
       "ref": "otp:component:mint:hex:82086386"
     },
-    { "ref": "otp:component:ssl:otp:131716903" },
+    { "ref": "otp:component:ssl:otp:102842373" },
     {
       "dependsOn": [
         "otp:component:mime:hex:92200854",
         "otp:component:plug_crypto:hex:78240569",
         "otp:component:telemetry:hex:111137185",
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763",
-        "otp:component:logger:otp:72055478",
-        "otp:component:eex:otp:45483983"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447",
+        "otp:component:logger:otp:16931961",
+        "otp:component:eex:otp:98317081"
       ],
       "ref": "otp:component:plug:hex:15594346"
     },
-    { "ref": "otp:component:logger:otp:72055478" },
+    { "ref": "otp:component:logger:otp:16931961" },
     { "ref": "otp:component:inets:otp:121672126" },
-    { "ref": "otp:component:erts:otp:112605601" },
-    { "ref": "otp:component:syntax_tools:otp:25983030" },
+    { "ref": "otp:component:erts:otp:23928872" },
+    { "ref": "otp:component:syntax_tools:otp:105159087" },
     {
       "dependsOn": [
-        "otp:component:stdlib:otp:33644561"
+        "otp:component:stdlib:otp:20921218"
       ],
-      "ref": "otp:component:elixir:otp:91030763"
+      "ref": "otp:component:elixir:otp:78816447"
     },
-    { "ref": "otp:component:kernel:otp:41009003" },
-    { "ref": "otp:component:ex_unit:otp:106830735" },
+    { "ref": "otp:component:kernel:otp:3444471" },
+    { "ref": "otp:component:ex_unit:otp:80731915" },
     {
       "dependsOn": [
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447"
       ],
       "ref": "otp:component:nimble_options:hex:39936919"
     },
@@ -2632,9 +2559,9 @@
       "dependsOn": [
         "otp:component:makeup:hex:26210935",
         "otp:component:nimble_parsec:hex:48420652",
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447"
       ],
       "ref": "otp:component:makeup_elixir:hex:91535187"
     },
@@ -2645,11 +2572,11 @@
         "otp:component:mime:hex:92200854",
         "otp:component:mint:hex:82086386",
         "otp:component:telemetry:hex:111137185",
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763",
-        "otp:component:logger:otp:72055478",
-        "otp:component:ssl:otp:131716903",
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447",
+        "otp:component:logger:otp:16931961",
+        "otp:component:ssl:otp:102842373",
         "otp:component:inets:otp:121672126",
         "otp:component:mox:hex:133772067"
       ],
@@ -2657,35 +2584,35 @@
     },
     {
       "dependsOn": [
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447"
       ],
       "ref": "otp:component:purl:hex:34644079"
     },
     {
       "dependsOn": [
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447"
       ],
       "ref": "otp:component:bunt:hex:49979295"
     },
     {
       "dependsOn": [
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447"
       ],
       "ref": "otp:component:hpax:hex:13049320"
     },
     {
       "dependsOn": [
         "otp:component:makeup:hex:26210935",
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763",
-        "otp:component:logger:otp:72055478"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447",
+        "otp:component:logger:otp:16931961"
       ],
       "ref": "otp:component:makeup_erlang:hex:89517532"
     },
@@ -2695,17 +2622,17 @@
         "otp:component:jason:hex:87655102",
         "otp:component:nimble_parsec:hex:48420652",
         "otp:component:req:hex:41648200",
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763",
-        "otp:component:logger:otp:72055478"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447",
+        "otp:component:logger:otp:16931961"
       ],
       "ref": "otp:component:git_ops:hex:12179310"
     },
     {
       "dependsOn": [
-        "otp:component:logger:otp:72055478",
-        "otp:component:elixir:otp:91030763",
+        "otp:component:logger:otp:16931961",
+        "otp:component:elixir:otp:78816447",
         "otp:component:tesla:hex:106181469",
         "otp:component:finch:hex:63700879",
         "otp:component:mint_web_socket:hex:91229639",
@@ -2723,22 +2650,22 @@
       ],
       "ref": "otp:component:ex_daytona:github:52732362"
     },
-    { "ref": "otp:component:crypto:otp:69550612" },
+    { "ref": "otp:component:crypto:otp:55543569" },
     {
       "dependsOn": [
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763",
-        "otp:component:logger:otp:72055478"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447",
+        "otp:component:logger:otp:16931961"
       ],
       "ref": "otp:component:nimble_pool:hex:34034329"
     },
     {
       "dependsOn": [
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763",
-        "otp:component:logger:otp:72055478"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447",
+        "otp:component:logger:otp:16931961"
       ],
       "ref": "otp:component:git_cli:hex:42013463"
     },
@@ -2754,28 +2681,28 @@
     },
     {
       "dependsOn": [
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447"
       ],
       "ref": "otp:component:earmark_parser:hex:104838958"
     },
     {
       "dependsOn": [
         "otp:component:nimble_parsec:hex:48420652",
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763",
-        "otp:component:eex:otp:45483983"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447",
+        "otp:component:eex:otp:98317081"
       ],
       "ref": "otp:component:makeup:hex:26210935"
     },
     {
       "dependsOn": [
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763",
-        "otp:component:crypto:otp:69550612"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447",
+        "otp:component:crypto:otp:55543569"
       ],
       "ref": "otp:component:plug_crypto:hex:78240569"
     },
@@ -2786,63 +2713,63 @@
         "otp:component:nimble_options:hex:39936919",
         "otp:component:nimble_pool:hex:34034329",
         "otp:component:telemetry:hex:111137185",
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763",
-        "otp:component:logger:otp:72055478"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447",
+        "otp:component:logger:otp:16931961"
       ],
       "ref": "otp:component:finch:hex:63700879"
     },
     {
       "dependsOn": [
         "otp:component:mint:hex:82086386",
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763",
-        "otp:component:logger:otp:72055478"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447",
+        "otp:component:logger:otp:16931961"
       ],
       "ref": "otp:component:mint_web_socket:hex:91229639"
     },
     {
       "dependsOn": [
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763",
-        "otp:component:logger:otp:72055478"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447",
+        "otp:component:logger:otp:16931961"
       ],
       "ref": "otp:component:file_system:hex:5267745"
     },
     {
       "dependsOn": [
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763",
-        "otp:component:logger:otp:72055478"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447",
+        "otp:component:logger:otp:16931961"
       ],
       "ref": "otp:component:erlex:hex:97046561"
     },
     {
       "dependsOn": [
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447"
       ],
       "ref": "otp:component:jason:hex:87655102"
     },
     {
       "dependsOn": [
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
         "otp:component:inets:otp:121672126",
-        "otp:component:ssl:otp:131716903"
+        "otp:component:ssl:otp:102842373"
       ],
       "ref": "otp:component:hex_core:hex:65565843"
     },
     {
       "dependsOn": [
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447"
       ],
       "ref": "otp:component:nimble_parsec:hex:48420652"
     },
@@ -2852,10 +2779,10 @@
         "otp:component:jason:hex:87655102",
         "otp:component:mime:hex:92200854",
         "otp:component:plug:hex:15594346",
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763",
-        "otp:component:logger:otp:72055478"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447",
+        "otp:component:logger:otp:16931961"
       ],
       "ref": "otp:component:req:hex:41648200"
     },
@@ -2864,18 +2791,18 @@
         "otp:component:earmark_parser:hex:104838958",
         "otp:component:makeup_elixir:hex:91535187",
         "otp:component:makeup_erlang:hex:89517532",
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763",
-        "otp:component:eex:otp:45483983"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447",
+        "otp:component:eex:otp:98317081"
       ],
       "ref": "otp:component:ex_doc:hex:3052568"
     },
     {
       "dependsOn": [
-        "otp:component:kernel:otp:41009003"
+        "otp:component:kernel:otp:3444471"
       ],
-      "ref": "otp:component:stdlib:otp:33644561"
+      "ref": "otp:component:stdlib:otp:20921218"
     },
     {
       "dependsOn": [
@@ -2887,27 +2814,26 @@
     },
     {
       "dependsOn": [
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763",
-        "otp:component:logger:otp:72055478"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447",
+        "otp:component:logger:otp:16931961"
       ],
       "ref": "otp:component:mime:hex:92200854"
     },
     {
       "dependsOn": [
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763",
-        "otp:component:logger:otp:72055478"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447",
+        "otp:component:logger:otp:16931961"
       ],
       "ref": "otp:component:optimus:hex:124476107"
     },
-    { "ref": "otp:component:xmerl:otp:64702251" },
     {
       "dependsOn": [
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561"
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218"
       ],
       "ref": "otp:component:telemetry:hex:111137185"
     },
@@ -2916,18 +2842,18 @@
         "otp:component:bunt:hex:49979295",
         "otp:component:file_system:hex:5267745",
         "otp:component:jason:hex:87655102",
-        "otp:component:kernel:otp:41009003",
-        "otp:component:stdlib:otp:33644561",
-        "otp:component:elixir:otp:91030763",
-        "otp:component:crypto:otp:69550612",
-        "otp:component:eex:otp:45483983",
-        "otp:component:ex_unit:otp:106830735",
+        "otp:component:kernel:otp:3444471",
+        "otp:component:stdlib:otp:20921218",
+        "otp:component:elixir:otp:78816447",
+        "otp:component:crypto:otp:55543569",
+        "otp:component:eex:otp:98317081",
+        "otp:component:ex_unit:otp:80731915",
         "otp:component:inets:otp:121672126",
-        "otp:component:logger:otp:72055478"
+        "otp:component:logger:otp:16931961"
       ],
       "ref": "otp:component:credo:hex:95473491"
     },
-    { "ref": "otp:component:dialyzer:otp:116986873" },
+    { "ref": "otp:component:dialyzer:otp:73677362" },
     {
       "dependsOn": [
         "otp:component:jason:hex:87655102"
@@ -2981,7 +2907,7 @@
       "type": "library",
       "version": "0.4.0"
     },
-    "timestamp": "2026-09-01T01:50:08Z",
+    "timestamp": "2026-09-21T15:28:07Z",
     "tools": {
       "components": [
         {
@@ -2994,7 +2920,7 @@
       ]
     }
   },
-  "serialNumber": "urn:uuid:9475dec4-336e-41fd-9180-e4799e332c52",
+  "serialNumber": "urn:uuid:053a1bb8-5d85-4148-856d-b8828efc083a",
   "specVersion": "1.6",
   "version": 1
 }

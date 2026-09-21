@@ -37,7 +37,7 @@ defmodule ExDaytona.Model.ListSecretsResponse do
   @type t :: %__MODULE__{
           :items => [ExDaytona.Model.Secret.t()],
           :nextCursor => String.t() | nil,
-          :total => number()
+          :total => integer()
         }
 
   alias ExDaytona.Deserializer

@@ -668,8 +668,8 @@ defmodule ExDaytona.Api.Sandbox do
   - `to` (DateTime.t): End of time range (ISO 8601)
   - `opts` (keyword): Optional parameters
     - `:"X-Daytona-Organization-ID"` (String.t): Use with JWT to specify the organization ID
-    - `:page` (number()): Page number (1-indexed)
-    - `:limit` (number()): Number of items per page
+    - `:page` (integer()): Page number (1-indexed)
+    - `:limit` (integer()): Number of items per page
     - `:severities` ([String.t]): Filter by severity levels (DEBUG, INFO, WARN, ERROR)
     - `:search` (String.t): Search in log body
 
@@ -885,8 +885,8 @@ defmodule ExDaytona.Api.Sandbox do
   - `to` (DateTime.t): End of time range (ISO 8601)
   - `opts` (keyword): Optional parameters
     - `:"X-Daytona-Organization-ID"` (String.t): Use with JWT to specify the organization ID
-    - `:page` (number()): Page number (1-indexed)
-    - `:limit` (number()): Number of items per page
+    - `:page` (integer()): Page number (1-indexed)
+    - `:limit` (integer()): Number of items per page
 
   ### Returns
 
@@ -1054,7 +1054,7 @@ defmodule ExDaytona.Api.Sandbox do
   - `opts` (keyword): Optional parameters
     - `:"X-Daytona-Organization-ID"` (String.t): Use with JWT to specify the organization ID
     - `:cursor` (String.t): Pagination cursor from a previous response
-    - `:limit` (number()): Number of results per page
+    - `:limit` (integer()): Number of results per page
     - `:id` (String.t): Filter by ID prefix (case-insensitive)
     - `:name` (String.t): Filter by name prefix (case-insensitive)
     - `:labels` (String.t): JSON encoded labels to filter by
@@ -1070,6 +1070,8 @@ defmodule ExDaytona.Api.Sandbox do
     - `:maxMemoryGiB` (number()): Maximum memory in GiB
     - `:minDiskGiB` (number()): Minimum disk space in GiB
     - `:maxDiskGiB` (number()): Maximum disk space in GiB
+    - `:minGpu` (number()): Minimum GPU
+    - `:maxGpu` (number()): Maximum GPU
     - `:isPublic` (boolean()): Filter by public status
     - `:isRecoverable` (boolean()): Filter by recoverable status
     - `:createdAtAfter` (DateTime.t): Include items created after this timestamp
@@ -1108,6 +1110,8 @@ defmodule ExDaytona.Api.Sandbox do
       :maxMemoryGiB => :query,
       :minDiskGiB => :query,
       :maxDiskGiB => :query,
+      :minGpu => :query,
+      :maxGpu => :query,
       :isPublic => :query,
       :isRecoverable => :query,
       :createdAtAfter => :query,
@@ -1132,82 +1136,6 @@ defmodule ExDaytona.Api.Sandbox do
     |> evaluate_response(
       [
         {200, ExDaytona.Model.ListSandboxesResponse}
-      ],
-      opts
-    )
-  end
-
-  @doc """
-  [DEPRECATED] List all sandboxes paginated
-
-  ### Parameters
-
-  - `connection` (ExDaytona.Connection): Connection to server
-  - `opts` (keyword): Optional parameters
-    - `:"X-Daytona-Organization-ID"` (String.t): Use with JWT to specify the organization ID
-    - `:page` (number()): Page number of the results
-    - `:limit` (number()): Number of results per page
-    - `:id` (String.t): Filter by partial ID match
-    - `:name` (String.t): Filter by partial name match
-    - `:labels` (String.t): JSON encoded labels to filter by
-    - `:includeErroredDeleted` (boolean()): Include results with errored state and deleted desired state
-    - `:states` ([String.t]): List of states to filter by
-    - `:snapshots` ([String.t]): List of snapshot names to filter by
-    - `:regions` ([String.t]): List of regions to filter by
-    - `:minCpu` (number()): Minimum CPU
-    - `:maxCpu` (number()): Maximum CPU
-    - `:minMemoryGiB` (number()): Minimum memory in GiB
-    - `:maxMemoryGiB` (number()): Maximum memory in GiB
-    - `:minDiskGiB` (number()): Minimum disk space in GiB
-    - `:maxDiskGiB` (number()): Maximum disk space in GiB
-    - `:lastEventAfter` (DateTime.t): Include items with last event after this timestamp
-    - `:lastEventBefore` (DateTime.t): Include items with last event before this timestamp
-    - `:sort` (String.t): Field to sort by
-    - `:order` (String.t): Direction to sort by
-
-  ### Returns
-
-  - `{:ok, ExDaytona.Model.PaginatedSandboxesDeprecated.t}` on success
-  - `{:error, Tesla.Env.t}` on failure
-  """
-  @spec list_sandboxes_paginated_deprecated(Tesla.Env.client(), keyword()) ::
-          {:ok, ExDaytona.Model.PaginatedSandboxesDeprecated.t()} | {:error, Tesla.Env.t()}
-  def list_sandboxes_paginated_deprecated(connection, opts \\ []) do
-    optional_params = %{
-      :"X-Daytona-Organization-ID" => :headers,
-      :page => :query,
-      :limit => :query,
-      :id => :query,
-      :name => :query,
-      :labels => :query,
-      :includeErroredDeleted => :query,
-      :states => :query,
-      :snapshots => :query,
-      :regions => :query,
-      :minCpu => :query,
-      :maxCpu => :query,
-      :minMemoryGiB => :query,
-      :maxMemoryGiB => :query,
-      :minDiskGiB => :query,
-      :maxDiskGiB => :query,
-      :lastEventAfter => :query,
-      :lastEventBefore => :query,
-      :sort => :query,
-      :order => :query
-    }
-
-    request =
-      %{}
-      |> method(:get)
-      |> url("/sandbox/paginated")
-      |> add_optional_params(optional_params, opts)
-      |> Enum.into([])
-
-    connection
-    |> Connection.request(request)
-    |> evaluate_response(
-      [
-        {200, ExDaytona.Model.PaginatedSandboxesDeprecated}
       ],
       opts
     )

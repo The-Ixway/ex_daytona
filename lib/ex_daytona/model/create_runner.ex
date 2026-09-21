@@ -31,16 +31,21 @@ defmodule ExDaytona.Model.CreateRunner do
   defstruct [
     :name,
     :regionId,
+    :sandboxClass,
     :tags
   ]
 
   @type t :: %__MODULE__{
           :name => String.t(),
           :regionId => String.t(),
+          :sandboxClass => ExDaytona.Model.CreateRunnerSandboxClass.t() | nil,
           :tags => [String.t()] | nil
         }
 
+  alias ExDaytona.Deserializer
+
   def decode(value) do
     value
+    |> Deserializer.deserialize(:sandboxClass, :struct, ExDaytona.Model.CreateRunnerSandboxClass)
   end
 end
