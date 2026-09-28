@@ -33,6 +33,7 @@ defmodule ExDaytona.Model.ApiKeyList do
     :expiresAt,
     :lastUsedAt,
     :name,
+    :organizationId,
     :permissions,
     :userId,
     :value
@@ -43,6 +44,7 @@ defmodule ExDaytona.Model.ApiKeyList do
           :expiresAt => DateTime.t() | nil,
           :lastUsedAt => DateTime.t() | nil,
           :name => String.t(),
+          :organizationId => String.t() | nil,
           :permissions => [String.t()],
           :userId => String.t(),
           :value => String.t()

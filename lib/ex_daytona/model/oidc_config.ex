@@ -30,17 +30,26 @@ defmodule ExDaytona.Model.OidcConfig do
 
   defstruct [
     :audience,
+    :authApiHostname,
+    :cli,
     :clientId,
-    :issuer
+    :issuer,
+    :provider
   ]
 
   @type t :: %__MODULE__{
           :audience => String.t(),
+          :authApiHostname => String.t() | nil,
+          :cli => ExDaytona.Model.CliOidcConfig.t() | nil,
           :clientId => String.t(),
-          :issuer => String.t()
+          :issuer => String.t(),
+          :provider => String.t()
         }
+
+  alias ExDaytona.Deserializer
 
   def decode(value) do
     value
+    |> Deserializer.deserialize(:cli, :struct, ExDaytona.Model.CliOidcConfig)
   end
 end

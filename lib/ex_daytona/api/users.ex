@@ -11,6 +11,38 @@ defmodule ExDaytona.Api.Users do
   import ExDaytona.RequestBuilder
 
   @doc """
+  Accept the current privacy policies
+
+  ### Parameters
+
+  - `connection` (ExDaytona.Connection): Connection to server
+  - `opts` (keyword): Optional parameters
+
+  ### Returns
+
+  - `{:ok, nil}` on success
+  - `{:error, Tesla.Env.t}` on failure
+  """
+  @spec accept_privacy_policies(Tesla.Env.client(), keyword()) :: {:ok, nil} | {:error, Tesla.Env.t()}
+  def accept_privacy_policies(connection, opts \\ []) do
+    request =
+      %{}
+      |> method(:post)
+      |> url("/users/privacy-policies/accept")
+      |> ensure_body()
+      |> Enum.into([])
+
+    connection
+    |> Connection.request(request)
+    |> evaluate_response(
+      [
+        {204, false}
+      ],
+      opts
+    )
+  end
+
+  @doc """
   Confirm (link) a pending SSO account link
 
   ### Parameters
@@ -76,7 +108,8 @@ defmodule ExDaytona.Api.Users do
   end
 
   @doc """
-  Enroll in SMS MFA
+  Get account providers
+  Social sign-in providers (Google, GitHub, ...) enabled for this environment, each flagged with whether the authenticated user has an identity linked through it.
 
   ### Parameters
 
@@ -85,23 +118,23 @@ defmodule ExDaytona.Api.Users do
 
   ### Returns
 
-  - `{:ok, String.t}` on success
+  - `{:ok, [%AccountProvider{}, ...]}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec enroll_in_sms_mfa(Tesla.Env.client(), keyword()) :: {:ok, String.t()} | {:error, Tesla.Env.t()}
-  def enroll_in_sms_mfa(connection, opts \\ []) do
+  @spec get_account_providers(Tesla.Env.client(), keyword()) ::
+          {:ok, [ExDaytona.Model.AccountProvider.t()]} | {:error, Tesla.Env.t()}
+  def get_account_providers(connection, opts \\ []) do
     request =
       %{}
-      |> method(:post)
-      |> url("/users/mfa/sms/enroll")
-      |> ensure_body()
+      |> method(:get)
+      |> url("/users/account-providers")
       |> Enum.into([])
 
     connection
     |> Connection.request(request)
     |> evaluate_response(
       [
-        {200, false}
+        {200, ExDaytona.Model.AccountProvider}
       ],
       opts
     )
@@ -140,39 +173,8 @@ defmodule ExDaytona.Api.Users do
   end
 
   @doc """
-  Get available account providers
-
-  ### Parameters
-
-  - `connection` (ExDaytona.Connection): Connection to server
-  - `opts` (keyword): Optional parameters
-
-  ### Returns
-
-  - `{:ok, [%AccountProvider{}, ...]}` on success
-  - `{:error, Tesla.Env.t}` on failure
-  """
-  @spec get_available_account_providers(Tesla.Env.client(), keyword()) ::
-          {:ok, [ExDaytona.Model.AccountProvider.t()]} | {:error, Tesla.Env.t()}
-  def get_available_account_providers(connection, opts \\ []) do
-    request =
-      %{}
-      |> method(:get)
-      |> url("/users/account-providers")
-      |> Enum.into([])
-
-    connection
-    |> Connection.request(request)
-    |> evaluate_response(
-      [
-        {200, ExDaytona.Model.AccountProvider}
-      ],
-      opts
-    )
-  end
-
-  @doc """
-  Link account
+  Link account (withdrawn)
+  Withdrawn. This operation is no longer supported and always responds 410.
 
   ### Parameters
 
@@ -199,7 +201,7 @@ defmodule ExDaytona.Api.Users do
     |> Connection.request(request)
     |> evaluate_response(
       [
-        {204, false}
+        {410, false}
       ],
       opts
     )
@@ -238,13 +240,12 @@ defmodule ExDaytona.Api.Users do
   end
 
   @doc """
-  Unlink account
+  Record a completed login
+  Called by the dashboard once per completed sign-in. The email access gate evaluates the user and reports the login to analytics; a refused user receives 403 with code EMAIL_ACCESS_DENIED.
 
   ### Parameters
 
   - `connection` (ExDaytona.Connection): Connection to server
-  - `provider` (String.t): 
-  - `provider_user_id` (String.t): 
   - `opts` (keyword): Optional parameters
 
   ### Returns
@@ -252,12 +253,13 @@ defmodule ExDaytona.Api.Users do
   - `{:ok, nil}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec unlink_account(Tesla.Env.client(), String.t(), String.t(), keyword()) :: {:ok, nil} | {:error, Tesla.Env.t()}
-  def unlink_account(connection, provider, provider_user_id, opts \\ []) do
+  @spec record_login(Tesla.Env.client(), keyword()) :: {:ok, nil} | {:error, Tesla.Env.t()}
+  def record_login(connection, opts \\ []) do
     request =
       %{}
-      |> method(:delete)
-      |> url("/users/linked-accounts/#{provider}/#{provider_user_id}")
+      |> method(:post)
+      |> url("/users/me/logins")
+      |> ensure_body()
       |> Enum.into([])
 
     connection

@@ -37,9 +37,9 @@ defmodule ExDaytona.Model.PaginatedTraces do
 
   @type t :: %__MODULE__{
           :items => [ExDaytona.Model.TraceSummary.t()],
-          :page => number(),
-          :total => number(),
-          :totalPages => number()
+          :page => integer(),
+          :total => integer(),
+          :totalPages => integer()
         }
 
   alias ExDaytona.Deserializer

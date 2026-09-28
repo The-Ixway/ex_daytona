@@ -37,9 +37,9 @@ defmodule ExDaytona.Model.PaginatedSnapshots do
 
   @type t :: %__MODULE__{
           :items => [ExDaytona.Model.SnapshotDto.t()],
-          :page => number(),
-          :total => number(),
-          :totalPages => number()
+          :page => integer(),
+          :total => integer(),
+          :totalPages => integer()
         }
 
   alias ExDaytona.Deserializer

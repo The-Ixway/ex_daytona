@@ -118,7 +118,7 @@ defmodule ExDaytona.Connection do
         Keyword.get(
           tesla_options,
           :user_agent,
-          "openapi-generator - ExDaytona 0.3.0 - elixir"
+          "openapi-generator - ExDaytona 0.4.0 - elixir"
         )
       )
 

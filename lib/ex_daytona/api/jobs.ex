@@ -50,10 +50,10 @@ defmodule ExDaytona.Api.Jobs do
 
   - `connection` (ExDaytona.Connection): Connection to server
   - `opts` (keyword): Optional parameters
-    - `:page` (number()): Page number of the results
-    - `:limit` (number()): Maximum number of jobs to return (default: 100, max: 500)
+    - `:page` (integer()): Page number of the results
+    - `:limit` (integer()): Maximum number of jobs to return (default: 100, max: 500)
     - `:status` (JobStatus): Filter jobs by status
-    - `:offset` (number()): Number of jobs to skip for pagination (default: 0)
+    - `:offset` (integer()): Number of jobs to skip for pagination (default: 0)
 
   ### Returns
 
@@ -94,8 +94,8 @@ defmodule ExDaytona.Api.Jobs do
 
   - `connection` (ExDaytona.Connection): Connection to server
   - `opts` (keyword): Optional parameters
-    - `:timeout` (number()): Timeout in seconds for long polling (default: 30, max: 60)
-    - `:limit` (number()): Maximum number of jobs to return (default: 10, max: 100)
+    - `:timeout` (integer()): Timeout in seconds for long polling (default: 30, max: 60)
+    - `:limit` (integer()): Maximum number of jobs to return (default: 10, max: 100)
 
   ### Returns
 

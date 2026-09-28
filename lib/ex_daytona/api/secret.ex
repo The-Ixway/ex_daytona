@@ -174,7 +174,7 @@ defmodule ExDaytona.Api.Secret do
   - `opts` (keyword): Optional parameters
     - `:"X-Daytona-Organization-ID"` (String.t): Use with JWT to specify the organization ID
     - `:cursor` (String.t): Pagination cursor from a previous response
-    - `:limit` (number()): Number of results per page
+    - `:limit` (integer()): Number of results per page
     - `:name` (String.t): Filter by partial name match
     - `:sort` (String.t): Field to sort by
     - `:order` (String.t): Direction to sort by

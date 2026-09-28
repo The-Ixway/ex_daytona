@@ -19,12 +19,12 @@ defmodule ExDaytona.Api.Health do
 
   ### Returns
 
-  - `{:ok, ExDaytona.Model.Check200Response.t}` on success
+  - `{:ok, ExDaytona.Model.HealthControllerCheck200Response.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
   @spec check(Tesla.Env.client(), keyword()) ::
-          {:ok, ExDaytona.Model.Check200Response.t()}
-          | {:ok, ExDaytona.Model.Check503Response.t()}
+          {:ok, ExDaytona.Model.HealthControllerCheck200Response.t()}
+          | {:ok, ExDaytona.Model.HealthControllerCheck503Response.t()}
           | {:error, Tesla.Env.t()}
   def check(connection, opts \\ []) do
     request =
@@ -37,8 +37,8 @@ defmodule ExDaytona.Api.Health do
     |> Connection.request(request)
     |> evaluate_response(
       [
-        {200, ExDaytona.Model.Check200Response},
-        {503, ExDaytona.Model.Check503Response}
+        {200, ExDaytona.Model.HealthControllerCheck200Response},
+        {503, ExDaytona.Model.HealthControllerCheck503Response}
       ],
       opts
     )
